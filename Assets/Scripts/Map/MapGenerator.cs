@@ -373,9 +373,14 @@ public class MapGenerator : MonoBehaviour
         MeshFilter combinedMeshFilter = combinedObj.AddComponent<MeshFilter>();
         combinedMeshFilter.mesh = new Mesh();
 
+        // Use 32-bit index format to support more than 65535 vertices
+        combinedMeshFilter.mesh.indexFormat = UnityEngine.Rendering.IndexFormat.UInt32;
+        Debug.Log($"Set {combinedName} to use UInt32 index format (supports up to ~4 billion vertices)");
+
         try
         {
             combinedMeshFilter.mesh.CombineMeshes(combine, true, true);
+            Debug.Log($"Mesh combining successful! Total vertices: {combinedMeshFilter.mesh.vertexCount}");
         }
         catch (System.Exception e)
         {
