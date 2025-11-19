@@ -285,6 +285,7 @@ public class MapGenerator : MonoBehaviour
             GameObject zone = Instantiate(zoneData.instance, worldPos, Quaternion.identity);
             zone.name = zoneData.instance.name + "_Instance";
 
+#if UNITY_AI_NAVIGATION
             // Bake NavMesh for this zone
             NavMeshSurface surface = zone.GetComponent<NavMeshSurface>();
             if (surface != null)
@@ -292,6 +293,7 @@ public class MapGenerator : MonoBehaviour
                 surface.BuildNavMesh();
                 Debug.Log($"NavMesh baked for {zone.name}");
             }
+#endif
         }
 
         Debug.Log($"Spawned {placedMissionZones.Count} mission zones");
