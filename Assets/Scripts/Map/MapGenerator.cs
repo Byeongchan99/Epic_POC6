@@ -1,5 +1,6 @@
 using UnityEngine;
 using System.Collections.Generic;
+using UnityEngine.AI;
 
 public class MapGenerator : MonoBehaviour
 {
@@ -18,7 +19,15 @@ public class MapGenerator : MonoBehaviour
 
     [Header("Prefabs")]
     [SerializeField] private GameObject landTilePrefab;
-    [SerializeField] private GameObject waterTilePrefab; // Optional for visualization
+    [SerializeField] private GameObject waterTilePrefab;
+
+    [Header("Mission Zones")]
+    [SerializeField] private List<GameObject> missionZonePrefabs = new List<GameObject>();
+    [SerializeField] private int missionZoneSpacing = 20; // Minimum distance between zones
+
+    [Header("Optimization")]
+    [SerializeField] private bool optimizeMesh = true;
+    [SerializeField] private float waterWallHeight = 5f;
 
     [Header("References")]
     [SerializeField] private Transform mapParent;
@@ -26,11 +35,19 @@ public class MapGenerator : MonoBehaviour
     // Map data
     private int[,] mapData;
     private List<Vector2Int> landTiles = new List<Vector2Int>();
+    private List<MissionZoneData> placedMissionZones = new List<MissionZoneData>();
 
     public enum TileType
     {
         Water = 0,
         Land = 1
+    }
+
+    private class MissionZoneData
+    {
+        public Vector2Int position;
+        public Vector2Int size;
+        public GameObject instance;
     }
 
     void Start()
@@ -50,14 +67,24 @@ public class MapGenerator : MonoBehaviour
         mapData = new int[mapWidth, mapHeight];
         GenerateMapData();
 
+        // Place mission zones and carve out land for them
+        PlaceMissionZones();
+
         // Spawn tiles
         SpawnTiles();
 
-        // Find all land tiles for mission placement
+        // Optimize mesh
+        if (optimizeMesh)
+        {
+            OptimizeMap();
+        }
+
+        // Find all land tiles
         FindLandTiles();
 
         Debug.Log($"Map generated with seed: {seed}");
         Debug.Log($"Total land tiles: {landTiles.Count}");
+        Debug.Log($"Mission zones placed: {placedMissionZones.Count}");
     }
 
     private void GenerateMapData()
@@ -82,7 +109,6 @@ public class MapGenerator : MonoBehaviour
                 );
 
                 // Combine noises
-                // Reduce continent noise where hole noise is high
                 float combined = continentNoise * (1f - holeNoise * holeWeight);
 
                 // Determine tile type
@@ -93,6 +119,98 @@ public class MapGenerator : MonoBehaviour
                 else
                 {
                     mapData[x, y] = (int)TileType.Water;
+                }
+            }
+        }
+    }
+
+    private void PlaceMissionZones()
+    {
+        if (missionZonePrefabs == null || missionZonePrefabs.Count == 0)
+        {
+            Debug.LogWarning("No mission zone prefabs assigned!");
+            return;
+        }
+
+        placedMissionZones.Clear();
+
+        foreach (GameObject zonePrefab in missionZonePrefabs)
+        {
+            if (zonePrefab == null) continue;
+
+            // Get mission zone size from MissionZoneInfo component
+            MissionZoneInfo zoneInfo = zonePrefab.GetComponent<MissionZoneInfo>();
+            Vector2Int zoneSize = zoneInfo != null ? zoneInfo.size : new Vector2Int(15, 15);
+
+            // Find valid position
+            Vector2Int position = FindMissionZonePosition(zoneSize);
+
+            if (position != Vector2Int.zero)
+            {
+                // Carve out land for this mission zone
+                CarveLandForMissionZone(position, zoneSize);
+
+                // Store data (will instantiate after tiles are spawned)
+                placedMissionZones.Add(new MissionZoneData
+                {
+                    position = position,
+                    size = zoneSize,
+                    instance = zonePrefab
+                });
+
+                Debug.Log($"Mission zone placement reserved at {position} with size {zoneSize}");
+            }
+            else
+            {
+                Debug.LogWarning($"Could not find valid position for mission zone of size {zoneSize}");
+            }
+        }
+    }
+
+    private Vector2Int FindMissionZonePosition(Vector2Int size)
+    {
+        int maxAttempts = 100;
+
+        for (int i = 0; i < maxAttempts; i++)
+        {
+            int x = Random.Range(size.x / 2, mapWidth - size.x / 2);
+            int y = Random.Range(size.y / 2, mapHeight - size.y / 2);
+
+            Vector2Int candidate = new Vector2Int(x, y);
+
+            // Check if position is valid (not too close to other zones)
+            bool tooClose = false;
+            foreach (var zone in placedMissionZones)
+            {
+                float distance = Vector2Int.Distance(candidate, zone.position);
+                if (distance < missionZoneSpacing)
+                {
+                    tooClose = true;
+                    break;
+                }
+            }
+
+            if (!tooClose)
+            {
+                return candidate;
+            }
+        }
+
+        return Vector2Int.zero;
+    }
+
+    private void CarveLandForMissionZone(Vector2Int center, Vector2Int size)
+    {
+        int halfWidth = size.x / 2;
+        int halfHeight = size.y / 2;
+
+        for (int x = center.x - halfWidth; x <= center.x + halfWidth; x++)
+        {
+            for (int y = center.y - halfHeight; y <= center.y + halfHeight; y++)
+            {
+                if (x >= 0 && x < mapWidth && y >= 0 && y < mapHeight)
+                {
+                    mapData[x, y] = (int)TileType.Land;
                 }
             }
         }
@@ -111,31 +229,154 @@ public class MapGenerator : MonoBehaviour
             for (int y = 0; y < mapHeight; y++)
             {
                 Vector3 position = new Vector3(x, 0, y);
-                GameObject tilePrefab = null;
 
                 if (mapData[x, y] == (int)TileType.Land)
                 {
-                    tilePrefab = landTilePrefab;
+                    // Spawn Land tile
+                    if (landTilePrefab != null)
+                    {
+                        GameObject tile = Instantiate(landTilePrefab, position, Quaternion.identity, mapParent);
+                        tile.name = $"LandTile_{x}_{y}";
+                        tile.tag = "Terrain";
+                        tile.isStatic = true;
+                    }
                 }
-                else if (waterTilePrefab != null)
+                else // Water
                 {
-                    tilePrefab = waterTilePrefab;
-                }
+                    // Spawn Water wall (invisible barrier)
+                    if (waterTilePrefab != null)
+                    {
+                        GameObject waterTile = Instantiate(waterTilePrefab, position, Quaternion.identity, mapParent);
+                        waterTile.name = $"WaterWall_{x}_{y}";
+                        waterTile.tag = "Wall";
+                        waterTile.isStatic = true;
 
-                if (tilePrefab != null)
-                {
-                    GameObject tile = Instantiate(tilePrefab, position, Quaternion.identity, mapParent);
-                    tile.name = $"Tile_{x}_{y}";
+                        // Add or modify BoxCollider to make it a wall
+                        BoxCollider collider = waterTile.GetComponent<BoxCollider>();
+                        if (collider == null)
+                            collider = waterTile.AddComponent<BoxCollider>();
 
-                    // Set static for optimization
-                    tile.isStatic = true;
+                        collider.center = new Vector3(0, waterWallHeight / 2, 0);
+                        collider.size = new Vector3(1, waterWallHeight, 1);
+
+                        // Make renderer invisible (optional: keep visible for debugging)
+                        MeshRenderer renderer = waterTile.GetComponent<MeshRenderer>();
+                        if (renderer != null)
+                            renderer.enabled = false; // Set to true to see water
+                    }
                 }
             }
         }
 
-        // Apply static batching to all tiles
-        StaticBatchingUtility.Combine(mapParent.gameObject);
-        Debug.Log("Static batching applied to map tiles");
+        Debug.Log("Tiles spawned");
+
+        // Instantiate mission zone prefabs after tiles
+        SpawnMissionZonePrefabs();
+    }
+
+    private void SpawnMissionZonePrefabs()
+    {
+        foreach (var zoneData in placedMissionZones)
+        {
+            Vector3 worldPos = new Vector3(zoneData.position.x, 0, zoneData.position.y);
+            GameObject zone = Instantiate(zoneData.instance, worldPos, Quaternion.identity);
+            zone.name = zoneData.instance.name + "_Instance";
+
+            // Bake NavMesh for this zone
+            NavMeshSurface surface = zone.GetComponent<NavMeshSurface>();
+            if (surface != null)
+            {
+                surface.BuildNavMesh();
+                Debug.Log($"NavMesh baked for {zone.name}");
+            }
+        }
+
+        Debug.Log($"Spawned {placedMissionZones.Count} mission zones");
+    }
+
+    private void OptimizeMap()
+    {
+        Debug.Log("Optimizing map with Mesh Combining...");
+
+        // Combine Land tiles
+        CombineTilesByTag("Terrain", "CombinedLandMap");
+
+        // Combine Water walls
+        CombineTilesByTag("Wall", "CombinedWaterWalls", false);
+
+        Debug.Log("Map optimization complete!");
+    }
+
+    private void CombineTilesByTag(string tag, string combinedName, bool addRenderer = true)
+    {
+        List<MeshFilter> meshFilters = new List<MeshFilter>();
+        List<GameObject> tilesToDestroy = new List<GameObject>();
+        Material sharedMaterial = null;
+
+        foreach (Transform child in mapParent)
+        {
+            if (child.CompareTag(tag))
+            {
+                MeshFilter mf = child.GetComponent<MeshFilter>();
+                if (mf != null && mf.sharedMesh != null)
+                {
+                    meshFilters.Add(mf);
+                    tilesToDestroy.Add(child.gameObject);
+
+                    // Get material from first tile
+                    if (sharedMaterial == null && addRenderer)
+                    {
+                        MeshRenderer mr = child.GetComponent<MeshRenderer>();
+                        if (mr != null)
+                            sharedMaterial = mr.sharedMaterial;
+                    }
+                }
+            }
+        }
+
+        if (meshFilters.Count == 0)
+        {
+            Debug.LogWarning($"No meshes found with tag {tag}");
+            return;
+        }
+
+        // Combine meshes
+        CombineInstance[] combine = new CombineInstance[meshFilters.Count];
+
+        for (int i = 0; i < meshFilters.Count; i++)
+        {
+            combine[i].mesh = meshFilters[i].sharedMesh;
+            combine[i].transform = meshFilters[i].transform.localToWorldMatrix;
+        }
+
+        // Create combined object
+        GameObject combinedObj = new GameObject(combinedName);
+        combinedObj.transform.position = Vector3.zero;
+        combinedObj.isStatic = true;
+        combinedObj.tag = tag;
+
+        MeshFilter combinedMeshFilter = combinedObj.AddComponent<MeshFilter>();
+        combinedMeshFilter.mesh = new Mesh();
+        combinedMeshFilter.mesh.CombineMeshes(combine, true, true);
+
+        // Add renderer if needed
+        if (addRenderer && sharedMaterial != null)
+        {
+            MeshRenderer combinedRenderer = combinedObj.AddComponent<MeshRenderer>();
+            combinedRenderer.material = sharedMaterial;
+        }
+
+        // Add Mesh Collider
+        MeshCollider combinedCollider = combinedObj.AddComponent<MeshCollider>();
+        combinedCollider.sharedMesh = combinedMeshFilter.mesh;
+
+        // Destroy original tiles
+        foreach (GameObject tile in tilesToDestroy)
+        {
+            Destroy(tile);
+        }
+
+        Debug.Log($"Combined {meshFilters.Count} tiles into {combinedName}");
     }
 
     private void FindLandTiles()
@@ -154,7 +395,7 @@ public class MapGenerator : MonoBehaviour
         }
     }
 
-    // Public methods for other systems to use
+    // Public methods
     public bool IsTileLand(int x, int y)
     {
         if (x < 0 || x >= mapWidth || y < 0 || y >= mapHeight)
@@ -180,43 +421,6 @@ public class MapGenerator : MonoBehaviour
 
         Vector2Int randomTile = landTiles[Random.Range(0, landTiles.Count)];
         return new Vector3(randomTile.x, 0, randomTile.y);
-    }
-
-    public bool CanPlaceMission(Vector3 center, Vector2Int missionSize)
-    {
-        int centerX = Mathf.RoundToInt(center.x);
-        int centerY = Mathf.RoundToInt(center.z);
-
-        int halfWidth = missionSize.x / 2;
-        int halfHeight = missionSize.y / 2;
-
-        // Check if all tiles in the mission area are land
-        for (int x = centerX - halfWidth; x <= centerX + halfWidth; x++)
-        {
-            for (int y = centerY - halfHeight; y <= centerY + halfHeight; y++)
-            {
-                if (!IsTileLand(x, y))
-                    return false;
-            }
-        }
-
-        return true;
-    }
-
-    public Vector3 FindMissionPlacementPosition(Vector2Int missionSize, int maxAttempts = 100)
-    {
-        for (int i = 0; i < maxAttempts; i++)
-        {
-            Vector3 randomPos = GetRandomLandPosition();
-
-            if (CanPlaceMission(randomPos, missionSize))
-            {
-                return randomPos;
-            }
-        }
-
-        Debug.LogWarning($"Could not find suitable position for mission of size {missionSize} after {maxAttempts} attempts");
-        return Vector3.zero;
     }
 
     public int[,] GetMapData()

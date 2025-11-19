@@ -7,16 +7,16 @@ public class UIManager : MonoBehaviour
     public static UIManager Instance { get; private set; }
 
     [Header("Player Stats UI - Bottom Left")]
-    [SerializeField] private Image healthBar;
-    [SerializeField] private Image staminaBar;
-    [SerializeField] private Image hungerBar;
-    [SerializeField] private Image thirstBar;
+    [SerializeField] private Slider healthBar;
+    [SerializeField] private Slider staminaBar;
+    [SerializeField] private Slider hungerBar;
+    [SerializeField] private Slider thirstBar;
     [SerializeField] private TextMeshProUGUI ammoText;
 
     [Header("Vehicle Stats UI - Bottom Left")]
     [SerializeField] private GameObject vehicleStatsPanel;
-    [SerializeField] private Image vehicleHealthBar;
-    [SerializeField] private Image fuelBar;
+    [SerializeField] private Slider vehicleHealthBar;
+    [SerializeField] private Slider fuelBar;
 
     [Header("Minimap - Bottom Right")]
     [SerializeField] private MinimapController minimapController;
@@ -115,25 +115,25 @@ public class UIManager : MonoBehaviour
     private void UpdateHealthBar(float current, float max)
     {
         if (healthBar != null)
-            healthBar.fillAmount = current / max;
+            healthBar.value = current / max;
     }
 
     private void UpdateStaminaBar(float current, float max)
     {
         if (staminaBar != null)
-            staminaBar.fillAmount = current / max;
+            staminaBar.value = current / max;
     }
 
     private void UpdateHungerBar(float current, float max)
     {
         if (hungerBar != null)
-            hungerBar.fillAmount = current / max;
+            hungerBar.value = current / max;
     }
 
     private void UpdateThirstBar(float current, float max)
     {
         if (thirstBar != null)
-            thirstBar.fillAmount = current / max;
+            thirstBar.value = current / max;
     }
 
     private void UpdateAmmoText(int current, int max)
@@ -152,10 +152,10 @@ public class UIManager : MonoBehaviour
                 vehicleStatsPanel.SetActive(true);
 
             if (vehicleHealthBar != null)
-                vehicleHealthBar.fillAmount = vehicle.GetHealth() / vehicle.GetMaxHealth();
+                vehicleHealthBar.value = vehicle.GetHealth() / vehicle.GetMaxHealth();
 
             if (fuelBar != null)
-                fuelBar.fillAmount = vehicle.GetFuel() / vehicle.GetMaxFuel();
+                fuelBar.value = vehicle.GetFuel() / vehicle.GetMaxFuel();
         }
         else
         {

@@ -3,11 +3,28 @@ using System.Collections.Generic;
 
 public class ProjectilePool : MonoBehaviour
 {
+    public static ProjectilePool Instance { get; private set; }
+
     [SerializeField] private GameObject projectilePrefab;
     [SerializeField] private int initialPoolSize = 20;
     [SerializeField] private Transform poolParent;
 
     private Queue<Projectile> pool = new Queue<Projectile>();
+
+    private void Awake()
+    {
+        // Singleton pattern
+        if (Instance == null)
+        {
+            Instance = this;
+            DontDestroyOnLoad(gameObject);
+        }
+        else
+        {
+            Destroy(gameObject);
+            return;
+        }
+    }
 
     private void Start()
     {

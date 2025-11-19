@@ -20,8 +20,8 @@ public class Vehicle : MonoBehaviour, IDamageable, IInteractable
     [SerializeField] private Camera mainCamera;
 
     [Header("Arcade Vehicle Physics")]
-    // Reference to Arcade Vehicle Physics component (to be added in Unity)
-    private MonoBehaviour arcadeVehicleController;
+    [Tooltip("Assign your Arcade Vehicle Physics controller component here (optional)")]
+    [SerializeField] private MonoBehaviour arcadeVehicleController;
 
     private float currentHealth;
     private float currentFuel;
@@ -36,41 +36,52 @@ public class Vehicle : MonoBehaviour, IDamageable, IInteractable
         if (mainCamera == null)
             mainCamera = Camera.main;
 
-        // Find Arcade Vehicle Physics component (if exists)
-        // This will be replaced with actual component from the asset
-        arcadeVehicleController = GetComponent<MonoBehaviour>();
+        // Auto-find Arcade Vehicle Physics component if not assigned
+        // Replace "ArcadeVehicleController" with actual component name from asset
+        if (arcadeVehicleController == null)
+        {
+            // Try to find common vehicle controller component names
+            // arcadeVehicleController = GetComponent<ArcadeCarController>();
+            // arcadeVehicleController = GetComponent<VehicleController>();
+            // Uncomment and replace with actual component type from your asset
+        }
+
+        // Start with vehicle controller disabled
+        SetVehicleControllerEnabled(false);
     }
 
     private void Update()
     {
         if (isOccupied)
         {
-            HandleVehicleControls();
+            // Only handle our custom logic, let Arcade Physics handle movement
             ConsumeFuel();
+            CheckFuelForMovement();
             HandleVehicleShooting();
             HandleExit();
             HandleDebugKeys();
         }
     }
 
-    private void HandleVehicleControls()
+    private void CheckFuelForMovement()
     {
-        // Fuel check
+        // Disable vehicle movement if out of fuel
         if (currentFuel <= 0)
         {
-            // Can't move without fuel
-            Debug.Log("Out of fuel!");
-            return;
+            SetVehicleControllerEnabled(false);
+            Debug.Log("Out of fuel! Vehicle disabled.");
         }
-
-        // Note: Actual vehicle controls will be handled by Arcade Vehicle Physics asset
-        // This is just for reference
-
-        // Check for boost
-        if (Input.GetKey(KeyCode.LeftShift) && currentFuel > 0)
+        else if (arcadeVehicleController != null && !arcadeVehicleController.enabled)
         {
-            // Boost logic (Arcade Vehicle Physics will handle movement)
-            // We just consume extra fuel
+            SetVehicleControllerEnabled(true);
+        }
+    }
+
+    private void SetVehicleControllerEnabled(bool enabled)
+    {
+        if (arcadeVehicleController != null)
+        {
+            arcadeVehicleController.enabled = enabled;
         }
     }
 
@@ -157,6 +168,9 @@ public class Vehicle : MonoBehaviour, IDamageable, IInteractable
         currentDriver = player;
         isOccupied = true;
 
+        // Enable Arcade Vehicle Physics controller
+        SetVehicleControllerEnabled(true);
+
         // Tell player to enter vehicle
         player.EnterVehicle(this);
 
@@ -176,6 +190,9 @@ public class Vehicle : MonoBehaviour, IDamageable, IInteractable
             return;
 
         Vector3 exitPosition = exitPoint != null ? exitPoint.position : transform.position + transform.right * 2f;
+
+        // Disable Arcade Vehicle Physics controller
+        SetVehicleControllerEnabled(false);
 
         // Tell player to exit
         currentDriver.ExitVehicle(exitPosition);

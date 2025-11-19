@@ -27,9 +27,10 @@ public class Gun : MonoBehaviour
 
     private void Start()
     {
+        // Automatically get ProjectilePool singleton instance
         if (projectilePool == null)
         {
-            projectilePool = FindAnyObjectByType<ProjectilePool>();
+            projectilePool = ProjectilePool.Instance;
         }
 
         OnAmmoChanged?.Invoke(currentAmmo, maxAmmo);
