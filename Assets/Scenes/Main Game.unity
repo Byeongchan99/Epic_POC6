@@ -226,6 +226,11 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 78682735}
   m_CullTransparentMesh: 1
+--- !u!4 &84336161 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 964503720827136719, guid: 1defd6f94209d9b46988efafd154dad6, type: 3}
+  m_PrefabInstance: {fileID: 3458952745182735096}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &149332815
 GameObject:
   m_ObjectHideFlags: 0
@@ -2176,8 +2181,8 @@ MonoBehaviour:
       m_Calls: []
   m_text: Ammo
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
-  m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: 82a734bbe967f7347b44bd4857b866e4, type: 2}
+  m_sharedMaterial: {fileID: 546199596035815161, guid: 82a734bbe967f7347b44bd4857b866e4, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -2313,7 +2318,7 @@ GameObject:
   - component: {fileID: 1371736360}
   m_Layer: 0
   m_Name: Main Camera
-  m_TagString: Untagged
+  m_TagString: MainCamera
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -3847,7 +3852,7 @@ MonoBehaviour:
   holeScale: 10
   holeWeight: 0.3
   landTilePrefab: {fileID: 2671739583745122529, guid: d0c73120b771a034b95a52fb41cf11f4, type: 3}
-  waterTilePrefab: {fileID: 0}
+  waterTilePrefab: {fileID: 8074766356478920408, guid: defebb95a987a4c4e93d3182856ec86c, type: 3}
   missionZonePrefabs: []
   missionZoneSpacing: 20
   optimizeMesh: 1
@@ -4053,6 +4058,22 @@ PrefabInstance:
       propertyPath: m_Name
       value: Player
       objectReference: {fileID: 0}
+    - target: {fileID: 4137624477436302955, guid: 1defd6f94209d9b46988efafd154dad6, type: 3}
+      propertyPath: firePoint
+      value: 
+      objectReference: {fileID: 84336161}
+    - target: {fileID: 4137624477436302955, guid: 1defd6f94209d9b46988efafd154dad6, type: 3}
+      propertyPath: projectilePool
+      value: 
+      objectReference: {fileID: 307431056}
+    - target: {fileID: 8375715418748773015, guid: 1defd6f94209d9b46988efafd154dad6, type: 3}
+      propertyPath: firePoint
+      value: 
+      objectReference: {fileID: 84336161}
+    - target: {fileID: 8375715418748773015, guid: 1defd6f94209d9b46988efafd154dad6, type: 3}
+      propertyPath: mainCamera
+      value: 
+      objectReference: {fileID: 1371736363}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
