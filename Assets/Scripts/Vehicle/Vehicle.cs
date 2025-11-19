@@ -230,10 +230,15 @@ public class Vehicle : MonoBehaviour, IDamageable, IInteractable
             }
         }
 
-        // Collision with wall/terrain
+        // Collision with wall/terrain (only take damage if moving fast enough)
         if (collision.gameObject.CompareTag("Terrain") || collision.gameObject.CompareTag("Wall"))
         {
-            TakeDamage(collisionDamageToSelf);
+            // Only take damage if collision impact is strong enough
+            float impactVelocity = collision.relativeVelocity.magnitude;
+            if (impactVelocity > 5f) // Threshold: only damage if moving faster than 5 units/sec
+            {
+                TakeDamage(collisionDamageToSelf);
+            }
         }
     }
 

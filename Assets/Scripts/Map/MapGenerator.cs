@@ -320,6 +320,13 @@ public class MapGenerator : MonoBehaviour
                 MeshFilter mf = child.GetComponent<MeshFilter>();
                 if (mf != null && mf.sharedMesh != null)
                 {
+                    // Check if mesh is readable (can be combined)
+                    if (!mf.sharedMesh.isReadable)
+                    {
+                        Debug.LogWarning($"Mesh '{mf.sharedMesh.name}' is not readable. Skipping tile '{child.name}'. Enable Read/Write in mesh import settings.");
+                        continue;
+                    }
+
                     meshFilters.Add(mf);
                     tilesToDestroy.Add(child.gameObject);
 
@@ -357,7 +364,17 @@ public class MapGenerator : MonoBehaviour
 
         MeshFilter combinedMeshFilter = combinedObj.AddComponent<MeshFilter>();
         combinedMeshFilter.mesh = new Mesh();
-        combinedMeshFilter.mesh.CombineMeshes(combine, true, true);
+
+        try
+        {
+            combinedMeshFilter.mesh.CombineMeshes(combine, true, true);
+        }
+        catch (System.Exception e)
+        {
+            Debug.LogError($"Failed to combine meshes for {combinedName}: {e.Message}");
+            Destroy(combinedObj);
+            return;
+        }
 
         // Add renderer if needed
         if (addRenderer && sharedMaterial != null)
