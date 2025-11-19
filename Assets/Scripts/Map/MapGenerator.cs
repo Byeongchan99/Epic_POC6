@@ -302,8 +302,9 @@ public class MapGenerator : MonoBehaviour
         // Combine Land tiles
         CombineTilesByTag("Terrain", "CombinedLandMap");
 
-        // Combine Water walls
-        CombineTilesByTag("Wall", "CombinedWaterWalls", false);
+        // Don't combine Water walls - keep individual BoxColliders for 5m tall walls
+        // Water tiles are invisible anyway (no draw call benefit from combining)
+        Debug.Log("Keeping individual Water tiles for proper wall collision (5m tall BoxColliders)");
 
         Debug.Log("Map optimization complete!");
     }
