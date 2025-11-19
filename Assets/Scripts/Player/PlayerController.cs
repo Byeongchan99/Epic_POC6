@@ -44,6 +44,27 @@ public class PlayerController : MonoBehaviour
             mainCamera = Camera.main;
     }
 
+    private void Start()
+    {
+        // Move player to valid spawn position on land
+        MapGenerator mapGen = FindAnyObjectByType<MapGenerator>();
+        if (mapGen != null)
+        {
+            Vector3 spawnPos = mapGen.GetPlayerSpawnPosition();
+
+            // Disable CharacterController temporarily to teleport
+            controller.enabled = false;
+            transform.position = spawnPos;
+            controller.enabled = true;
+
+            Debug.Log($"Player spawned at valid land position: {spawnPos}");
+        }
+        else
+        {
+            Debug.LogWarning("MapGenerator not found! Player may spawn in water.");
+        }
+    }
+
     private void Update()
     {
         if (isInVehicle)
