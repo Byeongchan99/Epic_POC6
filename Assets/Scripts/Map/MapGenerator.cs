@@ -313,6 +313,7 @@ public class MapGenerator : MonoBehaviour
         List<MeshFilter> meshFilters = new List<MeshFilter>();
         List<GameObject> tilesToDestroy = new List<GameObject>();
         Material sharedMaterial = null;
+        int skippedCount = 0;
 
         foreach (Transform child in mapParent)
         {
@@ -325,6 +326,7 @@ public class MapGenerator : MonoBehaviour
                     if (!mf.sharedMesh.isReadable)
                     {
                         Debug.LogWarning($"Mesh '{mf.sharedMesh.name}' is not readable. Skipping tile '{child.name}'. Enable Read/Write in mesh import settings.");
+                        skippedCount++;
                         continue;
                     }
 
@@ -335,16 +337,21 @@ public class MapGenerator : MonoBehaviour
                     if (sharedMaterial == null && addRenderer)
                     {
                         MeshRenderer mr = child.GetComponent<MeshRenderer>();
-                        if (mr != null)
+                        if (mr != null && mr.sharedMaterial != null)
+                        {
                             sharedMaterial = mr.sharedMaterial;
+                            Debug.Log($"Using material: {sharedMaterial.name} from {child.name}");
+                        }
                     }
                 }
             }
         }
 
+        Debug.Log($"CombineTilesByTag [{tag}]: Found {meshFilters.Count} readable meshes, skipped {skippedCount} non-readable meshes");
+
         if (meshFilters.Count == 0)
         {
-            Debug.LogWarning($"No meshes found with tag {tag}");
+            Debug.LogWarning($"No combinable meshes found with tag {tag}. All meshes may be non-readable.");
             return;
         }
 
@@ -378,10 +385,24 @@ public class MapGenerator : MonoBehaviour
         }
 
         // Add renderer if needed
-        if (addRenderer && sharedMaterial != null)
+        if (addRenderer)
         {
             MeshRenderer combinedRenderer = combinedObj.AddComponent<MeshRenderer>();
-            combinedRenderer.material = sharedMaterial;
+
+            if (sharedMaterial != null)
+            {
+                combinedRenderer.material = sharedMaterial;
+                Debug.Log($"Applied material '{sharedMaterial.name}' to {combinedName}");
+            }
+            else
+            {
+                Debug.LogWarning($"No material found for {combinedName}. Using default material. Make sure your tile prefab has a Material assigned!");
+                // Unity will use default pink material
+            }
+        }
+        else
+        {
+            Debug.Log($"Skipping renderer for {combinedName} (invisible collider only)");
         }
 
         // Add Mesh Collider
@@ -394,7 +415,7 @@ public class MapGenerator : MonoBehaviour
             Destroy(tile);
         }
 
-        Debug.Log($"Combined {meshFilters.Count} tiles into {combinedName}");
+        Debug.Log($"✓ Successfully combined {meshFilters.Count} tiles into {combinedName}");
     }
 
     private void FindLandTiles()
