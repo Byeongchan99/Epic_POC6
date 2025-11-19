@@ -316,11 +316,127 @@ public class MapGenerator : MonoBehaviour
         // Combine Land tiles
         CombineTilesByTag("Terrain", "CombinedLandMap");
 
-        // Don't combine Water walls - keep individual BoxColliders for 5m tall walls
-        // Water tiles are invisible anyway (no draw call benefit from combining)
-        Debug.Log("Keeping individual Water tiles for proper wall collision (5m tall BoxColliders)");
+        // Combine Water wall BoxColliders into one MeshCollider
+        CombineWaterWallColliders();
 
         Debug.Log("Map optimization complete!");
+    }
+
+    /// <summary>
+    /// Combines all water tile BoxColliders into a single MeshCollider
+    /// Creates procedural box meshes and combines them
+    /// </summary>
+    private void CombineWaterWallColliders()
+    {
+        Debug.Log("Combining Water wall colliders...");
+
+        List<CombineInstance> combines = new List<CombineInstance>();
+        List<GameObject> waterTilesToDestroy = new List<GameObject>();
+
+        // Collect all water tiles and create box meshes
+        foreach (Transform child in mapParent)
+        {
+            if (child.CompareTag("Wall"))
+            {
+                BoxCollider boxCollider = child.GetComponent<BoxCollider>();
+                if (boxCollider != null)
+                {
+                    // Create a box mesh based on the BoxCollider
+                    Mesh boxMesh = CreateBoxMesh(boxCollider.size);
+
+                    CombineInstance ci = new CombineInstance();
+                    ci.mesh = boxMesh;
+
+                    // Calculate world matrix
+                    Vector3 worldCenter = child.position + boxCollider.center;
+                    Matrix4x4 matrix = Matrix4x4.TRS(worldCenter, child.rotation, child.lossyScale);
+                    ci.transform = matrix;
+
+                    combines.Add(ci);
+                    waterTilesToDestroy.Add(child.gameObject);
+                }
+            }
+        }
+
+        if (combines.Count == 0)
+        {
+            Debug.LogWarning("No water tiles found to combine");
+            return;
+        }
+
+        Debug.Log($"Combining {combines.Count} water wall BoxColliders into one MeshCollider");
+
+        // Create combined water walls object
+        GameObject combinedWalls = new GameObject("CombinedWaterWalls");
+        combinedWalls.transform.position = Vector3.zero;
+        combinedWalls.isStatic = true;
+        combinedWalls.tag = "Wall";
+
+        // Create combined mesh
+        Mesh combinedMesh = new Mesh();
+        combinedMesh.indexFormat = UnityEngine.Rendering.IndexFormat.UInt32; // Support large meshes
+        combinedMesh.CombineMeshes(combines.ToArray(), true, true);
+
+        // Add MeshCollider (no renderer - invisible)
+        MeshCollider meshCollider = combinedWalls.AddComponent<MeshCollider>();
+        meshCollider.sharedMesh = combinedMesh;
+
+        // Destroy original water tiles
+        foreach (GameObject waterTile in waterTilesToDestroy)
+        {
+            Destroy(waterTile);
+        }
+
+        Debug.Log($"✓ Successfully combined {combines.Count} water BoxColliders into one MeshCollider");
+    }
+
+    /// <summary>
+    /// Creates a procedural box mesh with given size
+    /// </summary>
+    private Mesh CreateBoxMesh(Vector3 size)
+    {
+        Mesh mesh = new Mesh();
+
+        Vector3 halfSize = size * 0.5f;
+
+        // 8 vertices of a box
+        Vector3[] vertices = new Vector3[]
+        {
+            // Bottom face
+            new Vector3(-halfSize.x, -halfSize.y, -halfSize.z),
+            new Vector3( halfSize.x, -halfSize.y, -halfSize.z),
+            new Vector3( halfSize.x, -halfSize.y,  halfSize.z),
+            new Vector3(-halfSize.x, -halfSize.y,  halfSize.z),
+            // Top face
+            new Vector3(-halfSize.x,  halfSize.y, -halfSize.z),
+            new Vector3( halfSize.x,  halfSize.y, -halfSize.z),
+            new Vector3( halfSize.x,  halfSize.y,  halfSize.z),
+            new Vector3(-halfSize.x,  halfSize.y,  halfSize.z),
+        };
+
+        // 12 triangles (6 faces * 2 triangles each)
+        int[] triangles = new int[]
+        {
+            // Bottom
+            0, 2, 1, 0, 3, 2,
+            // Top
+            4, 5, 6, 4, 6, 7,
+            // Front
+            0, 1, 5, 0, 5, 4,
+            // Back
+            2, 3, 7, 2, 7, 6,
+            // Left
+            3, 0, 4, 3, 4, 7,
+            // Right
+            1, 2, 6, 1, 6, 5
+        };
+
+        mesh.vertices = vertices;
+        mesh.triangles = triangles;
+        mesh.RecalculateNormals();
+        mesh.RecalculateBounds();
+
+        return mesh;
     }
 
     private void CombineTilesByTag(string tag, string combinedName, bool addRenderer = true)
