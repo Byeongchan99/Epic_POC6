@@ -52,8 +52,22 @@ public class Vehicle : MonoBehaviour, IDamageable, IInteractable
             }
         }
 
-        // Start with vehicle controller disabled
-        SetVehicleControllerEnabled(false);
+        // Keep vehicle controller enabled initially so its Start() can run
+        // Then disable it after a short delay
+        if (arcadeVehicleController != null)
+        {
+            arcadeVehicleController.enabled = true;
+            Invoke(nameof(DisableVehicleControllerAfterInit), 0.1f);
+        }
+    }
+
+    private void DisableVehicleControllerAfterInit()
+    {
+        // Disable vehicle controller until player enters
+        if (!isOccupied)
+        {
+            SetVehicleControllerEnabled(false);
+        }
     }
 
     private void Update()
@@ -75,12 +89,21 @@ public class Vehicle : MonoBehaviour, IDamageable, IInteractable
     private void HandleVehicleInput()
     {
         if (arcadeVehicleController == null)
+        {
+            Debug.LogWarning("ArcadeVehicleController is null! Cannot handle vehicle input.");
             return;
+        }
 
         // Get input
         float steering = Input.GetAxis("Horizontal"); // A/D or Left/Right arrows
         float acceleration = Input.GetAxis("Vertical"); // W/S or Up/Down arrows
         float brake = Input.GetKey(KeyCode.Space) ? 1f : 0f; // Space for brake/drift
+
+        // Debug: Log input when there's any
+        if (Mathf.Abs(steering) > 0.01f || Mathf.Abs(acceleration) > 0.01f || brake > 0.01f)
+        {
+            Debug.Log($"Vehicle Input - Steering: {steering:F2}, Acceleration: {acceleration:F2}, Brake: {brake:F2}");
+        }
 
         // Provide input to ArcadeVehicleController
         arcadeVehicleController.ProvideInputs(steering, acceleration, brake);
@@ -105,6 +128,11 @@ public class Vehicle : MonoBehaviour, IDamageable, IInteractable
         if (arcadeVehicleController != null)
         {
             arcadeVehicleController.enabled = enabled;
+            Debug.Log($"ArcadeVehicleController enabled = {enabled}");
+        }
+        else
+        {
+            Debug.LogWarning("Cannot set vehicle controller enabled state - arcadeVehicleController is null!");
         }
     }
 
@@ -186,7 +214,12 @@ public class Vehicle : MonoBehaviour, IDamageable, IInteractable
     public void EnterVehicle(PlayerController player)
     {
         if (isOccupied)
+        {
+            Debug.Log("Vehicle already occupied!");
             return;
+        }
+
+        Debug.Log($"EnterVehicle called - ArcadeVehicleController: {(arcadeVehicleController != null ? "Found" : "NULL")}");
 
         currentDriver = player;
         isOccupied = true;
@@ -202,9 +235,14 @@ public class Vehicle : MonoBehaviour, IDamageable, IInteractable
         if (camera != null)
         {
             camera.SetTarget(transform);
+            Debug.Log("Camera switched to vehicle");
+        }
+        else
+        {
+            Debug.LogWarning("TopDownCamera not found!");
         }
 
-        Debug.Log("Player entered vehicle");
+        Debug.Log("Player entered vehicle - ready to drive!");
     }
 
     private void ExitVehicle()
