@@ -52,34 +52,24 @@ public class Vehicle : MonoBehaviour, IDamageable, IInteractable
             }
         }
 
-        // Keep vehicle controller enabled initially so its Start() can run
-        // Then disable it after a short delay
+        // Keep vehicle controller always enabled for continuous physics calculations
+        // Control vehicle state via input (0,0,0) instead of disabling component
         if (arcadeVehicleController != null)
         {
             arcadeVehicleController.enabled = true;
-            Invoke(nameof(DisableVehicleControllerAfterInit), 0.1f);
-        }
-    }
-
-    private void DisableVehicleControllerAfterInit()
-    {
-        // Disable vehicle controller until player enters
-        if (!isOccupied)
-        {
-            SetVehicleControllerEnabled(false);
         }
     }
 
     private void Update()
     {
+        // Always provide inputs to ArcadeVehicleController (zero inputs when not occupied)
+        // This keeps physics running continuously to prevent floating
+        HandleVehicleInput();
+
         if (isOccupied)
         {
-            // Provide input to ArcadeVehicleController
-            HandleVehicleInput();
-
             // Handle our custom logic
             ConsumeFuel();
-            CheckFuelForMovement();
             HandleVehicleShooting();
             HandleExit();
             HandleDebugKeys();
@@ -94,6 +84,14 @@ public class Vehicle : MonoBehaviour, IDamageable, IInteractable
             return;
         }
 
+        // Only process input if occupied AND has fuel
+        if (!isOccupied || currentFuel <= 0)
+        {
+            // Provide zero inputs to keep physics running but vehicle stationary
+            arcadeVehicleController.ProvideInputs(0f, 0f, 0f);
+            return;
+        }
+
         // Get input using GetAxisRaw for instant response (no smoothing)
         float steering = Input.GetAxisRaw("Horizontal"); // A/D or Left/Right arrows
         float acceleration = Input.GetAxisRaw("Vertical"); // W/S or Up/Down arrows
@@ -102,39 +100,13 @@ public class Vehicle : MonoBehaviour, IDamageable, IInteractable
         // Debug: Log input when there's any
         if (Mathf.Abs(steering) > 0.01f || Mathf.Abs(acceleration) > 0.01f || brake > 0.01f)
         {
-            Debug.Log($"Vehicle Input - Steering: {steering:F2}, Acceleration: {acceleration:F2}, Brake: {brake:F2}, Controller enabled: {arcadeVehicleController.enabled}");
+            Debug.Log($"Vehicle Input - Steering: {steering:F2}, Acceleration: {acceleration:F2}, Brake: {brake:F2}, Fuel: {currentFuel:F1}");
         }
 
         // Provide input to ArcadeVehicleController
         arcadeVehicleController.ProvideInputs(steering, acceleration, brake);
     }
 
-    private void CheckFuelForMovement()
-    {
-        // Disable vehicle movement if out of fuel
-        if (currentFuel <= 0)
-        {
-            SetVehicleControllerEnabled(false);
-            Debug.Log("Out of fuel! Vehicle disabled.");
-        }
-        else if (arcadeVehicleController != null && !arcadeVehicleController.enabled)
-        {
-            SetVehicleControllerEnabled(true);
-        }
-    }
-
-    private void SetVehicleControllerEnabled(bool enabled)
-    {
-        if (arcadeVehicleController != null)
-        {
-            arcadeVehicleController.enabled = enabled;
-            Debug.Log($"ArcadeVehicleController enabled = {enabled}");
-        }
-        else
-        {
-            Debug.LogWarning("Cannot set vehicle controller enabled state - arcadeVehicleController is null!");
-        }
-    }
 
     private void ConsumeFuel()
     {
@@ -224,8 +196,8 @@ public class Vehicle : MonoBehaviour, IDamageable, IInteractable
         currentDriver = player;
         isOccupied = true;
 
-        // Enable Arcade Vehicle Physics controller
-        SetVehicleControllerEnabled(true);
+        // ArcadeVehicleController is always enabled, just update isOccupied state
+        // HandleVehicleInput() will now process player inputs instead of zero inputs
 
         // Diagnostic: Check ArcadeVehicleController setup
         if (arcadeVehicleController != null)
@@ -322,8 +294,7 @@ public class Vehicle : MonoBehaviour, IDamageable, IInteractable
 
         Vector3 exitPosition = exitPoint != null ? exitPoint.position : transform.position + transform.right * 2f;
 
-        // Disable Arcade Vehicle Physics controller
-        SetVehicleControllerEnabled(false);
+        // ArcadeVehicleController stays enabled, HandleVehicleInput() will provide zero inputs
 
         // Tell player to exit
         currentDriver.ExitVehicle(exitPosition);
