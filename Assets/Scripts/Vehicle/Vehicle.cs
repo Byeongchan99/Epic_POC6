@@ -28,6 +28,7 @@ public class Vehicle : MonoBehaviour, IDamageable, IInteractable
     private float currentFuel;
     private PlayerController currentDriver;
     private bool isOccupied;
+    private InputManager_ArcadeVP inputManager;
 
     private void Start()
     {
@@ -37,7 +38,7 @@ public class Vehicle : MonoBehaviour, IDamageable, IInteractable
         if (mainCamera == null)
             mainCamera = Camera.main;
 
-        // Auto-find Arcade Vehicle Physics component if not assigned
+        // Auto-find Arcade Vehicle Physics components if not assigned
         if (arcadeVehicleController == null)
         {
             arcadeVehicleController = GetComponent<ArcadeVehicleController>();
@@ -52,8 +53,20 @@ public class Vehicle : MonoBehaviour, IDamageable, IInteractable
             }
         }
 
-        // Keep vehicle controller always enabled for continuous physics calculations
-        // Control vehicle state via input (0,0,0) instead of disabling component
+        // Find InputManager_ArcadeVP (original asset's input handler)
+        inputManager = GetComponent<InputManager_ArcadeVP>();
+        if (inputManager == null)
+        {
+            Debug.LogWarning("InputManager_ArcadeVP not found! Add this component for vehicle input control.");
+        }
+        else
+        {
+            // Disable input manager until player enters vehicle
+            inputManager.enabled = false;
+            Debug.Log("InputManager_ArcadeVP found and disabled until player enters");
+        }
+
+        // Keep ArcadeVehicleController always enabled for continuous physics
         if (arcadeVehicleController != null)
         {
             arcadeVehicleController.enabled = true;
@@ -62,49 +75,33 @@ public class Vehicle : MonoBehaviour, IDamageable, IInteractable
 
     private void Update()
     {
-        // Always provide inputs to ArcadeVehicleController (zero inputs when not occupied)
-        // This keeps physics running continuously to prevent floating
-        HandleVehicleInput();
-
         if (isOccupied)
         {
-            // Handle our custom logic
+            // Handle game-specific logic (stats only, not input!)
             ConsumeFuel();
+            CheckFuelForInput();
             HandleVehicleShooting();
             HandleExit();
             HandleDebugKeys();
         }
     }
 
-    private void HandleVehicleInput()
+    private void CheckFuelForInput()
     {
-        if (arcadeVehicleController == null)
-        {
-            Debug.LogWarning("ArcadeVehicleController is null! Cannot handle vehicle input.");
+        if (inputManager == null)
             return;
-        }
 
-        // Only process input if occupied AND has fuel
-        if (!isOccupied || currentFuel <= 0)
+        // Disable input if out of fuel, enable if has fuel
+        if (currentFuel <= 0 && inputManager.enabled)
         {
-            // Provide zero inputs to keep physics running but vehicle stationary
-            arcadeVehicleController.ProvideInputs(0f, 0f, 0f);
-            return;
+            inputManager.enabled = false;
+            Debug.Log("Out of fuel! Vehicle input disabled.");
         }
-
-        // Get input using GetAxisRaw for instant response (no smoothing)
-        float steering = Input.GetAxisRaw("Horizontal"); // A/D or Left/Right arrows
-        float acceleration = Input.GetAxisRaw("Vertical"); // W/S or Up/Down arrows
-        float brake = Input.GetKey(KeyCode.Space) ? 1f : 0f; // Space for brake/drift
-
-        // Debug: Log input when there's any
-        if (Mathf.Abs(steering) > 0.01f || Mathf.Abs(acceleration) > 0.01f || brake > 0.01f)
+        else if (currentFuel > 0 && !inputManager.enabled)
         {
-            Debug.Log($"Vehicle Input - Steering: {steering:F2}, Acceleration: {acceleration:F2}, Brake: {brake:F2}, Fuel: {currentFuel:F1}");
+            inputManager.enabled = true;
+            Debug.Log("Vehicle refueled! Input enabled.");
         }
-
-        // Provide input to ArcadeVehicleController
-        arcadeVehicleController.ProvideInputs(steering, acceleration, brake);
     }
 
 
@@ -196,8 +193,12 @@ public class Vehicle : MonoBehaviour, IDamageable, IInteractable
         currentDriver = player;
         isOccupied = true;
 
-        // ArcadeVehicleController is always enabled, just update isOccupied state
-        // HandleVehicleInput() will now process player inputs instead of zero inputs
+        // Enable InputManager_ArcadeVP to allow player control (original asset's input system)
+        if (inputManager != null && currentFuel > 0)
+        {
+            inputManager.enabled = true;
+            Debug.Log("InputManager enabled - vehicle control active");
+        }
 
         // Diagnostic: Check ArcadeVehicleController setup
         if (arcadeVehicleController != null)
@@ -294,7 +295,12 @@ public class Vehicle : MonoBehaviour, IDamageable, IInteractable
 
         Vector3 exitPosition = exitPoint != null ? exitPoint.position : transform.position + transform.right * 2f;
 
-        // ArcadeVehicleController stays enabled, HandleVehicleInput() will provide zero inputs
+        // Disable InputManager_ArcadeVP (original asset's input system)
+        if (inputManager != null)
+        {
+            inputManager.enabled = false;
+            Debug.Log("InputManager disabled - vehicle input deactivated");
+        }
 
         // Tell player to exit
         currentDriver.ExitVehicle(exitPosition);
