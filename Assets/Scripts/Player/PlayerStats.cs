@@ -15,10 +15,10 @@ public class PlayerStats : MonoBehaviour
     [Header("Hunger & Thirst")]
     [SerializeField] private float maxHunger = 100f;
     [SerializeField] private float maxThirst = 100f;
-    [SerializeField] private float hungerDecayRate = 5f;
-    [SerializeField] private float thirstDecayRate = 7f;
-    [SerializeField] private float hungerDamageRate = 5f;
-    [SerializeField] private float thirstDamageRate = 5f;
+    [SerializeField] private float hungerDecayRate = 1f;  // Reduced from 5 to 1 (100 seconds to deplete)
+    [SerializeField] private float thirstDecayRate = 1.5f;  // Reduced from 7 to 1.5 (66 seconds to deplete)
+    [SerializeField] private float hungerDamageRate = 2f;  // Reduced from 5 to 2
+    [SerializeField] private float thirstDamageRate = 3f;  // Reduced from 5 to 3
     private float currentHunger;
     private float currentThirst;
 
