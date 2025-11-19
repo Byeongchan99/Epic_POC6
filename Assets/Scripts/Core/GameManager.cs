@@ -124,8 +124,9 @@ public class GameManager : MonoBehaviour
             // Check if this position is on land
             if (mapGenerator.IsTileLand(testPosition))
             {
-                testPosition.y = nearPosition.y; // Keep same height as player
-                Debug.Log($"Found valid vehicle spawn position at angle {angle * Mathf.Rad2Deg:F0}° from player");
+                // Use Raycast to find exact ground height
+                testPosition = GetGroundPosition(testPosition);
+                Debug.Log($"Found valid vehicle spawn position at angle {angle * Mathf.Rad2Deg:F0}° from player at height Y={testPosition.y:F2}");
                 return testPosition;
             }
         }
@@ -143,8 +144,8 @@ public class GameManager : MonoBehaviour
 
                 if (mapGenerator.IsTileLand(testPosition))
                 {
-                    testPosition.y = nearPosition.y;
-                    Debug.Log($"Found valid vehicle spawn position at {radius}m from player");
+                    testPosition = GetGroundPosition(testPosition);
+                    Debug.Log($"Found valid vehicle spawn position at {radius}m from player at height Y={testPosition.y:F2}");
                     return testPosition;
                 }
             }
@@ -152,7 +153,32 @@ public class GameManager : MonoBehaviour
 
         // Fallback: use player position (should always be valid)
         Debug.LogWarning("Could not find valid vehicle spawn position, spawning at player location");
-        return nearPosition;
+        return GetGroundPosition(nearPosition);
+    }
+
+    /// <summary>
+    /// Uses Raycast to find the exact ground position at given XZ coordinates
+    /// </summary>
+    private Vector3 GetGroundPosition(Vector3 position)
+    {
+        // Start raycast from high above the position
+        Vector3 rayStart = new Vector3(position.x, 100f, position.z);
+        RaycastHit hit;
+
+        // Cast downward to find ground
+        if (Physics.Raycast(rayStart, Vector3.down, out hit, 200f))
+        {
+            // Return position slightly above ground (to prevent clipping)
+            Vector3 groundPos = hit.point;
+            groundPos.y += 0.5f; // Add small offset so vehicle sits properly on ground
+            Debug.Log($"Ground found at Y={hit.point.y:F2}, vehicle spawn at Y={groundPos.y:F2}");
+            return groundPos;
+        }
+
+        // Fallback if raycast fails
+        Debug.LogWarning($"Raycast failed to find ground at ({position.x:F1}, {position.z:F1}), using default height");
+        position.y = 1f;
+        return position;
     }
 
     /// <summary>
