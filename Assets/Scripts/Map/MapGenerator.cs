@@ -64,9 +64,9 @@ public class MapGenerator : MonoBehaviour
     {
         // Set random seed
         if (seed == 0)
-            seed = Random.Range(0, 10000);
+            seed = UnityEngine.Random.Range(0, 10000);
 
-        Random.InitState(seed);
+        UnityEngine.Random.InitState(seed);
 
         // Generate map data using Multi-Layer Perlin Noise
         mapData = new int[mapWidth, mapHeight];
@@ -101,8 +101,8 @@ public class MapGenerator : MonoBehaviour
 
     private void GenerateMapData()
     {
-        float offsetX = Random.Range(0f, 10000f);
-        float offsetY = Random.Range(0f, 10000f);
+        float offsetX = UnityEngine.Random.Range(0f, 10000f);
+        float offsetY = UnityEngine.Random.Range(0f, 10000f);
 
         for (int x = 0; x < mapWidth; x++)
         {
@@ -185,8 +185,8 @@ public class MapGenerator : MonoBehaviour
 
         for (int i = 0; i < maxAttempts; i++)
         {
-            int x = Random.Range(size.x / 2, mapWidth - size.x / 2);
-            int y = Random.Range(size.y / 2, mapHeight - size.y / 2);
+            int x = UnityEngine.Random.Range(size.x / 2, mapWidth - size.x / 2);
+            int y = UnityEngine.Random.Range(size.y / 2, mapHeight - size.y / 2);
 
             Vector2Int candidate = new Vector2Int(x, y);
 
@@ -788,7 +788,7 @@ public class MapGenerator : MonoBehaviour
             return Vector3.zero;
         }
 
-        Vector2Int randomTile = landTiles[Random.Range(0, landTiles.Count)];
+        Vector2Int randomTile = landTiles[UnityEngine.Random.Range(0, landTiles.Count)];
         return new Vector3(randomTile.x * tileSize, 0, randomTile.y * tileSize);
     }
 
