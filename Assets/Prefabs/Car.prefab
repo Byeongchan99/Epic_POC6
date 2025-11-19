@@ -10083,7 +10083,7 @@ MonoBehaviour:
   GroundCheck: 0
   drivableSurface:
     serializedVersion: 2
-    m_Bits: 64
+    m_Bits: 1
   MaxSpeed: 100
   accelaration: 20
   turn: 10
@@ -10189,15 +10189,16 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   maxHealth: 100
   maxFuel: 100
-  fuelConsumptionRate: 5
-  boostFuelMultiplier: 2
+  fuelConsumptionRate: 1
+  boostFuelMultiplier: 1.5
   collisionDamageToEnemy: 50
   collisionKnockbackForce: 10
   collisionDamageToSelf: 10
-  exitPoint: {fileID: 0}
-  vehicleGun: {fileID: 0}
-  firePoint: {fileID: 0}
+  exitPoint: {fileID: 2567011430187249267}
+  vehicleGun: {fileID: 7631840795373286182}
+  firePoint: {fileID: 1758340150634730228}
   mainCamera: {fileID: 0}
+  arcadeVehicleController: {fileID: 7357005411639265638}
 --- !u!114 &7631840795373286182
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -10217,7 +10218,7 @@ MonoBehaviour:
   maxAmmo: 30
   currentAmmo: 30
   reloadTime: 2
-  firePoint: {fileID: 0}
+  firePoint: {fileID: 1758340150634730228}
   projectilePool: {fileID: 0}
   ownerTag: Player
 --- !u!1 &2020112082441296436
