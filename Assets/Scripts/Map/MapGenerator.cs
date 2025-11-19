@@ -1,9 +1,13 @@
 using UnityEngine;
 using System.Collections.Generic;
 using Unity.AI.Navigation;
+using System;
 
 public class MapGenerator : MonoBehaviour
 {
+    // Event fired when map generation is complete
+    public static event Action OnMapGenerationComplete;
+
     [Header("Map Settings")]
     [SerializeField] private int mapWidth = 100;
     [SerializeField] private int mapHeight = 100;
@@ -89,6 +93,10 @@ public class MapGenerator : MonoBehaviour
         Debug.Log($"Map generated with seed: {seed}");
         Debug.Log($"Total land tiles: {landTiles.Count}");
         Debug.Log($"Mission zones placed: {placedMissionZones.Count}");
+
+        // Notify all listeners that map generation is complete
+        OnMapGenerationComplete?.Invoke();
+        Debug.Log("Map generation complete event fired");
     }
 
     private void GenerateMapData()

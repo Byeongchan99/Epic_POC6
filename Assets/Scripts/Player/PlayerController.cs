@@ -44,9 +44,26 @@ public class PlayerController : MonoBehaviour
             mainCamera = Camera.main;
     }
 
-    private void Start()
+    private void OnEnable()
     {
-        // Move player to valid spawn position on land
+        // Subscribe to map generation complete event
+        MapGenerator.OnMapGenerationComplete += OnMapReady;
+    }
+
+    private void OnDisable()
+    {
+        // Unsubscribe from event to prevent memory leaks
+        MapGenerator.OnMapGenerationComplete -= OnMapReady;
+    }
+
+    private void OnMapReady()
+    {
+        // Called when map generation is complete
+        MoveToValidSpawnPosition();
+    }
+
+    private void MoveToValidSpawnPosition()
+    {
         MapGenerator mapGen = FindAnyObjectByType<MapGenerator>();
         if (mapGen != null)
         {

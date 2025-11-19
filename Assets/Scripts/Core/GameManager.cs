@@ -29,21 +29,33 @@ public class GameManager : MonoBehaviour
         }
     }
 
+    private void OnEnable()
+    {
+        // Subscribe to map generation complete event
+        MapGenerator.OnMapGenerationComplete += OnMapReady;
+    }
+
+    private void OnDisable()
+    {
+        // Unsubscribe from event
+        MapGenerator.OnMapGenerationComplete -= OnMapReady;
+    }
+
     private void Start()
     {
         InitializeGame();
+    }
 
-        if (mapGenerator != null)
-        {
-            Vector3 spawnPos = mapGenerator.GetPlayerSpawnPosition();
-            transform.position = spawnPos;
-            Debug.Log($"Player spawned at {spawnPos}");
-        }
+    private void OnMapReady()
+    {
+        // Called when map generation is complete
+        Debug.Log("GameManager: Map generation complete, ready to spawn vehicle");
 
-        // Spawn vehicle near player after a short delay
+        // Spawn vehicle near player after map is ready
         if (spawnVehicleOnStart && vehiclePrefab != null)
         {
-            Invoke(nameof(SpawnVehicleNearPlayer), 0.5f);
+            // Wait a frame to ensure player has moved to spawn position
+            Invoke(nameof(SpawnVehicleNearPlayer), 0.1f);
         }
     }
 
