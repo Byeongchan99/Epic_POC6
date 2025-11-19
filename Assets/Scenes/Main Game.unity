@@ -3846,13 +3846,14 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   mapWidth: 100
   mapHeight: 100
+  tileSize: 4
   seed: 0
   continentScale: 20
   continentThreshold: 0.4
   holeScale: 10
   holeWeight: 0.3
-  landTilePrefab: {fileID: 2671739583745122529, guid: d0c73120b771a034b95a52fb41cf11f4, type: 3}
-  waterTilePrefab: {fileID: 8074766356478920408, guid: defebb95a987a4c4e93d3182856ec86c, type: 3}
+  landTilePrefab: {fileID: 7596327752331418150, guid: d0519e023e6e90f4ab831ff4d902e6fb, type: 3}
+  waterTilePrefab: {fileID: 5261546581278825493, guid: 7a63fea818ecb84469f2bcc3ed42696a, type: 3}
   missionZonePrefabs: []
   missionZoneSpacing: 20
   optimizeMesh: 1
