@@ -376,10 +376,17 @@ public class MapGenerator : MonoBehaviour
         Mesh combinedMesh = new Mesh();
         combinedMesh.indexFormat = UnityEngine.Rendering.IndexFormat.UInt32; // Support large meshes
         combinedMesh.CombineMeshes(combines.ToArray(), true, true);
+        combinedMesh.RecalculateBounds();
+        combinedMesh.RecalculateNormals();
+
+        Debug.Log($"Combined water wall mesh: {combinedMesh.vertexCount} vertices, bounds: {combinedMesh.bounds}");
 
         // Add MeshCollider (no renderer - invisible)
         MeshCollider meshCollider = combinedWalls.AddComponent<MeshCollider>();
         meshCollider.sharedMesh = combinedMesh;
+        meshCollider.convex = false; // Keep non-convex for accurate collision with complex shapes
+
+        Debug.Log($"MeshCollider created: convex={meshCollider.convex}, bounds={meshCollider.bounds}");
 
         // Destroy original water tiles
         foreach (GameObject waterTile in waterTilesToDestroy)
