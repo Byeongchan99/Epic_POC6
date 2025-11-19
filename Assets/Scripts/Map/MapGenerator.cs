@@ -1,6 +1,9 @@
 using UnityEngine;
 using System.Collections.Generic;
-using UnityEngine.AI;
+
+#if UNITY_AI_NAVIGATION
+using Unity.AI.Navigation;
+#endif
 
 public class MapGenerator : MonoBehaviour
 {
