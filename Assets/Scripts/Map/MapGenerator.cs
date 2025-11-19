@@ -252,6 +252,9 @@ public class MapGenerator : MonoBehaviour
                         waterTile.tag = "Wall";
                         waterTile.isStatic = true;
 
+                        // Reset scale to ensure consistent sizing
+                        waterTile.transform.localScale = Vector3.one;
+
                         // Remove ALL mesh components - we only need BoxCollider
                         MeshFilter meshFilter = waterTile.GetComponent<MeshFilter>();
                         if (meshFilter != null)
