@@ -161,7 +161,7 @@ public class Vehicle : MonoBehaviour, IDamageable, IInteractable
         player.EnterVehicle(this);
 
         // Switch camera target
-        TopDownCamera camera = FindObjectOfType<TopDownCamera>();
+        TopDownCamera camera = FindAnyObjectByType<TopDownCamera>();
         if (camera != null)
         {
             camera.SetTarget(transform);
@@ -181,7 +181,7 @@ public class Vehicle : MonoBehaviour, IDamageable, IInteractable
         currentDriver.ExitVehicle(exitPosition);
 
         // Switch camera back to player
-        TopDownCamera camera = FindObjectOfType<TopDownCamera>();
+        TopDownCamera camera = FindAnyObjectByType<TopDownCamera>();
         if (camera != null)
         {
             camera.SetTarget(currentDriver.transform);

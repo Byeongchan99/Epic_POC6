@@ -25,7 +25,7 @@ public class InteractionMission : MissionBase
         base.Initialize();
 
         // Find player
-        PlayerController playerController = FindObjectOfType<PlayerController>();
+        PlayerController playerController = FindAnyObjectByType<PlayerController>();
         if (playerController != null)
         {
             player = playerController.transform;

@@ -36,7 +36,7 @@ public class EnemyAI : MonoBehaviour
         stats = GetComponent<EnemyStats>();
 
         // Find player
-        PlayerController playerController = FindObjectOfType<PlayerController>();
+        PlayerController playerController = FindAnyObjectByType<PlayerController>();
         if (playerController != null)
         {
             player = playerController.transform;
@@ -136,7 +136,7 @@ public class EnemyAI : MonoBehaviour
         Gizmos.color = Color.yellow;
         Gizmos.DrawWireSphere(transform.position, detectionRange);
 
-        Gizmos.color = Color.orange;
+        Gizmos.color = new Color(1f, 0.647f, 0f); // Orange
         Gizmos.DrawWireSphere(transform.position, chaseRange);
 
         Gizmos.color = Color.red;

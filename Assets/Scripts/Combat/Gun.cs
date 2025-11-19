@@ -29,7 +29,7 @@ public class Gun : MonoBehaviour
     {
         if (projectilePool == null)
         {
-            projectilePool = FindObjectOfType<ProjectilePool>();
+            projectilePool = FindAnyObjectByType<ProjectilePool>();
         }
 
         OnAmmoChanged?.Invoke(currentAmmo, maxAmmo);

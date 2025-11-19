@@ -31,7 +31,7 @@ public class MissionManager : MonoBehaviour
     private void InitializeMissions()
     {
         // Find all missions in the scene
-        MissionBase[] foundMissions = FindObjectsOfType<MissionBase>();
+        MissionBase[] foundMissions = FindObjectsByType<MissionBase>(FindObjectsSortMode.None);
         allMissions.AddRange(foundMissions);
 
         foreach (MissionBase mission in allMissions)
