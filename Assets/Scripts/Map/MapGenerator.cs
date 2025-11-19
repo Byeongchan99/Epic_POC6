@@ -323,127 +323,125 @@ public class MapGenerator : MonoBehaviour
     }
 
     /// <summary>
-    /// Combines all water tile BoxColliders into a single MeshCollider
-    /// Creates procedural box meshes and combines them
+    /// Optimizes water wall BoxColliders by grouping adjacent tiles into larger colliders
+    /// CharacterController works much better with BoxColliders than complex MeshColliders
     /// </summary>
     private void CombineWaterWallColliders()
     {
-        Debug.Log("Combining Water wall colliders...");
+        Debug.Log("Optimizing Water wall colliders...");
 
-        List<CombineInstance> combines = new List<CombineInstance>();
+        // Build a 2D grid of water tile positions
+        bool[,] waterGrid = new bool[mapWidth, mapHeight];
+        bool[,] processed = new bool[mapWidth, mapHeight];
+
+        // Mark all water tiles
+        for (int x = 0; x < mapWidth; x++)
+        {
+            for (int y = 0; y < mapHeight; y++)
+            {
+                waterGrid[x, y] = (mapData[x, y] == (int)TileType.Water);
+            }
+        }
+
+        // Destroy all individual water tile GameObjects
         List<GameObject> waterTilesToDestroy = new List<GameObject>();
-
-        // Collect all water tiles and create box meshes
         foreach (Transform child in mapParent)
         {
             if (child.CompareTag("Wall"))
             {
-                BoxCollider boxCollider = child.GetComponent<BoxCollider>();
-                if (boxCollider != null)
-                {
-                    // Create a box mesh based on the BoxCollider
-                    Mesh boxMesh = CreateBoxMesh(boxCollider.size);
-
-                    CombineInstance ci = new CombineInstance();
-                    ci.mesh = boxMesh;
-
-                    // Calculate world matrix
-                    Vector3 worldCenter = child.position + boxCollider.center;
-                    Matrix4x4 matrix = Matrix4x4.TRS(worldCenter, child.rotation, child.lossyScale);
-                    ci.transform = matrix;
-
-                    combines.Add(ci);
-                    waterTilesToDestroy.Add(child.gameObject);
-                }
+                waterTilesToDestroy.Add(child.gameObject);
             }
         }
 
-        if (combines.Count == 0)
+        int originalCount = waterTilesToDestroy.Count;
+        foreach (GameObject tile in waterTilesToDestroy)
         {
-            Debug.LogWarning("No water tiles found to combine");
-            return;
+            Destroy(tile);
         }
 
-        Debug.Log($"Combining {combines.Count} water wall BoxColliders into one MeshCollider");
+        Debug.Log($"Destroyed {originalCount} individual water tiles");
 
-        // Create combined water walls object
-        GameObject combinedWalls = new GameObject("CombinedWaterWalls");
-        combinedWalls.transform.position = Vector3.zero;
-        combinedWalls.isStatic = true;
-        combinedWalls.tag = "Wall";
+        // Create parent for optimized colliders
+        GameObject waterWallsParent = new GameObject("CombinedWaterWalls");
+        waterWallsParent.transform.position = Vector3.zero;
+        waterWallsParent.isStatic = true;
+        waterWallsParent.tag = "Wall";
+        waterWallsParent.layer = LayerMask.NameToLayer("Default"); // Ensure it's on a collidable layer
 
-        // Create combined mesh
-        Mesh combinedMesh = new Mesh();
-        combinedMesh.indexFormat = UnityEngine.Rendering.IndexFormat.UInt32; // Support large meshes
-        combinedMesh.CombineMeshes(combines.ToArray(), true, true);
-        combinedMesh.RecalculateBounds();
-        combinedMesh.RecalculateNormals();
+        int colliderCount = 0;
 
-        Debug.Log($"Combined water wall mesh: {combinedMesh.vertexCount} vertices, bounds: {combinedMesh.bounds}");
-
-        // Add MeshCollider (no renderer - invisible)
-        MeshCollider meshCollider = combinedWalls.AddComponent<MeshCollider>();
-        meshCollider.sharedMesh = combinedMesh;
-        meshCollider.convex = false; // Keep non-convex for accurate collision with complex shapes
-
-        Debug.Log($"MeshCollider created: convex={meshCollider.convex}, bounds={meshCollider.bounds}");
-
-        // Destroy original water tiles
-        foreach (GameObject waterTile in waterTilesToDestroy)
+        // Group water tiles into rectangular regions
+        for (int startX = 0; startX < mapWidth; startX++)
         {
-            Destroy(waterTile);
+            for (int startY = 0; startY < mapHeight; startY++)
+            {
+                if (!waterGrid[startX, startY] || processed[startX, startY])
+                    continue;
+
+                // Find the largest rectangle starting from (startX, startY)
+                int width = 1;
+                int height = 1;
+
+                // Expand horizontally
+                while (startX + width < mapWidth &&
+                       waterGrid[startX + width, startY] &&
+                       !processed[startX + width, startY])
+                {
+                    width++;
+                }
+
+                // Try to expand vertically
+                bool canExpandVertically = true;
+                while (startY + height < mapHeight && canExpandVertically)
+                {
+                    // Check if the entire row can be added
+                    for (int x = startX; x < startX + width; x++)
+                    {
+                        if (!waterGrid[x, startY + height] || processed[x, startY + height])
+                        {
+                            canExpandVertically = false;
+                            break;
+                        }
+                    }
+
+                    if (canExpandVertically)
+                        height++;
+                }
+
+                // Mark all tiles in this rectangle as processed
+                for (int x = startX; x < startX + width; x++)
+                {
+                    for (int y = startY; y < startY + height; y++)
+                    {
+                        processed[x, y] = true;
+                    }
+                }
+
+                // Create a single BoxCollider for this rectangular region
+                GameObject colliderObj = new GameObject($"WaterWall_Region_{colliderCount}");
+                colliderObj.transform.parent = waterWallsParent.transform;
+                colliderObj.tag = "Wall";
+                colliderObj.isStatic = true;
+                colliderObj.layer = LayerMask.NameToLayer("Default");
+
+                // Calculate center position
+                float centerX = (startX + (width - 1) * 0.5f) * tileSize;
+                float centerZ = (startY + (height - 1) * 0.5f) * tileSize;
+                float centerY = waterWallHeight / 2f;
+
+                colliderObj.transform.position = new Vector3(centerX, centerY, centerZ);
+
+                // Add BoxCollider
+                BoxCollider boxCollider = colliderObj.AddComponent<BoxCollider>();
+                boxCollider.size = new Vector3(width * tileSize, waterWallHeight, height * tileSize);
+                boxCollider.center = Vector3.zero;
+
+                colliderCount++;
+            }
         }
 
-        Debug.Log($"✓ Successfully combined {combines.Count} water BoxColliders into one MeshCollider");
-    }
-
-    /// <summary>
-    /// Creates a procedural box mesh with given size
-    /// </summary>
-    private Mesh CreateBoxMesh(Vector3 size)
-    {
-        Mesh mesh = new Mesh();
-
-        Vector3 halfSize = size * 0.5f;
-
-        // 8 vertices of a box
-        Vector3[] vertices = new Vector3[]
-        {
-            // Bottom face
-            new Vector3(-halfSize.x, -halfSize.y, -halfSize.z),
-            new Vector3( halfSize.x, -halfSize.y, -halfSize.z),
-            new Vector3( halfSize.x, -halfSize.y,  halfSize.z),
-            new Vector3(-halfSize.x, -halfSize.y,  halfSize.z),
-            // Top face
-            new Vector3(-halfSize.x,  halfSize.y, -halfSize.z),
-            new Vector3( halfSize.x,  halfSize.y, -halfSize.z),
-            new Vector3( halfSize.x,  halfSize.y,  halfSize.z),
-            new Vector3(-halfSize.x,  halfSize.y,  halfSize.z),
-        };
-
-        // 12 triangles (6 faces * 2 triangles each)
-        int[] triangles = new int[]
-        {
-            // Bottom
-            0, 2, 1, 0, 3, 2,
-            // Top
-            4, 5, 6, 4, 6, 7,
-            // Front
-            0, 1, 5, 0, 5, 4,
-            // Back
-            2, 3, 7, 2, 7, 6,
-            // Left
-            3, 0, 4, 3, 4, 7,
-            // Right
-            1, 2, 6, 1, 6, 5
-        };
-
-        mesh.vertices = vertices;
-        mesh.triangles = triangles;
-        mesh.RecalculateNormals();
-        mesh.RecalculateBounds();
-
-        return mesh;
+        Debug.Log($"✓ Optimized {originalCount} water tiles into {colliderCount} BoxColliders (reduction: {((1f - colliderCount / (float)originalCount) * 100f):F1}%)");
+        Debug.Log($"Water wall collision is now CharacterController-compatible with reliable physics");
     }
 
     private void CombineTilesByTag(string tag, string combinedName, bool addRenderer = true)
