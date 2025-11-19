@@ -7,6 +7,7 @@ public class MapGenerator : MonoBehaviour
     [Header("Map Settings")]
     [SerializeField] private int mapWidth = 100;
     [SerializeField] private int mapHeight = 100;
+    [SerializeField] private float tileSize = 1f; // Size of each tile (match your prefab scale)
     [SerializeField] private int seed = 0;
 
     [Header("Noise Settings - Continent")]
@@ -228,7 +229,7 @@ public class MapGenerator : MonoBehaviour
         {
             for (int y = 0; y < mapHeight; y++)
             {
-                Vector3 position = new Vector3(x, 0, y);
+                Vector3 position = new Vector3(x * tileSize, 0, y * tileSize);
 
                 if (mapData[x, y] == (int)TileType.Land)
                 {
@@ -257,7 +258,7 @@ public class MapGenerator : MonoBehaviour
                             collider = waterTile.AddComponent<BoxCollider>();
 
                         collider.center = new Vector3(0, waterWallHeight / 2, 0);
-                        collider.size = new Vector3(1, waterWallHeight, 1);
+                        collider.size = new Vector3(tileSize, waterWallHeight, tileSize);
 
                         // Make renderer invisible (optional: keep visible for debugging)
                         MeshRenderer renderer = waterTile.GetComponent<MeshRenderer>();
@@ -278,7 +279,7 @@ public class MapGenerator : MonoBehaviour
     {
         foreach (var zoneData in placedMissionZones)
         {
-            Vector3 worldPos = new Vector3(zoneData.position.x, 0, zoneData.position.y);
+            Vector3 worldPos = new Vector3(zoneData.position.x * tileSize, 0, zoneData.position.y * tileSize);
             GameObject zone = Instantiate(zoneData.instance, worldPos, Quaternion.identity);
             zone.name = zoneData.instance.name + "_Instance";
 
