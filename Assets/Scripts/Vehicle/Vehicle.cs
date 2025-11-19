@@ -94,15 +94,15 @@ public class Vehicle : MonoBehaviour, IDamageable, IInteractable
             return;
         }
 
-        // Get input
-        float steering = Input.GetAxis("Horizontal"); // A/D or Left/Right arrows
-        float acceleration = Input.GetAxis("Vertical"); // W/S or Up/Down arrows
+        // Get input using GetAxisRaw for instant response (no smoothing)
+        float steering = Input.GetAxisRaw("Horizontal"); // A/D or Left/Right arrows
+        float acceleration = Input.GetAxisRaw("Vertical"); // W/S or Up/Down arrows
         float brake = Input.GetKey(KeyCode.Space) ? 1f : 0f; // Space for brake/drift
 
         // Debug: Log input when there's any
         if (Mathf.Abs(steering) > 0.01f || Mathf.Abs(acceleration) > 0.01f || brake > 0.01f)
         {
-            Debug.Log($"Vehicle Input - Steering: {steering:F2}, Acceleration: {acceleration:F2}, Brake: {brake:F2}");
+            Debug.Log($"Vehicle Input - Steering: {steering:F2}, Acceleration: {acceleration:F2}, Brake: {brake:F2}, Controller enabled: {arcadeVehicleController.enabled}");
         }
 
         // Provide input to ArcadeVehicleController
@@ -226,6 +226,24 @@ public class Vehicle : MonoBehaviour, IDamageable, IInteractable
 
         // Enable Arcade Vehicle Physics controller
         SetVehicleControllerEnabled(true);
+
+        // Diagnostic: Check ArcadeVehicleController setup
+        if (arcadeVehicleController != null)
+        {
+            Debug.Log($"[Vehicle Setup Check]");
+            Debug.Log($"  - rb (main Rigidbody): {(arcadeVehicleController.rb != null ? "OK" : "MISSING!")}");
+            Debug.Log($"  - carBody (Rigidbody): {(arcadeVehicleController.carBody != null ? "OK" : "MISSING!")}");
+            Debug.Log($"  - MaxSpeed: {arcadeVehicleController.MaxSpeed}");
+            Debug.Log($"  - Acceleration: {arcadeVehicleController.accelaration}");
+            Debug.Log($"  - Turn: {arcadeVehicleController.turn}");
+            Debug.Log($"  - MovementMode: {arcadeVehicleController.movementMode}");
+
+            if (arcadeVehicleController.rb != null)
+            {
+                Debug.Log($"  - rb.mass: {arcadeVehicleController.rb.mass}");
+                Debug.Log($"  - rb.isKinematic: {arcadeVehicleController.rb.isKinematic}");
+            }
+        }
 
         // Tell player to enter vehicle
         player.EnterVehicle(this);
