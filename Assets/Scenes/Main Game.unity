@@ -985,14 +985,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1a256ed90aceaf54db94f063acb8ea04, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  healthBar: {fileID: 0}
-  staminaBar: {fileID: 0}
-  hungerBar: {fileID: 0}
-  thirstBar: {fileID: 0}
+  healthBar: {fileID: 488740175}
+  staminaBar: {fileID: 1913640001}
+  hungerBar: {fileID: 1947643813}
+  thirstBar: {fileID: 1852168604}
   ammoText: {fileID: 1201772364}
   vehicleStatsPanel: {fileID: 596491576}
-  vehicleHealthBar: {fileID: 0}
-  fuelBar: {fileID: 0}
+  vehicleHealthBar: {fileID: 693011543}
+  fuelBar: {fileID: 1401209464}
   minimapController: {fileID: 487199730}
   missionListContainer: {fileID: 215141028}
   missionEntryPrefab: {fileID: 9211107260895098216, guid: 80413f6fd4aad604bb91556112bc4800, type: 3}
@@ -2293,6 +2293,11 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 1200682607203253247, guid: 1defd6f94209d9b46988efafd154dad6, type: 3}
   m_PrefabInstance: {fileID: 3458952745182735096}
   m_PrefabAsset: {fileID: 0}
+--- !u!4 &1274269543 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 2567011430187249267, guid: 7797ccb4606edf04b9ebfce2ef4cbb21, type: 3}
+  m_PrefabInstance: {fileID: 2132156308}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &1371736358
 GameObject:
   m_ObjectHideFlags: 0
@@ -3286,6 +3291,11 @@ RectTransform:
   m_AnchoredPosition: {x: -5, y: 0}
   m_SizeDelta: {x: -20, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
+--- !u!4 &1765878387 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 1758340150634730228, guid: 7797ccb4606edf04b9ebfce2ef4cbb21, type: 3}
+  m_PrefabInstance: {fileID: 2132156308}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &1852168602
 GameObject:
   m_ObjectHideFlags: 0
@@ -3838,6 +3848,10 @@ MonoBehaviour:
   holeWeight: 0.3
   landTilePrefab: {fileID: 2671739583745122529, guid: d0c73120b771a034b95a52fb41cf11f4, type: 3}
   waterTilePrefab: {fileID: 0}
+  missionZonePrefabs: []
+  missionZoneSpacing: 20
+  optimizeMesh: 1
+  waterWallHeight: 5
   mapParent: {fileID: 1081312945}
 --- !u!1001 &2132156308
 PrefabInstance:
@@ -3851,6 +3865,34 @@ PrefabInstance:
       propertyPath: m_Name
       value: Vehicle
       objectReference: {fileID: 0}
+    - target: {fileID: 6273052910263192006, guid: 7797ccb4606edf04b9ebfce2ef4cbb21, type: 3}
+      propertyPath: exitPoint
+      value: 
+      objectReference: {fileID: 1274269543}
+    - target: {fileID: 6273052910263192006, guid: 7797ccb4606edf04b9ebfce2ef4cbb21, type: 3}
+      propertyPath: firePoint
+      value: 
+      objectReference: {fileID: 1765878387}
+    - target: {fileID: 6273052910263192006, guid: 7797ccb4606edf04b9ebfce2ef4cbb21, type: 3}
+      propertyPath: mainCamera
+      value: 
+      objectReference: {fileID: 1371736363}
+    - target: {fileID: 6273052910263192006, guid: 7797ccb4606edf04b9ebfce2ef4cbb21, type: 3}
+      propertyPath: vehicleGun
+      value: 
+      objectReference: {fileID: 2132156312}
+    - target: {fileID: 6273052910263192006, guid: 7797ccb4606edf04b9ebfce2ef4cbb21, type: 3}
+      propertyPath: arcadeVehicleController
+      value: 
+      objectReference: {fileID: 2132156310}
+    - target: {fileID: 7631840795373286182, guid: 7797ccb4606edf04b9ebfce2ef4cbb21, type: 3}
+      propertyPath: firePoint
+      value: 
+      objectReference: {fileID: 1765878387}
+    - target: {fileID: 7631840795373286182, guid: 7797ccb4606edf04b9ebfce2ef4cbb21, type: 3}
+      propertyPath: projectilePool
+      value: 
+      objectReference: {fileID: 307431056}
     - target: {fileID: 7872246724509763024, guid: 7797ccb4606edf04b9ebfce2ef4cbb21, type: 3}
       propertyPath: m_LocalPosition.x
       value: 55
@@ -3901,6 +3943,28 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 7872246724509763024, guid: 7797ccb4606edf04b9ebfce2ef4cbb21, type: 3}
   m_PrefabInstance: {fileID: 2132156308}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &2132156310 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 7357005411639265638, guid: 7797ccb4606edf04b9ebfce2ef4cbb21, type: 3}
+  m_PrefabInstance: {fileID: 2132156308}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f2d69c44041501f4aab1c355410d67b2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!114 &2132156312 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 7631840795373286182, guid: 7797ccb4606edf04b9ebfce2ef4cbb21, type: 3}
+  m_PrefabInstance: {fileID: 2132156308}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a7df6fdc53648724eb557d901a9d640f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &2136691306
 GameObject:
   m_ObjectHideFlags: 0
