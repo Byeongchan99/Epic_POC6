@@ -24,6 +24,13 @@ public class GameManager : MonoBehaviour
     private void Start()
     {
         InitializeGame();
+
+        if (mapGenerator != null)
+        {
+            Vector3 spawnPos = mapGenerator.GetPlayerSpawnPosition();
+            transform.position = spawnPos;
+            Debug.Log($"Player spawned at {spawnPos}");
+        }
     }
 
     private void InitializeGame()
