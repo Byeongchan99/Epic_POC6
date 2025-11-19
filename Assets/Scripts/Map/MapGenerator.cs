@@ -68,6 +68,9 @@ public class MapGenerator : MonoBehaviour
         mapData = new int[mapWidth, mapHeight];
         GenerateMapData();
 
+        // Ensure all land is connected (remove isolated islands)
+        EnsureConnectedLand();
+
         // Place mission zones and carve out land for them
         PlaceMissionZones();
 
@@ -451,6 +454,187 @@ public class MapGenerator : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Ensures all land tiles are connected by removing isolated islands
+    /// Keeps only the largest connected land mass
+    /// </summary>
+    private void EnsureConnectedLand()
+    {
+        Debug.Log("Ensuring land connectivity...");
+
+        bool[,] visited = new bool[mapWidth, mapHeight];
+        List<List<Vector2Int>> landMasses = new List<List<Vector2Int>>();
+
+        // Find all separate land masses using flood fill
+        for (int x = 0; x < mapWidth; x++)
+        {
+            for (int y = 0; y < mapHeight; y++)
+            {
+                if (mapData[x, y] == (int)TileType.Land && !visited[x, y])
+                {
+                    List<Vector2Int> landMass = FloodFill(x, y, visited);
+                    landMasses.Add(landMass);
+                }
+            }
+        }
+
+        if (landMasses.Count == 0)
+        {
+            Debug.LogError("No land found! Generating fallback land area.");
+            CreateFallbackLand();
+            return;
+        }
+
+        // Find the largest land mass
+        List<Vector2Int> largestLandMass = landMasses[0];
+        foreach (var landMass in landMasses)
+        {
+            if (landMass.Count > largestLandMass.Count)
+            {
+                largestLandMass = landMass;
+            }
+        }
+
+        Debug.Log($"Found {landMasses.Count} separate land masses. Largest has {largestLandMass.Count} tiles.");
+
+        // Convert all tiles to water first
+        for (int x = 0; x < mapWidth; x++)
+        {
+            for (int y = 0; y < mapHeight; y++)
+            {
+                mapData[x, y] = (int)TileType.Water;
+            }
+        }
+
+        // Restore only the largest land mass
+        foreach (var tile in largestLandMass)
+        {
+            mapData[tile.x, tile.y] = (int)TileType.Land;
+        }
+
+        Debug.Log($"Kept largest land mass with {largestLandMass.Count} tiles. Removed {landMasses.Count - 1} isolated islands.");
+    }
+
+    /// <summary>
+    /// Flood fill algorithm to find all connected land tiles
+    /// </summary>
+    private List<Vector2Int> FloodFill(int startX, int startY, bool[,] visited)
+    {
+        List<Vector2Int> landMass = new List<Vector2Int>();
+        Queue<Vector2Int> queue = new Queue<Vector2Int>();
+
+        queue.Enqueue(new Vector2Int(startX, startY));
+        visited[startX, startY] = true;
+
+        // 4-directional neighbors
+        int[] dx = { -1, 1, 0, 0 };
+        int[] dy = { 0, 0, -1, 1 };
+
+        while (queue.Count > 0)
+        {
+            Vector2Int current = queue.Dequeue();
+            landMass.Add(current);
+
+            // Check all 4 neighbors
+            for (int i = 0; i < 4; i++)
+            {
+                int nx = current.x + dx[i];
+                int ny = current.y + dy[i];
+
+                // Check bounds
+                if (nx >= 0 && nx < mapWidth && ny >= 0 && ny < mapHeight)
+                {
+                    // Check if land and not visited
+                    if (mapData[nx, ny] == (int)TileType.Land && !visited[nx, ny])
+                    {
+                        visited[nx, ny] = true;
+                        queue.Enqueue(new Vector2Int(nx, ny));
+                    }
+                }
+            }
+        }
+
+        return landMass;
+    }
+
+    /// <summary>
+    /// Creates a fallback land area in the center if no land was generated
+    /// </summary>
+    private void CreateFallbackLand()
+    {
+        int centerX = mapWidth / 2;
+        int centerY = mapHeight / 2;
+        int radius = Mathf.Min(mapWidth, mapHeight) / 4;
+
+        for (int x = centerX - radius; x < centerX + radius; x++)
+        {
+            for (int y = centerY - radius; y < centerY + radius; y++)
+            {
+                if (x >= 0 && x < mapWidth && y >= 0 && y < mapHeight)
+                {
+                    float distance = Vector2.Distance(new Vector2(x, y), new Vector2(centerX, centerY));
+                    if (distance < radius)
+                    {
+                        mapData[x, y] = (int)TileType.Land;
+                    }
+                }
+            }
+        }
+
+        Debug.Log($"Created fallback land area with radius {radius} at center ({centerX}, {centerY})");
+    }
+
+    /// <summary>
+    /// Finds a valid player spawn position near the center of the map
+    /// Guarantees position is on land
+    /// </summary>
+    private Vector3 FindPlayerSpawnPosition()
+    {
+        int centerX = mapWidth / 2;
+        int centerY = mapHeight / 2;
+
+        // Try to find land near center in expanding circles
+        for (int radius = 0; radius < Mathf.Max(mapWidth, mapHeight) / 2; radius++)
+        {
+            for (int x = centerX - radius; x <= centerX + radius; x++)
+            {
+                for (int y = centerY - radius; y <= centerY + radius; y++)
+                {
+                    // Only check tiles on the current radius circle
+                    if (Mathf.Abs(x - centerX) == radius || Mathf.Abs(y - centerY) == radius)
+                    {
+                        if (x >= 0 && x < mapWidth && y >= 0 && y < mapHeight)
+                        {
+                            if (mapData[x, y] == (int)TileType.Land)
+                            {
+                                Vector3 spawnPos = new Vector3(x * tileSize, 1f, y * tileSize);
+                                Debug.Log($"Player spawn position found at ({x}, {y}) world position {spawnPos}");
+                                return spawnPos;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        // Fallback: just find any land tile
+        for (int x = 0; x < mapWidth; x++)
+        {
+            for (int y = 0; y < mapHeight; y++)
+            {
+                if (mapData[x, y] == (int)TileType.Land)
+                {
+                    Vector3 spawnPos = new Vector3(x * tileSize, 1f, y * tileSize);
+                    Debug.LogWarning($"Using fallback spawn position at ({x}, {y})");
+                    return spawnPos;
+                }
+            }
+        }
+
+        Debug.LogError("No land tiles found for player spawn!");
+        return new Vector3(centerX * tileSize, 1f, centerY * tileSize);
+    }
+
     // Public methods
     public bool IsTileLand(int x, int y)
     {
@@ -476,7 +660,15 @@ public class MapGenerator : MonoBehaviour
         }
 
         Vector2Int randomTile = landTiles[Random.Range(0, landTiles.Count)];
-        return new Vector3(randomTile.x, 0, randomTile.y);
+        return new Vector3(randomTile.x * tileSize, 0, randomTile.y * tileSize);
+    }
+
+    /// <summary>
+    /// Returns a guaranteed valid player spawn position on land near map center
+    /// </summary>
+    public Vector3 GetPlayerSpawnPosition()
+    {
+        return FindPlayerSpawnPosition();
     }
 
     public int[,] GetMapData()
