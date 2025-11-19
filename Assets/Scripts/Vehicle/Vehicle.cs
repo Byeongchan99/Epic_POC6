@@ -1,4 +1,5 @@
 using UnityEngine;
+using ArcadeVP;
 
 public class Vehicle : MonoBehaviour, IDamageable, IInteractable
 {
@@ -21,7 +22,7 @@ public class Vehicle : MonoBehaviour, IDamageable, IInteractable
 
     [Header("Arcade Vehicle Physics")]
     [Tooltip("Assign your Arcade Vehicle Physics controller component here (optional)")]
-    [SerializeField] private MonoBehaviour arcadeVehicleController;
+    [SerializeField] private ArcadeVehicleController arcadeVehicleController;
 
     private float currentHealth;
     private float currentFuel;
@@ -37,13 +38,18 @@ public class Vehicle : MonoBehaviour, IDamageable, IInteractable
             mainCamera = Camera.main;
 
         // Auto-find Arcade Vehicle Physics component if not assigned
-        // Replace "ArcadeVehicleController" with actual component name from asset
         if (arcadeVehicleController == null)
         {
-            // Try to find common vehicle controller component names
-            // arcadeVehicleController = GetComponent<ArcadeCarController>();
-            // arcadeVehicleController = GetComponent<VehicleController>();
-            // Uncomment and replace with actual component type from your asset
+            arcadeVehicleController = GetComponent<ArcadeVehicleController>();
+
+            if (arcadeVehicleController != null)
+            {
+                Debug.Log("ArcadeVehicleController found and assigned automatically");
+            }
+            else
+            {
+                Debug.LogWarning("ArcadeVehicleController not found on vehicle! Vehicle movement will not work.");
+            }
         }
 
         // Start with vehicle controller disabled
@@ -54,13 +60,30 @@ public class Vehicle : MonoBehaviour, IDamageable, IInteractable
     {
         if (isOccupied)
         {
-            // Only handle our custom logic, let Arcade Physics handle movement
+            // Provide input to ArcadeVehicleController
+            HandleVehicleInput();
+
+            // Handle our custom logic
             ConsumeFuel();
             CheckFuelForMovement();
             HandleVehicleShooting();
             HandleExit();
             HandleDebugKeys();
         }
+    }
+
+    private void HandleVehicleInput()
+    {
+        if (arcadeVehicleController == null)
+            return;
+
+        // Get input
+        float steering = Input.GetAxis("Horizontal"); // A/D or Left/Right arrows
+        float acceleration = Input.GetAxis("Vertical"); // W/S or Up/Down arrows
+        float brake = Input.GetKey(KeyCode.Space) ? 1f : 0f; // Space for brake/drift
+
+        // Provide input to ArcadeVehicleController
+        arcadeVehicleController.ProvideInputs(steering, acceleration, brake);
     }
 
     private void CheckFuelForMovement()
