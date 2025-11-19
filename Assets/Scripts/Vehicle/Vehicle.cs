@@ -242,7 +242,24 @@ public class Vehicle : MonoBehaviour, IDamageable, IInteractable
             {
                 Debug.Log($"  - rb.mass: {arcadeVehicleController.rb.mass}");
                 Debug.Log($"  - rb.isKinematic: {arcadeVehicleController.rb.isKinematic}");
+
+                // Check for required SphereCollider
+                SphereCollider sphereCol = arcadeVehicleController.rb.GetComponent<SphereCollider>();
+                if (sphereCol != null)
+                {
+                    Debug.Log($"  - SphereCollider: OK (radius: {sphereCol.radius})");
+                }
+                else
+                {
+                    Debug.LogError($"  - SphereCollider: MISSING! ArcadeVehicleController requires a SphereCollider on rb GameObject!");
+                }
             }
+
+            // Check LayerMask for drivable surface
+            Debug.Log($"  - Drivable Surface LayerMask: {arcadeVehicleController.drivableSurface.value}");
+
+            // Start grounded check monitoring
+            Invoke(nameof(CheckGroundedStatus), 0.5f);
         }
 
         // Tell player to enter vehicle
@@ -261,6 +278,31 @@ public class Vehicle : MonoBehaviour, IDamageable, IInteractable
         }
 
         Debug.Log("Player entered vehicle - ready to drive!");
+    }
+
+    private void CheckGroundedStatus()
+    {
+        if (!isOccupied || arcadeVehicleController == null)
+            return;
+
+        // Check if vehicle is grounded
+        bool grounded = arcadeVehicleController.grounded();
+        Debug.Log($"[Grounded Check] Vehicle is {(grounded ? "GROUNDED" : "NOT GROUNDED (this prevents movement!)")}");
+
+        if (!grounded)
+        {
+            Debug.LogWarning("Vehicle is not grounded! Check:");
+            Debug.LogWarning("  1. Vehicle has SphereCollider on rb GameObject");
+            Debug.LogWarning("  2. drivableSurface LayerMask includes ground layer");
+            Debug.LogWarning("  3. Ground has proper layer assigned");
+            Debug.LogWarning("  4. Vehicle Y position is close to ground");
+        }
+
+        // Continue monitoring while occupied
+        if (isOccupied)
+        {
+            Invoke(nameof(CheckGroundedStatus), 2f);
+        }
     }
 
     private void ExitVehicle()
