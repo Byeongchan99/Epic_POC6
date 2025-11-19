@@ -65,8 +65,8 @@ public class PlayerController : MonoBehaviour
 
     private void HandleMovement()
     {
-        float h = Input.GetAxis("Horizontal");
-        float v = Input.GetAxis("Vertical");
+        float h = Input.GetAxisRaw("Horizontal");
+        float v = Input.GetAxisRaw("Vertical");
 
         Vector3 move = new Vector3(h, 0, v).normalized;
 
@@ -104,8 +104,8 @@ public class PlayerController : MonoBehaviour
         isInvincible = true;
 
         // Determine roll direction
-        float h = Input.GetAxis("Horizontal");
-        float v = Input.GetAxis("Vertical");
+        float h = Input.GetAxisRaw("Horizontal");
+        float v = Input.GetAxisRaw("Vertical");
         rollDirection = new Vector3(h, 0, v).normalized;
 
         // If no input, roll forward
