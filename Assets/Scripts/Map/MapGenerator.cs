@@ -252,6 +252,15 @@ public class MapGenerator : MonoBehaviour
                         waterTile.tag = "Wall";
                         waterTile.isStatic = true;
 
+                        // Remove mesh components - we only need the collider
+                        MeshFilter meshFilter = waterTile.GetComponent<MeshFilter>();
+                        if (meshFilter != null)
+                            DestroyImmediate(meshFilter);
+
+                        MeshRenderer renderer = waterTile.GetComponent<MeshRenderer>();
+                        if (renderer != null)
+                            DestroyImmediate(renderer);
+
                         // Add or modify BoxCollider to make it a wall
                         BoxCollider collider = waterTile.GetComponent<BoxCollider>();
                         if (collider == null)
@@ -259,11 +268,6 @@ public class MapGenerator : MonoBehaviour
 
                         collider.center = new Vector3(0, waterWallHeight / 2, 0);
                         collider.size = new Vector3(tileSize, waterWallHeight, tileSize);
-
-                        // Make renderer invisible (optional: keep visible for debugging)
-                        MeshRenderer renderer = waterTile.GetComponent<MeshRenderer>();
-                        if (renderer != null)
-                            renderer.enabled = false; // Set to true to see water
                     }
                 }
             }
