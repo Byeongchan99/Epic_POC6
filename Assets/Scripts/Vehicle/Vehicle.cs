@@ -255,8 +255,17 @@ public class Vehicle : MonoBehaviour, IDamageable, IInteractable
                 }
             }
 
-            // Check LayerMask for drivable surface
-            Debug.Log($"  - Drivable Surface LayerMask: {arcadeVehicleController.drivableSurface.value}");
+            // Check and auto-fix LayerMask for drivable surface
+            Debug.Log($"  - Drivable Surface LayerMask (before): {arcadeVehicleController.drivableSurface.value}");
+
+            // Auto-fix: Set to Everything if it's 0 (Nothing)
+            if (arcadeVehicleController.drivableSurface.value == 0)
+            {
+                arcadeVehicleController.drivableSurface = ~0; // Everything
+                Debug.LogWarning($"  - AUTO-FIXED: drivableSurface was 0 (Nothing), changed to Everything");
+            }
+
+            Debug.Log($"  - Drivable Surface LayerMask (after): {arcadeVehicleController.drivableSurface.value}");
 
             // Start grounded check monitoring
             Invoke(nameof(CheckGroundedStatus), 0.5f);
