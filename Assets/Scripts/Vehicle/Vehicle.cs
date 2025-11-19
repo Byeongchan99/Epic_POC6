@@ -265,12 +265,13 @@ public class Vehicle : MonoBehaviour, IDamageable, IInteractable
         // Tell player to enter vehicle
         player.EnterVehicle(this);
 
-        // Switch camera target
+        // Switch camera target and enable vehicle mode
         TopDownCamera camera = FindAnyObjectByType<TopDownCamera>();
         if (camera != null)
         {
             camera.SetTarget(transform);
-            Debug.Log("Camera switched to vehicle");
+            camera.EnableVehicleMode(true); // Use vehicle-specific camera settings
+            Debug.Log("Camera switched to vehicle with vehicle mode enabled");
         }
         else
         {
@@ -318,11 +319,12 @@ public class Vehicle : MonoBehaviour, IDamageable, IInteractable
         // Tell player to exit
         currentDriver.ExitVehicle(exitPosition);
 
-        // Switch camera back to player
+        // Switch camera back to player and disable vehicle mode
         TopDownCamera camera = FindAnyObjectByType<TopDownCamera>();
         if (camera != null)
         {
             camera.SetTarget(currentDriver.transform);
+            camera.EnableVehicleMode(false); // Restore player camera settings
         }
 
         currentDriver = null;

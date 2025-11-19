@@ -53,7 +53,7 @@ public class GameManager : MonoBehaviour
     }
 
     /// <summary>
-    /// Spawns a vehicle near the player's current position
+    /// Spawns a vehicle near the player's current position on valid land
     /// </summary>
     public void SpawnVehicleNearPlayer()
     {
@@ -78,16 +78,69 @@ public class GameManager : MonoBehaviour
             }
         }
 
-        // Calculate spawn position near player
-        Vector3 offset = playerTransform.right * vehicleSpawnDistanceFromPlayer;
-        Vector3 spawnPosition = playerTransform.position + offset;
-        spawnPosition.y = playerTransform.position.y; // Keep at same height
+        // Find valid spawn position near player using MapGenerator
+        Vector3 spawnPosition = FindValidVehicleSpawnPosition(playerTransform.position);
 
         // Spawn vehicle
         spawnedVehicle = Instantiate(vehiclePrefab, spawnPosition, Quaternion.identity);
         spawnedVehicle.name = "PlayerVehicle";
 
-        Debug.Log($"Vehicle spawned at {spawnPosition} (near player)");
+        Debug.Log($"Vehicle spawned at {spawnPosition} (on valid land near player)");
+    }
+
+    /// <summary>
+    /// Finds a valid land position near the target position for vehicle spawning
+    /// </summary>
+    private Vector3 FindValidVehicleSpawnPosition(Vector3 nearPosition)
+    {
+        if (mapGenerator == null)
+        {
+            Debug.LogWarning("MapGenerator not assigned! Using simple offset spawn.");
+            return nearPosition + Vector3.right * vehicleSpawnDistanceFromPlayer;
+        }
+
+        float searchRadius = vehicleSpawnDistanceFromPlayer;
+        int maxAttempts = 16; // Check in 16 directions around player
+
+        for (int attempt = 0; attempt < maxAttempts; attempt++)
+        {
+            // Calculate angle for this attempt
+            float angle = (attempt / (float)maxAttempts) * 360f * Mathf.Deg2Rad;
+            Vector3 offset = new Vector3(Mathf.Cos(angle), 0, Mathf.Sin(angle)) * searchRadius;
+            Vector3 testPosition = nearPosition + offset;
+
+            // Check if this position is on land
+            if (mapGenerator.IsTileLand(testPosition))
+            {
+                testPosition.y = nearPosition.y; // Keep same height as player
+                Debug.Log($"Found valid vehicle spawn position at angle {angle * Mathf.Rad2Deg:F0}° from player");
+                return testPosition;
+            }
+        }
+
+        // If no valid position found at vehicleSpawnDistanceFromPlayer, expand search
+        Debug.LogWarning($"No valid position found at {searchRadius}m, expanding search...");
+
+        for (float radius = searchRadius + 2f; radius <= searchRadius * 2f; radius += 2f)
+        {
+            for (int attempt = 0; attempt < maxAttempts; attempt++)
+            {
+                float angle = (attempt / (float)maxAttempts) * 360f * Mathf.Deg2Rad;
+                Vector3 offset = new Vector3(Mathf.Cos(angle), 0, Mathf.Sin(angle)) * radius;
+                Vector3 testPosition = nearPosition + offset;
+
+                if (mapGenerator.IsTileLand(testPosition))
+                {
+                    testPosition.y = nearPosition.y;
+                    Debug.Log($"Found valid vehicle spawn position at {radius}m from player");
+                    return testPosition;
+                }
+            }
+        }
+
+        // Fallback: use player position (should always be valid)
+        Debug.LogWarning("Could not find valid vehicle spawn position, spawning at player location");
+        return nearPosition;
     }
 
     /// <summary>
