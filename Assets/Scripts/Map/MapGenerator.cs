@@ -252,7 +252,7 @@ public class MapGenerator : MonoBehaviour
                         waterTile.tag = "Wall";
                         waterTile.isStatic = true;
 
-                        // Remove mesh components - we only need the collider
+                        // Remove ALL mesh components - we only need BoxCollider
                         MeshFilter meshFilter = waterTile.GetComponent<MeshFilter>();
                         if (meshFilter != null)
                             DestroyImmediate(meshFilter);
@@ -261,7 +261,11 @@ public class MapGenerator : MonoBehaviour
                         if (renderer != null)
                             DestroyImmediate(renderer);
 
-                        // Add or modify BoxCollider to make it a wall
+                        MeshCollider meshCollider = waterTile.GetComponent<MeshCollider>();
+                        if (meshCollider != null)
+                            DestroyImmediate(meshCollider);
+
+                        // Add BoxCollider to make it a 5m tall wall
                         BoxCollider collider = waterTile.GetComponent<BoxCollider>();
                         if (collider == null)
                             collider = waterTile.AddComponent<BoxCollider>();
