@@ -211,17 +211,35 @@ public class PlayerController : MonoBehaviour
     private void TryInteract()
     {
         // Check for nearby interactable objects
-        Collider[] colliders = Physics.OverlapSphere(transform.position, 2f);
+        float interactionRadius = 3f;
+        Collider[] colliders = Physics.OverlapSphere(transform.position, interactionRadius);
+
+        Debug.Log($"Checking for interactions... Found {colliders.Length} colliders in {interactionRadius}m radius");
 
         foreach (Collider col in colliders)
         {
+            // Skip self
+            if (col.gameObject == gameObject)
+                continue;
+
+            // Try to find IInteractable on the object or its parents
             IInteractable interactable = col.GetComponent<IInteractable>();
+
+            // If not found, search in parent hierarchy
+            if (interactable == null)
+            {
+                interactable = col.GetComponentInParent<IInteractable>();
+            }
+
             if (interactable != null)
             {
+                Debug.Log($"Found interactable: {col.gameObject.name}, Distance: {Vector3.Distance(transform.position, col.transform.position):F2}m");
                 interactable.Interact(this);
-                break;
+                return;
             }
         }
+
+        Debug.Log("No interactable objects found nearby");
     }
 
     public bool IsInvincible()

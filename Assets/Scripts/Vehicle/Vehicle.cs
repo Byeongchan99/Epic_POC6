@@ -278,9 +278,15 @@ public class Vehicle : MonoBehaviour, IDamageable, IInteractable
     // IInteractable implementation
     public void Interact(PlayerController player)
     {
+        Debug.Log($"Vehicle.Interact() called by {player.gameObject.name}. isOccupied: {isOccupied}");
+
         if (!isOccupied)
         {
             EnterVehicle(player);
+        }
+        else
+        {
+            Debug.Log("Vehicle is already occupied!");
         }
     }
 
