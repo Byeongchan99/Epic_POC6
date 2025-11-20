@@ -138,7 +138,7 @@ public class Gun : MonoBehaviour
                 // Set next fire time
                 nextFireTime = Time.time + fireRate;
 
-                Debug.Log($"Fired! Ammo: {currentAmmo}/{maxAmmo}");
+                if (enableDebugLogs) Debug.Log($"Fired! Ammo: {currentAmmo}/{maxAmmo}");
             }
         }
         else

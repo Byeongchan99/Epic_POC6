@@ -14,6 +14,9 @@ public class GameManager : MonoBehaviour
     [SerializeField] private float vehicleSpawnDistanceFromPlayer = 5f;
     [SerializeField] private bool spawnVehicleOnStart = true;
 
+    [Header("Debug")]
+    [SerializeField] private bool enableDebugLogs = false;
+
     private GameObject spawnedVehicle;
     private bool uiInitialized = false;
 
@@ -51,7 +54,7 @@ public class GameManager : MonoBehaviour
     private void OnMapReady()
     {
         // Called when map generation is complete
-        Debug.Log("GameManager: Map generation complete, ready to spawn vehicle");
+        if (enableDebugLogs) Debug.Log("GameManager: Map generation complete, ready to spawn vehicle");
 
         // Initialize Minimap
         InitializeMinimap();
@@ -69,7 +72,7 @@ public class GameManager : MonoBehaviour
 
     private void InitializeGame()
     {
-        Debug.Log("Game initialized");
+        if (enableDebugLogs) Debug.Log("Game initialized");
     }
 
     /// <summary>
@@ -105,7 +108,7 @@ public class GameManager : MonoBehaviour
         spawnedVehicle = Instantiate(vehiclePrefab, spawnPosition, Quaternion.identity);
         spawnedVehicle.name = "PlayerVehicle";
 
-        Debug.Log($"Vehicle spawned at {spawnPosition} (on valid land near player)");
+        if (enableDebugLogs) Debug.Log($"Vehicle spawned at {spawnPosition} (on valid land near player)");
     }
 
     /// <summary>
@@ -134,7 +137,7 @@ public class GameManager : MonoBehaviour
             {
                 // Use Raycast to find exact ground height
                 testPosition = GetGroundPosition(testPosition);
-                Debug.Log($"Found valid vehicle spawn position at angle {angle * Mathf.Rad2Deg:F0}° from player at height Y={testPosition.y:F2}");
+                if (enableDebugLogs) Debug.Log($"Found valid vehicle spawn position at angle {angle * Mathf.Rad2Deg:F0}° from player at height Y={testPosition.y:F2}");
                 return testPosition;
             }
         }
@@ -153,7 +156,7 @@ public class GameManager : MonoBehaviour
                 if (mapGenerator.IsTileLand(testPosition))
                 {
                     testPosition = GetGroundPosition(testPosition);
-                    Debug.Log($"Found valid vehicle spawn position at {radius}m from player at height Y={testPosition.y:F2}");
+                    if (enableDebugLogs) Debug.Log($"Found valid vehicle spawn position at {radius}m from player at height Y={testPosition.y:F2}");
                     return testPosition;
                 }
             }
@@ -179,7 +182,7 @@ public class GameManager : MonoBehaviour
             // Return position slightly above ground (to prevent clipping)
             Vector3 groundPos = hit.point;
             groundPos.y += 0.5f; // Add small offset so vehicle sits properly on ground
-            Debug.Log($"Ground found at Y={hit.point.y:F2}, vehicle spawn at Y={groundPos.y:F2}");
+            if (enableDebugLogs) Debug.Log($"Ground found at Y={hit.point.y:F2}, vehicle spawn at Y={groundPos.y:F2}");
             return groundPos;
         }
 
@@ -201,7 +204,7 @@ public class GameManager : MonoBehaviour
         }
 
         GameObject vehicle = Instantiate(vehiclePrefab, position, Quaternion.identity);
-        Debug.Log($"Vehicle spawned at {position}");
+        if (enableDebugLogs) Debug.Log($"Vehicle spawned at {position}");
         return vehicle;
     }
 
@@ -244,7 +247,7 @@ public class GameManager : MonoBehaviour
             }
 
             minimapController.Initialize(mapGenerator, playerTransform);
-            Debug.Log("Minimap initialized successfully");
+            if (enableDebugLogs) Debug.Log("Minimap initialized successfully");
         }
         else
         {
@@ -295,6 +298,6 @@ public class GameManager : MonoBehaviour
         uiManager.Initialize(playerStats, playerController, playerGun);
         uiInitialized = true;
 
-        Debug.Log("UI initialized successfully");
+        if (enableDebugLogs) Debug.Log("UI initialized successfully");
     }
 }

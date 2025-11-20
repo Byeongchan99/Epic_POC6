@@ -17,6 +17,9 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private Transform firePoint;
     [SerializeField] private Camera mainCamera;
 
+    [Header("Debug")]
+    [SerializeField] private bool enableDebugLogs = false;
+
     private CharacterController controller;
     private PlayerStats stats;
     private Gun gun;
@@ -74,7 +77,7 @@ public class PlayerController : MonoBehaviour
             transform.position = spawnPos;
             controller.enabled = true;
 
-            Debug.Log($"Player spawned at valid land position: {spawnPos}");
+            if (enableDebugLogs) Debug.Log($"Player spawned at valid land position: {spawnPos}");
         }
         else
         {
@@ -152,7 +155,7 @@ public class PlayerController : MonoBehaviour
 
         stats.ConsumeStamina(rollStaminaCost);
 
-        Debug.Log("Rolling!");
+        if (enableDebugLogs) Debug.Log("Rolling!");
     }
 
     private void UpdateRoll()
@@ -175,7 +178,7 @@ public class PlayerController : MonoBehaviour
     {
         isRolling = false;
         isInvincible = false;
-        Debug.Log("Roll ended");
+        if (enableDebugLogs) Debug.Log("Roll ended");
     }
 
     private void HandleRotation()
@@ -231,7 +234,7 @@ public class PlayerController : MonoBehaviour
         float interactionRadius = 3f;
         Collider[] colliders = Physics.OverlapSphere(transform.position, interactionRadius);
 
-        Debug.Log($"Checking for interactions... Found {colliders.Length} colliders in {interactionRadius}m radius");
+        if (enableDebugLogs) Debug.Log($"Checking for interactions... Found {colliders.Length} colliders in {interactionRadius}m radius");
 
         foreach (Collider col in colliders)
         {
@@ -250,13 +253,13 @@ public class PlayerController : MonoBehaviour
 
             if (interactable != null)
             {
-                Debug.Log($"Found interactable: {col.gameObject.name}, Distance: {Vector3.Distance(transform.position, col.transform.position):F2}m");
+                if (enableDebugLogs) Debug.Log($"Found interactable: {col.gameObject.name}, Distance: {Vector3.Distance(transform.position, col.transform.position):F2}m");
                 interactable.Interact(this);
                 return;
             }
         }
 
-        Debug.Log("No interactable objects found nearby");
+        if (enableDebugLogs) Debug.Log("No interactable objects found nearby");
     }
 
     public bool IsInvincible()
@@ -270,7 +273,7 @@ public class PlayerController : MonoBehaviour
         currentVehicle = vehicle;
         gameObject.SetActive(false);
 
-        Debug.Log("Entered vehicle");
+        if (enableDebugLogs) Debug.Log("Entered vehicle");
     }
 
     public void ExitVehicle(Vector3 exitPosition)
@@ -280,7 +283,7 @@ public class PlayerController : MonoBehaviour
         transform.position = exitPosition;
         gameObject.SetActive(true);
 
-        Debug.Log("Exited vehicle");
+        if (enableDebugLogs) Debug.Log("Exited vehicle");
     }
 
     public bool IsInVehicle()

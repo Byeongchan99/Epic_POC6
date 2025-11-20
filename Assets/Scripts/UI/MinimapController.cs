@@ -13,6 +13,9 @@ public class MinimapController : MonoBehaviour
     [SerializeField] private Color landColor = Color.green;
     [SerializeField] private Color waterColor = Color.blue;
 
+    [Header("Debug")]
+    [SerializeField] private bool enableDebugLogs = false;
+
     private Texture2D minimapTexture;
     private MapGenerator mapGenerator;
     private Transform playerTransform;
@@ -53,7 +56,7 @@ public class MinimapController : MonoBehaviour
         mapHeight = mapGenerator.GetMapHeight();
         tileSize = mapGenerator.GetTileSize();
 
-        Debug.Log($"MinimapController initialized - Map: {mapWidth}x{mapHeight} tiles, TileSize: {tileSize}, WorldSize: {mapWidth * tileSize}x{mapHeight * tileSize}, Player at: {player.position}");
+        if (enableDebugLogs) Debug.Log($"MinimapController initialized - Map: {mapWidth}x{mapHeight} tiles, TileSize: {tileSize}, WorldSize: {mapWidth * tileSize}x{mapHeight * tileSize}, Player at: {player.position}");
 
         // Validate UI references
         if (minimapImage == null)
@@ -92,7 +95,7 @@ public class MinimapController : MonoBehaviour
             minimapImage.texture = minimapTexture;
         }
 
-        Debug.Log("Minimap texture generated");
+        if (enableDebugLogs) Debug.Log("Minimap texture generated");
     }
 
     private void Update()
@@ -141,7 +144,7 @@ public class MinimapController : MonoBehaviour
         // Debug log every 60 frames (about once per second)
         if (Time.frameCount % 60 == 0)
         {
-            Debug.Log($"Minimap Update: World({worldPos.x:F1}, {worldPos.z:F1}) -> Minimap({minimapPos.x:F1}, {minimapPos.y:F1})");
+            if (enableDebugLogs) Debug.Log($"Minimap Update: World({worldPos.x:F1}, {worldPos.z:F1}) -> Minimap({minimapPos.x:F1}, {minimapPos.y:F1})");
         }
 
         // Update player icon position
@@ -208,8 +211,8 @@ public class MinimapController : MonoBehaviour
         // Debug: Log the calculation process every 60 frames
         if (Time.frameCount % 60 == 0)
         {
-            //Debug.Log($"[Minimap Calc] World({worldPos.x:F1}, {worldPos.z:F1}) / WorldSize({worldWidth:F0}x{worldHeight:F0}) = Norm({normalizedX:F3}, {normalizedY:F3})");
-            //Debug.Log($"[Minimap Calc] MinimapRect size: ({minimapWidth:F1} x {minimapHeight:F1})");
+            //if (enableDebugLogs) Debug.Log($"[Minimap Calc] World({worldPos.x:F1}, {worldPos.z:F1}) / WorldSize({worldWidth:F0}x{worldHeight:F0}) = Norm({normalizedX:F3}, {normalizedY:F3})");
+            //if (enableDebugLogs) Debug.Log($"[Minimap Calc] MinimapRect size: ({minimapWidth:F1} x {minimapHeight:F1})");
         }
 
         // Convert normalized position to minimap UI coordinates

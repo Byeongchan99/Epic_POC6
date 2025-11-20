@@ -35,6 +35,9 @@ public class MapGenerator : MonoBehaviour
     [SerializeField] private float waterWallHeight = 5f;
     [SerializeField] private PhysicsMaterial groundPhysicsMaterial; // Assign Friction.physicMaterial from Arcade Vehicle Physics
 
+    [Header("Debug")]
+    [SerializeField] private bool enableDebugLogs = false;
+
     [Header("References")]
     [SerializeField] private Transform mapParent;
 
@@ -91,13 +94,13 @@ public class MapGenerator : MonoBehaviour
         // Find all land tiles
         FindLandTiles();
 
-        Debug.Log($"Map generated with seed: {seed}");
-        Debug.Log($"Total land tiles: {landTiles.Count}");
-        Debug.Log($"Mission zones placed: {placedMissionZones.Count}");
+        if (enableDebugLogs) Debug.Log($"Map generated with seed: {seed}");
+        if (enableDebugLogs) Debug.Log($"Total land tiles: {landTiles.Count}");
+        if (enableDebugLogs) Debug.Log($"Mission zones placed: {placedMissionZones.Count}");
 
         // Notify all listeners that map generation is complete
         OnMapGenerationComplete?.Invoke();
-        Debug.Log("Map generation complete event fired");
+        if (enableDebugLogs) Debug.Log("Map generation complete event fired");
     }
 
     private void GenerateMapData()
@@ -171,7 +174,7 @@ public class MapGenerator : MonoBehaviour
                     instance = zonePrefab
                 });
 
-                Debug.Log($"Mission zone placement reserved at {position} with size {zoneSize}");
+                if (enableDebugLogs) Debug.Log($"Mission zone placement reserved at {position} with size {zoneSize}");
             }
             else
             {
@@ -292,7 +295,7 @@ public class MapGenerator : MonoBehaviour
             }
         }
 
-        Debug.Log("Tiles spawned");
+        if (enableDebugLogs) Debug.Log("Tiles spawned");
 
         // Instantiate mission zone prefabs after tiles
         SpawnMissionZonePrefabs();
@@ -311,16 +314,16 @@ public class MapGenerator : MonoBehaviour
             if (surface != null)
             {
                 surface.BuildNavMesh();
-                Debug.Log($"NavMesh baked for {zone.name}");
+                if (enableDebugLogs) Debug.Log($"NavMesh baked for {zone.name}");
             }
         }
 
-        Debug.Log($"Spawned {placedMissionZones.Count} mission zones");
+        if (enableDebugLogs) Debug.Log($"Spawned {placedMissionZones.Count} mission zones");
     }
 
     private void OptimizeMap()
     {
-        Debug.Log("Optimizing map with Mesh Combining...");
+        if (enableDebugLogs) Debug.Log("Optimizing map with Mesh Combining...");
 
         // Combine Land tiles
         CombineTilesByTag("Terrain", "CombinedLandMap");
@@ -328,7 +331,7 @@ public class MapGenerator : MonoBehaviour
         // Combine Water wall BoxColliders into one MeshCollider
         CombineWaterWallColliders();
 
-        Debug.Log("Map optimization complete!");
+        if (enableDebugLogs) Debug.Log("Map optimization complete!");
     }
 
     /// <summary>
@@ -337,7 +340,7 @@ public class MapGenerator : MonoBehaviour
     /// </summary>
     private void CombineWaterWallColliders()
     {
-        Debug.Log("Optimizing Water wall colliders...");
+        if (enableDebugLogs) Debug.Log("Optimizing Water wall colliders...");
 
         // Build a 2D grid of water tile positions
         bool[,] waterGrid = new bool[mapWidth, mapHeight];
@@ -368,7 +371,7 @@ public class MapGenerator : MonoBehaviour
             Destroy(tile);
         }
 
-        Debug.Log($"Destroyed {originalCount} individual water tiles");
+        if (enableDebugLogs) Debug.Log($"Destroyed {originalCount} individual water tiles");
 
         // Create parent for optimized colliders
         GameObject waterWallsParent = new GameObject("CombinedWaterWalls");
@@ -449,8 +452,8 @@ public class MapGenerator : MonoBehaviour
             }
         }
 
-        Debug.Log($"✓ Optimized {originalCount} water tiles into {colliderCount} BoxColliders (reduction: {((1f - colliderCount / (float)originalCount) * 100f):F1}%)");
-        Debug.Log($"Water wall collision is now CharacterController-compatible with reliable physics");
+        if (enableDebugLogs) Debug.Log($"✓ Optimized {originalCount} water tiles into {colliderCount} BoxColliders (reduction: {((1f - colliderCount / (float)originalCount) * 100f):F1}%)");
+        if (enableDebugLogs) Debug.Log($"Water wall collision is now CharacterController-compatible with reliable physics");
     }
 
     private void CombineTilesByTag(string tag, string combinedName, bool addRenderer = true)
@@ -485,14 +488,14 @@ public class MapGenerator : MonoBehaviour
                         if (mr != null && mr.sharedMaterial != null)
                         {
                             sharedMaterial = mr.sharedMaterial;
-                            Debug.Log($"Using material: {sharedMaterial.name} from {child.name}");
+                            if (enableDebugLogs) Debug.Log($"Using material: {sharedMaterial.name} from {child.name}");
                         }
                     }
                 }
             }
         }
 
-        Debug.Log($"CombineTilesByTag [{tag}]: Found {meshFilters.Count} readable meshes, skipped {skippedCount} non-readable meshes");
+        if (enableDebugLogs) Debug.Log($"CombineTilesByTag [{tag}]: Found {meshFilters.Count} readable meshes, skipped {skippedCount} non-readable meshes");
 
         if (meshFilters.Count == 0)
         {
@@ -520,21 +523,21 @@ public class MapGenerator : MonoBehaviour
 
         // Use 32-bit index format to support more than 65535 vertices
         combinedMeshFilter.mesh.indexFormat = UnityEngine.Rendering.IndexFormat.UInt32;
-        Debug.Log($"Set {combinedName} to use UInt32 index format (supports up to ~4 billion vertices)");
+        if (enableDebugLogs) Debug.Log($"Set {combinedName} to use UInt32 index format (supports up to ~4 billion vertices)");
 
         try
         {
             combinedMeshFilter.mesh.CombineMeshes(combine, true, true);
-            Debug.Log($"Mesh combining successful! Total vertices: {combinedMeshFilter.mesh.vertexCount}");
+            if (enableDebugLogs) Debug.Log($"Mesh combining successful! Total vertices: {combinedMeshFilter.mesh.vertexCount}");
 
             // OPTIMIZATION: Remove duplicate vertices and optimize mesh
             combinedMeshFilter.mesh.Optimize();
-            Debug.Log($"Mesh optimized. Vertices after optimization: {combinedMeshFilter.mesh.vertexCount}");
+            if (enableDebugLogs) Debug.Log($"Mesh optimized. Vertices after optimization: {combinedMeshFilter.mesh.vertexCount}");
 
             // Recalculate normals for smooth surface
             combinedMeshFilter.mesh.RecalculateNormals();
             combinedMeshFilter.mesh.RecalculateTangents();
-            Debug.Log("Normals and tangents recalculated for smooth surface");
+            if (enableDebugLogs) Debug.Log("Normals and tangents recalculated for smooth surface");
         }
         catch (System.Exception e)
         {
@@ -551,7 +554,7 @@ public class MapGenerator : MonoBehaviour
             if (sharedMaterial != null)
             {
                 combinedRenderer.material = sharedMaterial;
-                Debug.Log($"Applied material '{sharedMaterial.name}' to {combinedName}");
+                if (enableDebugLogs) Debug.Log($"Applied material '{sharedMaterial.name}' to {combinedName}");
             }
             else
             {
@@ -561,7 +564,7 @@ public class MapGenerator : MonoBehaviour
         }
         else
         {
-            Debug.Log($"Skipping renderer for {combinedName} (invisible collider only)");
+            if (enableDebugLogs) Debug.Log($"Skipping renderer for {combinedName} (invisible collider only)");
         }
 
         // Add Mesh Collider with optimized settings
@@ -578,14 +581,14 @@ public class MapGenerator : MonoBehaviour
         if (groundPhysicsMaterial != null)
         {
             combinedCollider.material = groundPhysicsMaterial;
-            Debug.Log($"Applied '{groundPhysicsMaterial.name}' Physics Material to {combinedName}");
+            if (enableDebugLogs) Debug.Log($"Applied '{groundPhysicsMaterial.name}' Physics Material to {combinedName}");
         }
         else
         {
             Debug.LogWarning($"Ground Physics Material not assigned in MapGenerator! Assign Friction.physicMaterial for proper vehicle physics.");
         }
 
-        Debug.Log($"MeshCollider created with WeldColocatedVertices for smooth surface");
+        if (enableDebugLogs) Debug.Log($"MeshCollider created with WeldColocatedVertices for smooth surface");
 
         // Destroy original tiles
         foreach (GameObject tile in tilesToDestroy)
@@ -593,7 +596,7 @@ public class MapGenerator : MonoBehaviour
             Destroy(tile);
         }
 
-        Debug.Log($"✓ Successfully combined {meshFilters.Count} tiles into {combinedName}");
+        if (enableDebugLogs) Debug.Log($"✓ Successfully combined {meshFilters.Count} tiles into {combinedName}");
     }
 
     private void FindLandTiles()
@@ -618,7 +621,7 @@ public class MapGenerator : MonoBehaviour
     /// </summary>
     private void EnsureConnectedLand()
     {
-        Debug.Log("Ensuring land connectivity...");
+        if (enableDebugLogs) Debug.Log("Ensuring land connectivity...");
 
         bool[,] visited = new bool[mapWidth, mapHeight];
         List<List<Vector2Int>> landMasses = new List<List<Vector2Int>>();
@@ -653,7 +656,7 @@ public class MapGenerator : MonoBehaviour
             }
         }
 
-        Debug.Log($"Found {landMasses.Count} separate land masses. Largest has {largestLandMass.Count} tiles.");
+        if (enableDebugLogs) Debug.Log($"Found {landMasses.Count} separate land masses. Largest has {largestLandMass.Count} tiles.");
 
         // Convert all tiles to water first
         for (int x = 0; x < mapWidth; x++)
@@ -670,7 +673,7 @@ public class MapGenerator : MonoBehaviour
             mapData[tile.x, tile.y] = (int)TileType.Land;
         }
 
-        Debug.Log($"Kept largest land mass with {largestLandMass.Count} tiles. Removed {landMasses.Count - 1} isolated islands.");
+        if (enableDebugLogs) Debug.Log($"Kept largest land mass with {largestLandMass.Count} tiles. Removed {landMasses.Count - 1} isolated islands.");
     }
 
     /// <summary>
@@ -739,7 +742,7 @@ public class MapGenerator : MonoBehaviour
             }
         }
 
-        Debug.Log($"Created fallback land area with radius {radius} at center ({centerX}, {centerY})");
+        if (enableDebugLogs) Debug.Log($"Created fallback land area with radius {radius} at center ({centerX}, {centerY})");
     }
 
     /// <summary>
@@ -766,7 +769,7 @@ public class MapGenerator : MonoBehaviour
                             if (mapData[x, y] == (int)TileType.Land)
                             {
                                 Vector3 spawnPos = new Vector3(x * tileSize, 1f, y * tileSize);
-                                Debug.Log($"Player spawn position found at ({x}, {y}) world position {spawnPos}");
+                                if (enableDebugLogs) Debug.Log($"Player spawn position found at ({x}, {y}) world position {spawnPos}");
                                 return spawnPos;
                             }
                         }

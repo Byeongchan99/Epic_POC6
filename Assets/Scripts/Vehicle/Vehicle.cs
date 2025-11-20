@@ -24,6 +24,9 @@ public class Vehicle : MonoBehaviour, IDamageable, IInteractable
     [Tooltip("Assign your Arcade Vehicle Physics controller component here (optional)")]
     [SerializeField] private ArcadeVehicleController arcadeVehicleController;
 
+    [Header("Debug")]
+    [SerializeField] private bool enableDebugLogs = false;
+
     [Header("Debug Info (Read Only)")]
     [SerializeField] private bool isGrounded;
     [SerializeField] private float distanceToGround;
@@ -57,7 +60,7 @@ public class Vehicle : MonoBehaviour, IDamageable, IInteractable
 
             if (arcadeVehicleController != null)
             {
-                Debug.Log("ArcadeVehicleController found and assigned automatically");
+                if (enableDebugLogs) Debug.Log("ArcadeVehicleController found and assigned automatically");
             }
             else
             {
@@ -75,7 +78,7 @@ public class Vehicle : MonoBehaviour, IDamageable, IInteractable
         {
             // Disable input manager until player enters vehicle
             inputManager.enabled = false;
-            Debug.Log("InputManager_ArcadeVP found and disabled until player enters");
+            if (enableDebugLogs) Debug.Log("InputManager_ArcadeVP found and disabled until player enters");
         }
 
         // Keep ArcadeVehicleController always enabled for continuous physics
@@ -170,12 +173,12 @@ public class Vehicle : MonoBehaviour, IDamageable, IInteractable
         if (currentFuel <= 0 && inputManager.enabled)
         {
             inputManager.enabled = false;
-            Debug.Log("Out of fuel! Vehicle input disabled.");
+            if (enableDebugLogs) Debug.Log("Out of fuel! Vehicle input disabled.");
         }
         else if (currentFuel > 0 && !inputManager.enabled)
         {
             inputManager.enabled = true;
-            Debug.Log("Vehicle refueled! Input enabled.");
+            if (enableDebugLogs) Debug.Log("Vehicle refueled! Input enabled.");
         }
     }
 
@@ -259,11 +262,11 @@ public class Vehicle : MonoBehaviour, IDamageable, IInteractable
     {
         if (isOccupied)
         {
-            Debug.Log("Vehicle already occupied!");
+            if (enableDebugLogs) Debug.Log("Vehicle already occupied!");
             return;
         }
 
-        Debug.Log($"EnterVehicle called - ArcadeVehicleController: {(arcadeVehicleController != null ? "Found" : "NULL")}");
+        if (enableDebugLogs) Debug.Log($"EnterVehicle called - ArcadeVehicleController: {(arcadeVehicleController != null ? "Found" : "NULL")}");
 
         currentDriver = player;
         isOccupied = true;
@@ -285,30 +288,30 @@ public class Vehicle : MonoBehaviour, IDamageable, IInteractable
         if (inputManager != null && currentFuel > 0)
         {
             inputManager.enabled = true;
-            Debug.Log("InputManager enabled - vehicle control active");
+            if (enableDebugLogs) Debug.Log("InputManager enabled - vehicle control active");
         }
 
         // Diagnostic: Check ArcadeVehicleController setup
         if (arcadeVehicleController != null)
         {
-            Debug.Log($"[Vehicle Setup Check]");
-            Debug.Log($"  - rb (main Rigidbody): {(arcadeVehicleController.rb != null ? "OK" : "MISSING!")}");
-            Debug.Log($"  - carBody (Rigidbody): {(arcadeVehicleController.carBody != null ? "OK" : "MISSING!")}");
-            Debug.Log($"  - MaxSpeed: {arcadeVehicleController.MaxSpeed}");
-            Debug.Log($"  - Acceleration: {arcadeVehicleController.accelaration}");
-            Debug.Log($"  - Turn: {arcadeVehicleController.turn}");
-            Debug.Log($"  - MovementMode: {arcadeVehicleController.movementMode}");
+            if (enableDebugLogs) Debug.Log($"[Vehicle Setup Check]");
+            if (enableDebugLogs) Debug.Log($"  - rb (main Rigidbody): {(arcadeVehicleController.rb != null ? "OK" : "MISSING!")}");
+            if (enableDebugLogs) Debug.Log($"  - carBody (Rigidbody): {(arcadeVehicleController.carBody != null ? "OK" : "MISSING!")}");
+            if (enableDebugLogs) Debug.Log($"  - MaxSpeed: {arcadeVehicleController.MaxSpeed}");
+            if (enableDebugLogs) Debug.Log($"  - Acceleration: {arcadeVehicleController.accelaration}");
+            if (enableDebugLogs) Debug.Log($"  - Turn: {arcadeVehicleController.turn}");
+            if (enableDebugLogs) Debug.Log($"  - MovementMode: {arcadeVehicleController.movementMode}");
 
             if (arcadeVehicleController.rb != null)
             {
-                Debug.Log($"  - rb.mass: {arcadeVehicleController.rb.mass}");
-                Debug.Log($"  - rb.isKinematic: {arcadeVehicleController.rb.isKinematic}");
+                if (enableDebugLogs) Debug.Log($"  - rb.mass: {arcadeVehicleController.rb.mass}");
+                if (enableDebugLogs) Debug.Log($"  - rb.isKinematic: {arcadeVehicleController.rb.isKinematic}");
 
                 // Check for required SphereCollider
                 SphereCollider sphereCol = arcadeVehicleController.rb.GetComponent<SphereCollider>();
                 if (sphereCol != null)
                 {
-                    Debug.Log($"  - SphereCollider: OK (radius: {sphereCol.radius})");
+                    if (enableDebugLogs) Debug.Log($"  - SphereCollider: OK (radius: {sphereCol.radius})");
                 }
                 else
                 {
@@ -317,7 +320,7 @@ public class Vehicle : MonoBehaviour, IDamageable, IInteractable
             }
 
             // Check and auto-fix LayerMask for drivable surface
-            Debug.Log($"  - Drivable Surface LayerMask (before): {arcadeVehicleController.drivableSurface.value}");
+            if (enableDebugLogs) Debug.Log($"  - Drivable Surface LayerMask (before): {arcadeVehicleController.drivableSurface.value}");
 
             // Auto-fix: Set to Everything if it's 0 (Nothing)
             if (arcadeVehicleController.drivableSurface.value == 0)
@@ -326,7 +329,7 @@ public class Vehicle : MonoBehaviour, IDamageable, IInteractable
                 Debug.LogWarning($"  - AUTO-FIXED: drivableSurface was 0 (Nothing), changed to Everything");
             }
 
-            Debug.Log($"  - Drivable Surface LayerMask (after): {arcadeVehicleController.drivableSurface.value}");
+            if (enableDebugLogs) Debug.Log($"  - Drivable Surface LayerMask (after): {arcadeVehicleController.drivableSurface.value}");
 
             // Start grounded check monitoring
             Invoke(nameof(CheckGroundedStatus), 0.5f);
@@ -341,14 +344,14 @@ public class Vehicle : MonoBehaviour, IDamageable, IInteractable
         {
             camera.SetTarget(transform);
             camera.EnableVehicleMode(true); // Use vehicle-specific camera settings
-            Debug.Log("Camera switched to vehicle with vehicle mode enabled");
+            if (enableDebugLogs) Debug.Log("Camera switched to vehicle with vehicle mode enabled");
         }
         else
         {
             Debug.LogWarning("TopDownCamera not found!");
         }
 
-        Debug.Log("Player entered vehicle - ready to drive!");
+        if (enableDebugLogs) Debug.Log("Player entered vehicle - ready to drive!");
     }
 
     private void CheckGroundedStatus()
@@ -358,7 +361,7 @@ public class Vehicle : MonoBehaviour, IDamageable, IInteractable
 
         // Check if vehicle is grounded
         bool grounded = arcadeVehicleController.grounded();
-        Debug.Log($"[Grounded Check] Vehicle is {(grounded ? "GROUNDED" : "NOT GROUNDED (this prevents movement!)")}");
+        if (enableDebugLogs) Debug.Log($"[Grounded Check] Vehicle is {(grounded ? "GROUNDED" : "NOT GROUNDED (this prevents movement!)")}");
 
         if (!grounded)
         {
@@ -387,7 +390,7 @@ public class Vehicle : MonoBehaviour, IDamageable, IInteractable
         if (inputManager != null)
         {
             inputManager.enabled = false;
-            Debug.Log("InputManager disabled - vehicle input deactivated");
+            if (enableDebugLogs) Debug.Log("InputManager disabled - vehicle input deactivated");
         }
 
         // Tell player to exit
@@ -417,7 +420,7 @@ public class Vehicle : MonoBehaviour, IDamageable, IInteractable
         currentDriver = null;
         isOccupied = false;
 
-        Debug.Log("Player exited vehicle");
+        if (enableDebugLogs) Debug.Log("Player exited vehicle");
     }
 
     private void OnCollisionEnter(Collision collision)
@@ -458,7 +461,7 @@ public class Vehicle : MonoBehaviour, IDamageable, IInteractable
         currentHealth -= damage;
         currentHealth = Mathf.Max(currentHealth, 0);
 
-        Debug.Log($"Vehicle took {damage} damage. Health: {currentHealth}/{maxHealth}");
+        if (enableDebugLogs) Debug.Log($"Vehicle took {damage} damage. Health: {currentHealth}/{maxHealth}");
 
         if (currentHealth <= 0)
         {
@@ -473,7 +476,7 @@ public class Vehicle : MonoBehaviour, IDamageable, IInteractable
 
     private void Die()
     {
-        Debug.Log("Vehicle destroyed!");
+        if (enableDebugLogs) Debug.Log("Vehicle destroyed!");
 
         // Eject player if occupied
         if (isOccupied && currentDriver != null)
@@ -488,7 +491,7 @@ public class Vehicle : MonoBehaviour, IDamageable, IInteractable
     // IInteractable implementation
     public void Interact(PlayerController player)
     {
-        Debug.Log($"Vehicle.Interact() called by {player.gameObject.name}. isOccupied: {isOccupied}");
+        if (enableDebugLogs) Debug.Log($"Vehicle.Interact() called by {player.gameObject.name}. isOccupied: {isOccupied}");
 
         if (!isOccupied)
         {
@@ -496,7 +499,7 @@ public class Vehicle : MonoBehaviour, IDamageable, IInteractable
         }
         else
         {
-            Debug.Log("Vehicle is already occupied!");
+            if (enableDebugLogs) Debug.Log("Vehicle is already occupied!");
         }
     }
 
@@ -510,26 +513,26 @@ public class Vehicle : MonoBehaviour, IDamageable, IInteractable
     {
         currentHealth += amount;
         currentHealth = Mathf.Min(currentHealth, maxHealth);
-        Debug.Log($"Vehicle repaired. Health: {currentHealth}/{maxHealth}");
+        if (enableDebugLogs) Debug.Log($"Vehicle repaired. Health: {currentHealth}/{maxHealth}");
     }
 
     public void RepairFull()
     {
         currentHealth = maxHealth;
-        Debug.Log("Vehicle fully repaired!");
+        if (enableDebugLogs) Debug.Log("Vehicle fully repaired!");
     }
 
     public void Refuel(float amount)
     {
         currentFuel += amount;
         currentFuel = Mathf.Min(currentFuel, maxFuel);
-        Debug.Log($"Vehicle refueled. Fuel: {currentFuel}/{maxFuel}");
+        if (enableDebugLogs) Debug.Log($"Vehicle refueled. Fuel: {currentFuel}/{maxFuel}");
     }
 
     public void RefuelFull()
     {
         currentFuel = maxFuel;
-        Debug.Log("Vehicle fully refueled!");
+        if (enableDebugLogs) Debug.Log("Vehicle fully refueled!");
     }
 
     // Getters
