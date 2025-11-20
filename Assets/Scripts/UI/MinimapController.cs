@@ -179,10 +179,35 @@ public class MinimapController : MonoBehaviour
         normalizedX = Mathf.Clamp01(normalizedX);
         normalizedY = Mathf.Clamp01(normalizedY);
 
-        // Convert to minimap UI coordinates (anchored position)
+        // Get minimap dimensions - use sizeDelta as it's more reliable than rect
+        // rect.width/height can be 0 if layout hasn't been calculated
         float minimapWidth = minimapRect.rect.width;
         float minimapHeight = minimapRect.rect.height;
 
+        // Fallback to sizeDelta if rect dimensions are invalid
+        if (minimapWidth <= 0 || minimapHeight <= 0)
+        {
+            minimapWidth = minimapRect.sizeDelta.x;
+            minimapHeight = minimapRect.sizeDelta.y;
+            Debug.LogWarning($"MinimapRect.rect has invalid dimensions! Using sizeDelta instead: ({minimapWidth:F1} x {minimapHeight:F1})");
+        }
+
+        // Final check - if still invalid, return center
+        if (minimapWidth <= 0 || minimapHeight <= 0)
+        {
+            Debug.LogError($"MinimapRect has no valid dimensions! rect: ({minimapRect.rect.width}, {minimapRect.rect.height}), sizeDelta: ({minimapRect.sizeDelta.x}, {minimapRect.sizeDelta.y})");
+            return Vector2.zero;
+        }
+
+        // Debug: Log the calculation process every 60 frames
+        if (Time.frameCount % 60 == 0)
+        {
+            Debug.Log($"[Minimap Calc] World({worldPos.x:F1}, {worldPos.z:F1}) / Map({mapWidth}x{mapHeight}) = Norm({normalizedX:F3}, {normalizedY:F3})");
+            Debug.Log($"[Minimap Calc] MinimapRect size: ({minimapWidth:F1} x {minimapHeight:F1})");
+        }
+
+        // Convert normalized position to minimap UI coordinates
+        // Anchored position is relative to anchor point (typically center)
         Vector2 minimapPos = new Vector2(
             normalizedX * minimapWidth - minimapWidth / 2,
             normalizedY * minimapHeight - minimapHeight / 2
