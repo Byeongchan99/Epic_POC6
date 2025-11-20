@@ -584,10 +584,6 @@ PrefabInstance:
       propertyPath: m_Enabled
       value: 0
       objectReference: {fileID: 0}
-    - target: {fileID: 7357005411639265638, guid: 7797ccb4606edf04b9ebfce2ef4cbb21, type: 3}
-      propertyPath: drivableSurface.m_Bits
-      value: 65
-      objectReference: {fileID: 0}
     - target: {fileID: 7631840795373286182, guid: 7797ccb4606edf04b9ebfce2ef4cbb21, type: 3}
       propertyPath: m_Enabled
       value: 0

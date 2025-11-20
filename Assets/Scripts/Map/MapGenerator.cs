@@ -33,7 +33,7 @@ public class MapGenerator : MonoBehaviour
     [Header("Optimization")]
     [SerializeField] private bool optimizeMesh = true;
     [SerializeField] private float waterWallHeight = 5f;
-    [SerializeField] private PhysicsMaterial groundPhysicsMaterial; // Assign Friction.physicMaterial from Arcade Vehicle Physics
+    [SerializeField] private PhysicMaterial groundPhysicsMaterial; // Assign Friction.physicMaterial from Arcade Vehicle Physics
 
     [Header("References")]
     [SerializeField] private Transform mapParent;
