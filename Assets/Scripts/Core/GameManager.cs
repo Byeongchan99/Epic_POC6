@@ -176,14 +176,19 @@ public class GameManager : MonoBehaviour
         Vector3 rayStart = new Vector3(position.x, 100f, position.z);
         RaycastHit hit;
 
-        // Cast downward to find ground
-        if (Physics.Raycast(rayStart, Vector3.down, out hit, 200f))
+        // Cast downward to find ground - only hit Terrain tag (ignore water walls)
+        int terrainLayer = LayerMask.GetMask("Default");
+        if (Physics.Raycast(rayStart, Vector3.down, out hit, 200f, terrainLayer))
         {
-            // Return position slightly above ground (to prevent clipping)
-            Vector3 groundPos = hit.point;
-            groundPos.y += 0.5f; // Add small offset so vehicle sits properly on ground
-            if (enableDebugLogs) Debug.Log($"Ground found at Y={hit.point.y:F2}, vehicle spawn at Y={groundPos.y:F2}");
-            return groundPos;
+            // Additional check: make sure we hit actual terrain, not water wall
+            if (hit.collider.CompareTag("Terrain"))
+            {
+                // Return position slightly above ground (to prevent clipping)
+                Vector3 groundPos = hit.point;
+                groundPos.y += 0.5f; // Add small offset so vehicle sits properly on ground
+                if (enableDebugLogs) Debug.Log($"Ground found at Y={hit.point.y:F2}, vehicle spawn at Y={groundPos.y:F2}");
+                return groundPos;
+            }
         }
 
         // Fallback if raycast fails
