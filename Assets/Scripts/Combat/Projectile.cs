@@ -10,8 +10,9 @@ public class Projectile : MonoBehaviour
     private Vector3 velocity; // Combined velocity (direction * speed + initial velocity)
     private ProjectilePool pool;
     private string ownerTag; // "Player" or "Enemy"
+    private bool enableDebugLogs = false; // Set by Gun when initializing
 
-    public void Initialize(float damage, float speed, float lifetime, Vector3 direction, ProjectilePool pool, string ownerTag)
+    public void Initialize(float damage, float speed, float lifetime, Vector3 direction, ProjectilePool pool, string ownerTag, bool debugLogs = false)
     {
         this.damage = damage;
         this.speed = speed;
@@ -21,12 +22,13 @@ public class Projectile : MonoBehaviour
         this.pool = pool;
         this.ownerTag = ownerTag;
         this.timer = 0f;
+        this.enableDebugLogs = debugLogs;
 
         gameObject.SetActive(true);
     }
 
     // Overload with initial velocity (e.g., from vehicle movement)
-    public void Initialize(float damage, float speed, float lifetime, Vector3 direction, ProjectilePool pool, string ownerTag, Vector3 initialVelocity)
+    public void Initialize(float damage, float speed, float lifetime, Vector3 direction, ProjectilePool pool, string ownerTag, Vector3 initialVelocity, bool debugLogs = false)
     {
         this.damage = damage;
         this.speed = speed;
@@ -36,8 +38,12 @@ public class Projectile : MonoBehaviour
         this.pool = pool;
         this.ownerTag = ownerTag;
         this.timer = 0f;
+        this.enableDebugLogs = debugLogs;
 
-        Debug.Log($"[Projectile Init] BulletSpeed: {speed}, InitialVel: {initialVelocity.magnitude:F1}, FinalVel: {this.velocity.magnitude:F1} m/s");
+        if (enableDebugLogs)
+        {
+            Debug.Log($"[Projectile Init] BulletSpeed: {speed}, InitialVel: {initialVelocity.magnitude:F1}, FinalVel: {this.velocity.magnitude:F1} m/s");
+        }
 
         gameObject.SetActive(true);
     }

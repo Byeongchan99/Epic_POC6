@@ -272,6 +272,13 @@ public class Vehicle : MonoBehaviour, IDamageable, IInteractable
         if (vehicleGun != null)
         {
             vehicleGun.SetPlayerController(player);
+
+            // Connect vehicle gun to UIManager for ammo display
+            UIManager uiManager = UIManager.Instance;
+            if (uiManager != null)
+            {
+                uiManager.ConnectVehicleGun(vehicleGun);
+            }
         }
 
         // Enable InputManager_ArcadeVP to allow player control (original asset's input system)
@@ -398,6 +405,13 @@ public class Vehicle : MonoBehaviour, IDamageable, IInteractable
         if (vehicleGun != null)
         {
             vehicleGun.SetPlayerController(null);
+
+            // Disconnect vehicle gun from UIManager
+            UIManager uiManager = UIManager.Instance;
+            if (uiManager != null)
+            {
+                uiManager.DisconnectVehicleGun();
+            }
         }
 
         currentDriver = null;

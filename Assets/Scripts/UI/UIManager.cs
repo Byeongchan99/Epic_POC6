@@ -35,6 +35,7 @@ public class UIManager : MonoBehaviour
     private PlayerStats playerStats;
     private PlayerController playerController;
     private Gun playerGun;
+    private Gun vehicleGun;
 
     private void Awake()
     {
@@ -243,6 +244,39 @@ public class UIManager : MonoBehaviour
             {
                 Destroy(child.gameObject);
             }
+        }
+    }
+
+    public void ConnectVehicleGun(Gun gun)
+    {
+        // Disconnect old vehicle gun if any
+        if (vehicleGun != null)
+        {
+            vehicleGun.OnAmmoChanged -= UpdateAmmoText;
+        }
+
+        // Connect new vehicle gun
+        vehicleGun = gun;
+        if (vehicleGun != null)
+        {
+            vehicleGun.OnAmmoChanged += UpdateAmmoText;
+            // Trigger initial update
+            UpdateAmmoText(vehicleGun.GetCurrentAmmo(), vehicleGun.GetMaxAmmo());
+        }
+    }
+
+    public void DisconnectVehicleGun()
+    {
+        if (vehicleGun != null)
+        {
+            vehicleGun.OnAmmoChanged -= UpdateAmmoText;
+            vehicleGun = null;
+        }
+
+        // Restore player gun ammo display
+        if (playerGun != null)
+        {
+            UpdateAmmoText(playerGun.GetCurrentAmmo(), playerGun.GetMaxAmmo());
         }
     }
 }

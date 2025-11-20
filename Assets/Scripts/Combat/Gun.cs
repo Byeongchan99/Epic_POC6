@@ -16,6 +16,9 @@ public class Gun : MonoBehaviour
     [SerializeField] private ProjectilePool projectilePool;
     [SerializeField] private string ownerTag = "Player"; // "Player" or "Enemy"
 
+    [Header("Debug")]
+    [SerializeField] private bool enableDebugLogs = false;
+
     private float nextFireTime;
     private bool isReloading;
     private float reloadTimer;
@@ -38,13 +41,16 @@ public class Gun : MonoBehaviour
         if (ownerTag == "Player")
         {
             playerController = GetComponentInParent<PlayerController>();
-            if (playerController == null)
+            if (enableDebugLogs)
             {
-                Debug.LogWarning($"[Gun Start] PlayerController not found in parent hierarchy! Gun is on: {gameObject.name}");
-            }
-            else
-            {
-                Debug.Log($"[Gun Start] PlayerController found successfully on: {playerController.gameObject.name}");
+                if (playerController == null)
+                {
+                    Debug.LogWarning($"[Gun Start] PlayerController not found in parent hierarchy! Gun is on: {gameObject.name}");
+                }
+                else
+                {
+                    Debug.Log($"[Gun Start] PlayerController found successfully on: {playerController.gameObject.name}");
+                }
             }
         }
 
@@ -88,14 +94,17 @@ public class Gun : MonoBehaviour
             if (currentVehicle != null)
             {
                 vehicleVelocity = currentVehicle.GetVelocity();
-                Debug.Log($"[Gun Fire] In vehicle - Velocity: {vehicleVelocity.magnitude:F1} m/s ({vehicleVelocity.x:F1}, {vehicleVelocity.y:F1}, {vehicleVelocity.z:F1})");
+                if (enableDebugLogs)
+                {
+                    Debug.Log($"[Gun Fire] In vehicle - Velocity: {vehicleVelocity.magnitude:F1} m/s ({vehicleVelocity.x:F1}, {vehicleVelocity.y:F1}, {vehicleVelocity.z:F1})");
+                }
             }
-            else
+            else if (enableDebugLogs)
             {
                 Debug.LogWarning("[Gun Fire] In vehicle but currentVehicle is NULL!");
             }
         }
-        else
+        else if (enableDebugLogs)
         {
             Debug.Log($"[Gun Fire] On foot - playerController null? {playerController == null}");
         }
@@ -115,11 +124,11 @@ public class Gun : MonoBehaviour
                 // Initialize with vehicle velocity if in vehicle
                 if (vehicleVelocity != Vector3.zero)
                 {
-                    projectile.Initialize(damage, bulletSpeed, lifetime, direction, projectilePool, ownerTag, vehicleVelocity);
+                    projectile.Initialize(damage, bulletSpeed, lifetime, direction, projectilePool, ownerTag, vehicleVelocity, enableDebugLogs);
                 }
                 else
                 {
-                    projectile.Initialize(damage, bulletSpeed, lifetime, direction, projectilePool, ownerTag);
+                    projectile.Initialize(damage, bulletSpeed, lifetime, direction, projectilePool, ownerTag, enableDebugLogs);
                 }
 
                 // Consume ammo
@@ -157,7 +166,10 @@ public class Gun : MonoBehaviour
             if (currentVehicle != null)
             {
                 vehicleVelocity = currentVehicle.GetVelocity();
-                Debug.Log($"[Gun Fire(dir)] In vehicle - Velocity: {vehicleVelocity.magnitude:F1} m/s");
+                if (enableDebugLogs)
+                {
+                    Debug.Log($"[Gun Fire(dir)] In vehicle - Velocity: {vehicleVelocity.magnitude:F1} m/s");
+                }
             }
         }
 
@@ -176,11 +188,11 @@ public class Gun : MonoBehaviour
                 // Initialize with vehicle velocity if in vehicle
                 if (vehicleVelocity != Vector3.zero)
                 {
-                    projectile.Initialize(damage, bulletSpeed, lifetime, targetDirection, projectilePool, ownerTag, vehicleVelocity);
+                    projectile.Initialize(damage, bulletSpeed, lifetime, targetDirection, projectilePool, ownerTag, vehicleVelocity, enableDebugLogs);
                 }
                 else
                 {
-                    projectile.Initialize(damage, bulletSpeed, lifetime, targetDirection, projectilePool, ownerTag);
+                    projectile.Initialize(damage, bulletSpeed, lifetime, targetDirection, projectilePool, ownerTag, enableDebugLogs);
                 }
 
                 // Consume ammo
@@ -252,6 +264,9 @@ public class Gun : MonoBehaviour
     public void SetPlayerController(PlayerController controller)
     {
         playerController = controller;
-        Debug.Log($"[Gun] PlayerController set to: {(controller != null ? controller.gameObject.name : "NULL")}");
+        if (enableDebugLogs)
+        {
+            Debug.Log($"[Gun] PlayerController set to: {(controller != null ? controller.gameObject.name : "NULL")}");
+        }
     }
 }
