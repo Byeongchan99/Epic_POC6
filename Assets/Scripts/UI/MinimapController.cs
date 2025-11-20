@@ -95,10 +95,26 @@ public class MinimapController : MonoBehaviour
 
     private void Update()
     {
-        if (playerTransform != null && playerIcon != null && minimapRect != null)
+        // Debug: Check if Update is being called
+        if (playerTransform == null)
         {
-            UpdatePlayerIcon();
+            Debug.LogWarning("MinimapController Update: playerTransform is NULL!");
+            return;
         }
+
+        if (playerIcon == null)
+        {
+            Debug.LogWarning("MinimapController Update: playerIcon is NULL!");
+            return;
+        }
+
+        if (minimapRect == null)
+        {
+            Debug.LogWarning("MinimapController Update: minimapRect is NULL!");
+            return;
+        }
+
+        UpdatePlayerIcon();
     }
 
     private void UpdatePlayerIcon()
@@ -117,7 +133,14 @@ public class MinimapController : MonoBehaviour
         }
 
         // Convert world position to minimap position
-        Vector2 minimapPos = WorldToMinimapPosition(trackedTransform.position);
+        Vector3 worldPos = trackedTransform.position;
+        Vector2 minimapPos = WorldToMinimapPosition(worldPos);
+
+        // Debug log every 60 frames (about once per second)
+        if (Time.frameCount % 60 == 0)
+        {
+            Debug.Log($"Minimap Update: World({worldPos.x:F1}, {worldPos.z:F1}) -> Minimap({minimapPos.x:F1}, {minimapPos.y:F1})");
+        }
 
         // Update player icon position
         if (playerIcon != null && playerIcon.rectTransform != null)
@@ -127,6 +150,10 @@ public class MinimapController : MonoBehaviour
             // Rotate player icon to match rotation (Y rotation in world space)
             float angle = -trackedTransform.eulerAngles.y;
             playerIcon.rectTransform.rotation = Quaternion.Euler(0, 0, angle);
+        }
+        else
+        {
+            Debug.LogWarning("MinimapController: playerIcon or its RectTransform is null!");
         }
     }
 
