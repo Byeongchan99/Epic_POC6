@@ -10,7 +10,6 @@ GameObject:
   m_Component:
   - component: {fileID: 2694521508991613479}
   - component: {fileID: 3193957253895193144}
-  - component: {fileID: 4160091178503786736}
   m_Layer: 0
   m_Name: Delivery Mission Zone
   m_TagString: Untagged
@@ -49,20 +48,6 @@ MonoBehaviour:
   missionDescription: "\uBB3C\uC790\uB97C \uD53D\uC5C5\uD558\uC5EC \uC9C0\uC815\uB41C
     \uC7A5\uC18C\uC5D0 \uBC30\uB2EC\uD558\uC138\uC694."
   interactionRange: 2
-  minDistanceBetweenPoints: 10
+  minDistanceBetweenPoints: 100
   pickupVisualPrefab: {fileID: 1314569178573685660, guid: bb8a05248b7ccdc469635fdf84ada104, type: 3}
   deliveryVisualPrefab: {fileID: 7641486068028211367, guid: 378dff8a4fd143a4d8dd4a3e24700543, type: 3}
---- !u!114 &4160091178503786736
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2201897184742064448}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 51b3e182d5f7c014f980de214d332595, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  size: {x: 10, y: 10}
-  gizmoColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}

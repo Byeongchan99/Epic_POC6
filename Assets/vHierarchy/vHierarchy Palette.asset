@@ -84,6 +84,11 @@ MonoBehaviour:
     - Transform Icon
     - GameManager Icon
     - ProbeVolume Icon
+    - PanelSettings On Icon
+    - Text Icon
+    - Slider Icon
+    - Image Icon
+    - RawImage Icon
     enabled: 1
   - builtinIcons: []
     customIcons: []

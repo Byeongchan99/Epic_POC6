@@ -976,6 +976,7 @@ MonoBehaviour:
   playerIcon: {fileID: 945374481}
   landColor: {r: 0, g: 1, b: 0, a: 1}
   waterColor: {r: 0, g: 0, b: 1, a: 1}
+  missionZoneColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
   enableDebugLogs: 0
   missionMarkerPrefab: {fileID: 0}
 --- !u!1 &488740173
@@ -1703,6 +1704,7 @@ GameObject:
   m_Component:
   - component: {fileID: 696404391}
   - component: {fileID: 696404392}
+  - component: {fileID: 696404393}
   m_Layer: 0
   m_Name: Mission Manager
   m_TagString: Untagged
@@ -1738,6 +1740,25 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   allMissions: []
+--- !u!114 &696404393
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 696404390}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 204a44f193dd70444b9c08044145d3b8, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  missionName: "\uBB3C\uC790 \uC6B4\uBC18 \uC784\uBB34"
+  missionDescription: "\uBB3C\uC790\uB97C \uD53D\uC5C5\uD558\uC5EC \uC9C0\uC815\uB41C
+    \uC7A5\uC18C\uC5D0 \uBC30\uB2EC\uD558\uC138\uC694."
+  interactionRange: 2
+  minDistanceBetweenPoints: 100
+  pickupVisualPrefab: {fileID: 1314569178573685660, guid: bb8a05248b7ccdc469635fdf84ada104, type: 3}
+  deliveryVisualPrefab: {fileID: 7641486068028211367, guid: 378dff8a4fd143a4d8dd4a3e24700543, type: 3}
 --- !u!1 &702811449
 GameObject:
   m_ObjectHideFlags: 0

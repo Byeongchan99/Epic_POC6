@@ -15,6 +15,8 @@ MonoBehaviour:
   sceneDatas_byGuid:
     keys:
     - a128fe4a6840bbe49971f3e201f56269
+    - 7797ccb4606edf04b9ebfce2ef4cbb21
+    - ccf865a897fa446439b367e665ff676c
     values:
     - goDatas_byGlobalId:
         keys:
@@ -32,14 +34,42 @@ MonoBehaviour:
         - globalObjectIdString: GlobalObjectId_V1-2-a128fe4a6840bbe49971f3e201f56269-1371736358-0
         - globalObjectIdString: GlobalObjectId_V1-2-a128fe4a6840bbe49971f3e201f56269-9113633616334826049-3458952745182735096
         - globalObjectIdString: GlobalObjectId_V1-2-a128fe4a6840bbe49971f3e201f56269-609533764-0
+        - globalObjectIdString: GlobalObjectId_V1-2-a128fe4a6840bbe49971f3e201f56269-696404390-0
+        - globalObjectIdString: GlobalObjectId_V1-2-a128fe4a6840bbe49971f3e201f56269-1523227015-0
+        - globalObjectIdString: GlobalObjectId_V1-2-a128fe4a6840bbe49971f3e201f56269-596491576-0
+        - globalObjectIdString: GlobalObjectId_V1-2-a128fe4a6840bbe49971f3e201f56269-1463414026-0
+        - globalObjectIdString: GlobalObjectId_V1-2-a128fe4a6840bbe49971f3e201f56269-215141027-0
+        - globalObjectIdString: GlobalObjectId_V1-2-a128fe4a6840bbe49971f3e201f56269-833394179-0
+        - globalObjectIdString: GlobalObjectId_V1-2-a128fe4a6840bbe49971f3e201f56269-1221329324-0
+        - globalObjectIdString: GlobalObjectId_V1-2-a128fe4a6840bbe49971f3e201f56269-488740173-0
+        - globalObjectIdString: GlobalObjectId_V1-2-a128fe4a6840bbe49971f3e201f56269-1191649965-0
+        - globalObjectIdString: GlobalObjectId_V1-2-a128fe4a6840bbe49971f3e201f56269-1913639999-0
+        - globalObjectIdString: GlobalObjectId_V1-2-a128fe4a6840bbe49971f3e201f56269-645446110-0
+        - globalObjectIdString: GlobalObjectId_V1-2-a128fe4a6840bbe49971f3e201f56269-1947643811-0
+        - globalObjectIdString: GlobalObjectId_V1-2-a128fe4a6840bbe49971f3e201f56269-1453244998-0
+        - globalObjectIdString: GlobalObjectId_V1-2-a128fe4a6840bbe49971f3e201f56269-1852168602-0
+        - globalObjectIdString: GlobalObjectId_V1-2-a128fe4a6840bbe49971f3e201f56269-1201772362-0
+        - globalObjectIdString: GlobalObjectId_V1-2-a128fe4a6840bbe49971f3e201f56269-702811449-0
+        - globalObjectIdString: GlobalObjectId_V1-2-a128fe4a6840bbe49971f3e201f56269-693011541-0
+        - globalObjectIdString: GlobalObjectId_V1-2-a128fe4a6840bbe49971f3e201f56269-620285188-0
+        - globalObjectIdString: GlobalObjectId_V1-2-a128fe4a6840bbe49971f3e201f56269-1401209462-0
+        - globalObjectIdString: GlobalObjectId_V1-2-a128fe4a6840bbe49971f3e201f56269-1559179936-0
+        - globalObjectIdString: GlobalObjectId_V1-2-a128fe4a6840bbe49971f3e201f56269-787368800-0
+        - globalObjectIdString: GlobalObjectId_V1-2-a128fe4a6840bbe49971f3e201f56269-1407864907-0
+        - globalObjectIdString: GlobalObjectId_V1-2-a128fe4a6840bbe49971f3e201f56269-945374479-0
+        - globalObjectIdString: GlobalObjectId_V1-2-a128fe4a6840bbe49971f3e201f56269-2070776293-0
+        - globalObjectIdString: GlobalObjectId_V1-2-a128fe4a6840bbe49971f3e201f56269-1625985203-0
+        - globalObjectIdString: GlobalObjectId_V1-2-a128fe4a6840bbe49971f3e201f56269-1639169799-0
+        - globalObjectIdString: GlobalObjectId_V1-2-a128fe4a6840bbe49971f3e201f56269-681929674-0
         - globalObjectIdString: GlobalObjectId_V1-2-a128fe4a6840bbe49971f3e201f56269-307431054-0
+        - globalObjectIdString: GlobalObjectId_V1-2-a128fe4a6840bbe49971f3e201f56269-2073495412-0
         values:
         - colorIndex: 6
-          iconNameOrGuid: 
+          iconNameOrGuid: cs Script Icon
           isIconRecursive: 0
           isColorRecursive: 0
         - colorIndex: 6
-          iconNameOrGuid: 
+          iconNameOrGuid: Canvas Icon
           isIconRecursive: 0
           isColorRecursive: 0
         - colorIndex: 0
@@ -91,8 +121,126 @@ MonoBehaviour:
           isIconRecursive: 0
           isColorRecursive: 0
         - colorIndex: 0
-          iconNameOrGuid: Folder Icon
+          iconNameOrGuid: cs Script Icon
           isIconRecursive: 0
           isColorRecursive: 0
+        - colorIndex: 0
+          iconNameOrGuid: PanelSettings On Icon
+          isIconRecursive: 0
+          isColorRecursive: 0
+        - colorIndex: 0
+          iconNameOrGuid: PanelSettings On Icon
+          isIconRecursive: 0
+          isColorRecursive: 0
+        - colorIndex: 0
+          iconNameOrGuid: PanelSettings On Icon
+          isIconRecursive: 0
+          isColorRecursive: 0
+        - colorIndex: 0
+          iconNameOrGuid: PanelSettings On Icon
+          isIconRecursive: 0
+          isColorRecursive: 0
+        - colorIndex: 0
+          iconNameOrGuid: PanelSettings On Icon
+          isIconRecursive: 0
+          isColorRecursive: 0
+        - colorIndex: 0
+          iconNameOrGuid: Text Icon
+          isIconRecursive: 0
+          isColorRecursive: 0
+        - colorIndex: 0
+          iconNameOrGuid: Slider Icon
+          isIconRecursive: 0
+          isColorRecursive: 0
+        - colorIndex: 0
+          iconNameOrGuid: Text Icon
+          isIconRecursive: 0
+          isColorRecursive: 0
+        - colorIndex: 0
+          iconNameOrGuid: Slider Icon
+          isIconRecursive: 0
+          isColorRecursive: 0
+        - colorIndex: 0
+          iconNameOrGuid: Text Icon
+          isIconRecursive: 0
+          isColorRecursive: 0
+        - colorIndex: 0
+          iconNameOrGuid: Slider Icon
+          isIconRecursive: 0
+          isColorRecursive: 0
+        - colorIndex: 0
+          iconNameOrGuid: Text Icon
+          isIconRecursive: 0
+          isColorRecursive: 0
+        - colorIndex: 0
+          iconNameOrGuid: Slider Icon
+          isIconRecursive: 0
+          isColorRecursive: 0
+        - colorIndex: 0
+          iconNameOrGuid: Text Icon
+          isIconRecursive: 0
+          isColorRecursive: 0
+        - colorIndex: 0
+          iconNameOrGuid: Text Icon
+          isIconRecursive: 0
+          isColorRecursive: 0
+        - colorIndex: 0
+          iconNameOrGuid: Slider Icon
+          isIconRecursive: 0
+          isColorRecursive: 0
+        - colorIndex: 0
+          iconNameOrGuid: Text Icon
+          isIconRecursive: 0
+          isColorRecursive: 0
+        - colorIndex: 0
+          iconNameOrGuid: Slider Icon
+          isIconRecursive: 0
+          isColorRecursive: 0
+        - colorIndex: 0
+          iconNameOrGuid: Text Icon
+          isIconRecursive: 0
+          isColorRecursive: 0
+        - colorIndex: 0
+          iconNameOrGuid: Image Icon
+          isIconRecursive: 0
+          isColorRecursive: 0
+        - colorIndex: 0
+          iconNameOrGuid: RawImage Icon
+          isIconRecursive: 0
+          isColorRecursive: 0
+        - colorIndex: 0
+          iconNameOrGuid: Image Icon
+          isIconRecursive: 0
+          isColorRecursive: 0
+        - colorIndex: 0
+          iconNameOrGuid: RawImage Icon
+          isIconRecursive: 0
+          isColorRecursive: 0
+        - colorIndex: 0
+          iconNameOrGuid: PanelSettings On Icon
+          isIconRecursive: 0
+          isColorRecursive: 0
+        - colorIndex: 0
+          iconNameOrGuid: PanelSettings On Icon
+          isIconRecursive: 0
+          isColorRecursive: 0
+        - colorIndex: 0
+          iconNameOrGuid: EventSystem Icon
+          isIconRecursive: 0
+          isColorRecursive: 0
+        - colorIndex: 0
+          iconNameOrGuid: cs Script Icon
+          isIconRecursive: 0
+          isColorRecursive: 0
+        - colorIndex: 0
+          iconNameOrGuid: cs Script Icon
+          isIconRecursive: 0
+          isColorRecursive: 0
+    - goDatas_byGlobalId:
+        keys: []
+        values: []
+    - goDatas_byGlobalId:
+        keys: []
+        values: []
   bookmarks: []
   bookmarkedScenePaths: []
