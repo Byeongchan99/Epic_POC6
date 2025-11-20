@@ -17,14 +17,24 @@ public class TopDownCamera : MonoBehaviour
     [SerializeField] private float rotationSmoothSpeed = 5f;
 
     [Header("Vehicle Mode Settings")]
+    [Tooltip("Camera offset when in vehicle (adjustable in Play Mode)")]
     [SerializeField] private Vector3 vehicleOffset = new Vector3(0, 20, -10);
+    [Tooltip("Camera angle when in vehicle (adjustable in Play Mode)")]
     [SerializeField] private float vehicleCameraAngle = 45f;
+    [Tooltip("Whether camera follows vehicle rotation (adjustable in Play Mode)")]
     [SerializeField] private bool vehicleFollowRotation = true;
+    [Tooltip("Enable to see real-time updates in Play Mode")]
+    [SerializeField] private bool enableRuntimeAdjustment = true;
 
     private bool isFollowingVehicle = false;
     private Vector3 currentOffset;
     private float currentCameraAngle;
     private bool currentFollowRotation;
+
+    // Cache previous values to detect changes in Inspector
+    private Vector3 previousVehicleOffset;
+    private float previousVehicleCameraAngle;
+    private bool previousVehicleFollowRotation;
 
     private void Start()
     {
@@ -35,6 +45,11 @@ public class TopDownCamera : MonoBehaviour
         currentOffset = offset;
         currentCameraAngle = cameraAngle;
         currentFollowRotation = followTargetRotation;
+
+        // Initialize cache for runtime adjustment
+        previousVehicleOffset = vehicleOffset;
+        previousVehicleCameraAngle = vehicleCameraAngle;
+        previousVehicleFollowRotation = vehicleFollowRotation;
     }
 
     private void LateUpdate()
@@ -42,7 +57,36 @@ public class TopDownCamera : MonoBehaviour
         if (target == null)
             return;
 
+        // Check for runtime adjustments in Play Mode (for vehicle settings)
+        if (enableRuntimeAdjustment && isFollowingVehicle)
+        {
+            CheckForVehicleSettingsChanges();
+        }
+
         FollowTarget();
+    }
+
+    private void CheckForVehicleSettingsChanges()
+    {
+        // Detect if vehicle settings changed in Inspector during Play Mode
+        bool offsetChanged = previousVehicleOffset != vehicleOffset;
+        bool angleChanged = !Mathf.Approximately(previousVehicleCameraAngle, vehicleCameraAngle);
+        bool rotationChanged = previousVehicleFollowRotation != vehicleFollowRotation;
+
+        if (offsetChanged || angleChanged || rotationChanged)
+        {
+            // Apply new settings immediately
+            currentOffset = vehicleOffset;
+            currentCameraAngle = vehicleCameraAngle;
+            currentFollowRotation = vehicleFollowRotation;
+
+            // Update cache
+            previousVehicleOffset = vehicleOffset;
+            previousVehicleCameraAngle = vehicleCameraAngle;
+            previousVehicleFollowRotation = vehicleFollowRotation;
+
+            Debug.Log($"[Runtime Adjustment] Vehicle camera updated - Offset: {vehicleOffset}, Angle: {vehicleCameraAngle}, FollowRotation: {vehicleFollowRotation}");
+        }
     }
 
     private void FollowTarget()
@@ -143,5 +187,37 @@ public class TopDownCamera : MonoBehaviour
     public void SetFollowRotation(bool follow)
     {
         currentFollowRotation = follow;
+    }
+
+    // Context menu for quick adjustments in Play Mode
+    [ContextMenu("Apply Vehicle Settings Now")]
+    private void ApplyVehicleSettingsNow()
+    {
+        if (isFollowingVehicle)
+        {
+            currentOffset = vehicleOffset;
+            currentCameraAngle = vehicleCameraAngle;
+            currentFollowRotation = vehicleFollowRotation;
+            Debug.Log($"[Manual Apply] Vehicle camera updated - Offset: {vehicleOffset}, Angle: {vehicleCameraAngle}");
+        }
+        else
+        {
+            Debug.LogWarning("Not in vehicle mode. Enter a vehicle first.");
+        }
+    }
+
+    [ContextMenu("Reset to Default Vehicle Settings")]
+    private void ResetToDefaultVehicleSettings()
+    {
+        vehicleOffset = new Vector3(0, 20, -10);
+        vehicleCameraAngle = 45f;
+        vehicleFollowRotation = true;
+
+        if (isFollowingVehicle)
+        {
+            ApplyVehicleSettingsNow();
+        }
+
+        Debug.Log("Vehicle camera settings reset to defaults");
     }
 }
