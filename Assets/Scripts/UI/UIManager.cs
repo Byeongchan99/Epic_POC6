@@ -232,29 +232,44 @@ public class UIManager : MonoBehaviour
         if (missionEntryPrefab != null && missionListContainer != null)
         {
             GameObject entry = Instantiate(missionEntryPrefab, missionListContainer);
-            TextMeshProUGUI text = entry.GetComponentInChildren<TextMeshProUGUI>();
-            if (text != null)
+
+            // Try to get MissionEntryUI component (new method - Inspector assignment)
+            MissionEntryUI entryUI = entry.GetComponent<MissionEntryUI>();
+            if (entryUI != null)
             {
-                text.text = missionName;
+                // Use component-based approach
+                entryUI.SetMissionName(missionName);
+                entryUI.SetCheckboxState(false); // Start unchecked
+
+                if (!entryUI.HasValidCheckboxes())
+                {
+                    Debug.LogWarning($"UIManager: MissionEntryUI has missing checkbox references! Assign them in Inspector.");
+                }
+            }
+            else
+            {
+                // Fallback to old method (Find by name)
+                Debug.LogWarning($"UIManager: Add MissionEntryUI component to prefab for Inspector assignment!");
+
+                TextMeshProUGUI text = entry.GetComponentInChildren<TextMeshProUGUI>();
+                if (text != null)
+                {
+                    text.text = missionName;
+                }
+
+                Transform uncheckedTransform = entry.transform.Find("CheckboxUnchecked");
+                Transform checkedTransform = entry.transform.Find("CheckboxChecked");
+
+                if (uncheckedTransform != null && checkedTransform != null)
+                {
+                    uncheckedTransform.gameObject.SetActive(true);
+                    checkedTransform.gameObject.SetActive(false);
+                }
             }
 
             // Store entry for later updates
             missionEntries[missionName] = entry;
-
-            // Find checkbox images and show unchecked, hide checked initially
-            Transform uncheckedTransform = entry.transform.Find("CheckboxUnchecked");
-            Transform checkedTransform = entry.transform.Find("CheckboxChecked");
-
-            if (uncheckedTransform != null && checkedTransform != null)
-            {
-                uncheckedTransform.gameObject.SetActive(true);  // Show unchecked
-                checkedTransform.gameObject.SetActive(false);   // Hide checked
-                Debug.Log($"UIManager: Added mission '{missionName}' to list (unchecked)");
-            }
-            else
-            {
-                Debug.LogWarning($"UIManager: CheckboxUnchecked or CheckboxChecked not found in mission entry prefab! Make sure child objects are named correctly.");
-            }
+            Debug.Log($"UIManager: Added mission '{missionName}' to list (unchecked)");
         }
     }
 
@@ -264,29 +279,37 @@ public class UIManager : MonoBehaviour
         {
             GameObject entry = missionEntries[missionName];
 
-            // Find checkbox images
-            Transform uncheckedTransform = entry.transform.Find("CheckboxUnchecked");
-            Transform checkedTransform = entry.transform.Find("CheckboxChecked");
-
-            if (uncheckedTransform != null && checkedTransform != null)
+            // Try to get MissionEntryUI component (new method - Inspector assignment)
+            MissionEntryUI entryUI = entry.GetComponent<MissionEntryUI>();
+            if (entryUI != null)
             {
-                if (isCompleted)
-                {
-                    // Mission completed - show checked, hide unchecked
-                    uncheckedTransform.gameObject.SetActive(false);
-                    checkedTransform.gameObject.SetActive(true);
-                }
-                else
-                {
-                    // Mission not completed - show unchecked, hide checked
-                    uncheckedTransform.gameObject.SetActive(true);
-                    checkedTransform.gameObject.SetActive(false);
-                }
+                entryUI.SetCheckboxState(isCompleted);
                 Debug.Log($"UIManager: Updated mission '{missionName}' checkbox to {(isCompleted ? "checked" : "unchecked")}");
             }
             else
             {
-                Debug.LogWarning($"UIManager: CheckboxUnchecked or CheckboxChecked not found in mission entry for '{missionName}'");
+                // Fallback to old method (Find by name)
+                Transform uncheckedTransform = entry.transform.Find("CheckboxUnchecked");
+                Transform checkedTransform = entry.transform.Find("CheckboxChecked");
+
+                if (uncheckedTransform != null && checkedTransform != null)
+                {
+                    if (isCompleted)
+                    {
+                        uncheckedTransform.gameObject.SetActive(false);
+                        checkedTransform.gameObject.SetActive(true);
+                    }
+                    else
+                    {
+                        uncheckedTransform.gameObject.SetActive(true);
+                        checkedTransform.gameObject.SetActive(false);
+                    }
+                    Debug.Log($"UIManager: Updated mission '{missionName}' checkbox to {(isCompleted ? "checked" : "unchecked")}");
+                }
+                else
+                {
+                    Debug.LogWarning($"UIManager: CheckboxUnchecked or CheckboxChecked not found in mission entry for '{missionName}'");
+                }
             }
         }
         else
