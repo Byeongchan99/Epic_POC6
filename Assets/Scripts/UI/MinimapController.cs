@@ -16,6 +16,7 @@ public class MinimapController : MonoBehaviour
     private Texture2D minimapTexture;
     private MapGenerator mapGenerator;
     private Transform playerTransform;
+    private PlayerController playerController;
     private int mapWidth;
     private int mapHeight;
 
@@ -27,8 +28,38 @@ public class MinimapController : MonoBehaviour
     {
         mapGenerator = generator;
         playerTransform = player;
+
+        if (mapGenerator == null)
+        {
+            Debug.LogError("MinimapController: MapGenerator is null!");
+            return;
+        }
+
+        if (playerTransform == null)
+        {
+            Debug.LogError("MinimapController: Player Transform is null!");
+            return;
+        }
+
+        // Get PlayerController component for vehicle tracking
+        playerController = playerTransform.GetComponent<PlayerController>();
+        if (playerController == null)
+        {
+            Debug.LogWarning("MinimapController: PlayerController not found on player!");
+        }
+
         mapWidth = mapGenerator.GetMapWidth();
         mapHeight = mapGenerator.GetMapHeight();
+
+        Debug.Log($"MinimapController initialized with map size: {mapWidth}x{mapHeight}, player at: {player.position}");
+
+        // Validate UI references
+        if (minimapImage == null)
+            Debug.LogWarning("MinimapController: minimapImage is not assigned!");
+        if (minimapRect == null)
+            Debug.LogWarning("MinimapController: minimapRect is not assigned!");
+        if (playerIcon == null)
+            Debug.LogWarning("MinimapController: playerIcon is not assigned!");
 
         GenerateMinimapTexture();
     }
@@ -64,7 +95,7 @@ public class MinimapController : MonoBehaviour
 
     private void Update()
     {
-        if (playerTransform != null)
+        if (playerTransform != null && playerIcon != null && minimapRect != null)
         {
             UpdatePlayerIcon();
         }
@@ -72,16 +103,47 @@ public class MinimapController : MonoBehaviour
 
     private void UpdatePlayerIcon()
     {
-        Vector2 minimapPos = WorldToMinimapPosition(playerTransform.position);
-        playerIcon.rectTransform.anchoredPosition = minimapPos;
+        // Determine which transform to track (player or vehicle if in vehicle)
+        Transform trackedTransform = playerTransform;
 
-        // Rotate player icon to match player rotation
-        float angle = -playerTransform.eulerAngles.y;
-        playerIcon.rectTransform.rotation = Quaternion.Euler(0, 0, angle);
+        if (playerController != null && playerController.IsInVehicle())
+        {
+            // Player is in vehicle, track vehicle position instead
+            Vehicle currentVehicle = playerController.GetCurrentVehicle();
+            if (currentVehicle != null)
+            {
+                trackedTransform = currentVehicle.transform;
+            }
+        }
+
+        // Convert world position to minimap position
+        Vector2 minimapPos = WorldToMinimapPosition(trackedTransform.position);
+
+        // Update player icon position
+        if (playerIcon != null && playerIcon.rectTransform != null)
+        {
+            playerIcon.rectTransform.anchoredPosition = minimapPos;
+
+            // Rotate player icon to match rotation (Y rotation in world space)
+            float angle = -trackedTransform.eulerAngles.y;
+            playerIcon.rectTransform.rotation = Quaternion.Euler(0, 0, angle);
+        }
     }
 
     private Vector2 WorldToMinimapPosition(Vector3 worldPos)
     {
+        if (mapWidth <= 0 || mapHeight <= 0)
+        {
+            Debug.LogWarning($"MinimapController: Invalid map dimensions ({mapWidth}x{mapHeight})");
+            return Vector2.zero;
+        }
+
+        if (minimapRect == null)
+        {
+            Debug.LogWarning("MinimapController: minimapRect is null in WorldToMinimapPosition");
+            return Vector2.zero;
+        }
+
         // Normalize world position to 0-1 range
         float normalizedX = worldPos.x / mapWidth;
         float normalizedY = worldPos.z / mapHeight;
@@ -90,14 +152,16 @@ public class MinimapController : MonoBehaviour
         normalizedX = Mathf.Clamp01(normalizedX);
         normalizedY = Mathf.Clamp01(normalizedY);
 
-        // Convert to minimap UI coordinates
+        // Convert to minimap UI coordinates (anchored position)
         float minimapWidth = minimapRect.rect.width;
         float minimapHeight = minimapRect.rect.height;
 
-        return new Vector2(
+        Vector2 minimapPos = new Vector2(
             normalizedX * minimapWidth - minimapWidth / 2,
             normalizedY * minimapHeight - minimapHeight / 2
         );
+
+        return minimapPos;
     }
 
     public void AddMissionMarker(Vector3 missionWorldPos)
