@@ -91,8 +91,37 @@ public class Vehicle : MonoBehaviour, IDamageable, IInteractable
             {
                 arcadeVehicleController.rb.velocity = Vector3.zero;
                 arcadeVehicleController.rb.angularVelocity = Vector3.zero;
+
+                // Also reset carBody rigidbody if it exists
+                if (arcadeVehicleController.carBody != null)
+                {
+                    arcadeVehicleController.carBody.velocity = Vector3.zero;
+                    arcadeVehicleController.carBody.angularVelocity = Vector3.zero;
+                }
+
                 if (enableDebugLogs) Debug.Log("Vehicle Rigidbody initialized with zero velocity");
             }
+        }
+
+        // Schedule a second initialization after physics has settled
+        Invoke(nameof(ResetVelocityDelayed), 0.1f);
+    }
+
+    private void ResetVelocityDelayed()
+    {
+        // Double-check velocity after a short delay to ensure it stays at zero
+        if (arcadeVehicleController != null && arcadeVehicleController.rb != null && !isOccupied)
+        {
+            arcadeVehicleController.rb.velocity = Vector3.zero;
+            arcadeVehicleController.rb.angularVelocity = Vector3.zero;
+
+            if (arcadeVehicleController.carBody != null)
+            {
+                arcadeVehicleController.carBody.velocity = Vector3.zero;
+                arcadeVehicleController.carBody.angularVelocity = Vector3.zero;
+            }
+
+            if (enableDebugLogs) Debug.Log("Vehicle velocity reset (delayed check)");
         }
     }
 

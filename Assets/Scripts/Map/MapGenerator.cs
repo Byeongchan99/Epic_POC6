@@ -373,8 +373,9 @@ public class MapGenerator : MonoBehaviour
 
         if (enableDebugLogs) Debug.Log($"Destroyed {originalCount} individual water tiles");
 
-        // Create parent for optimized colliders
+        // Create parent for optimized colliders as child of mapParent
         GameObject waterWallsParent = new GameObject("CombinedWaterWalls");
+        waterWallsParent.transform.SetParent(mapParent);
         waterWallsParent.transform.position = Vector3.zero;
         waterWallsParent.isStatic = true;
         waterWallsParent.tag = "Wall";
@@ -512,8 +513,9 @@ public class MapGenerator : MonoBehaviour
             combine[i].transform = meshFilters[i].transform.localToWorldMatrix;
         }
 
-        // Create combined object
+        // Create combined object as child of mapParent
         GameObject combinedObj = new GameObject(combinedName);
+        combinedObj.transform.SetParent(mapParent);
         combinedObj.transform.position = Vector3.zero;
         combinedObj.isStatic = true;
         combinedObj.tag = tag;
