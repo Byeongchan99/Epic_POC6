@@ -194,6 +194,12 @@ public class MapGenerator : MonoBehaviour
 
             Vector2Int candidate = new Vector2Int(x, y);
 
+            // Check if the entire zone area is on land (accessible)
+            if (!IsZoneAreaOnLand(candidate, size))
+            {
+                continue; // Skip if zone would be on water or isolated
+            }
+
             // Check if position is valid (not too close to other zones)
             bool tooClose = false;
             foreach (var zone in placedMissionZones)
@@ -213,6 +219,45 @@ public class MapGenerator : MonoBehaviour
         }
 
         return Vector2Int.zero;
+    }
+
+    private bool IsZoneAreaOnLand(Vector2Int center, Vector2Int size)
+    {
+        int halfWidth = size.x / 2;
+        int halfHeight = size.y / 2;
+
+        // Check center and surrounding area to ensure it's connected to main land mass
+        int landTileCount = 0;
+        int totalTiles = 0;
+
+        // Check the zone area and a buffer around it
+        int buffer = 3; // Check 3 tiles around the zone
+        for (int x = center.x - halfWidth - buffer; x <= center.x + halfWidth + buffer; x++)
+        {
+            for (int y = center.y - halfHeight - buffer; y <= center.y + halfHeight + buffer; y++)
+            {
+                if (x >= 0 && x < mapWidth && y >= 0 && y < mapHeight)
+                {
+                    totalTiles++;
+                    if (mapData[x, y] == (int)TileType.Land)
+                    {
+                        landTileCount++;
+                    }
+                }
+            }
+        }
+
+        // Require at least 70% of the area (including buffer) to be land
+        // This ensures the zone is on a large land mass, not an isolated island
+        float landRatio = (float)landTileCount / totalTiles;
+        bool isOnLand = landRatio >= 0.7f;
+
+        if (enableDebugLogs && !isOnLand)
+        {
+            Debug.Log($"Zone position {center} rejected - only {landRatio:P0} land (need 70%+)");
+        }
+
+        return isOnLand;
     }
 
     private void CarveLandForMissionZone(Vector2Int center, Vector2Int size)
