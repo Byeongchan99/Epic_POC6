@@ -416,6 +416,53 @@ public class Vehicle : MonoBehaviour, IDamageable, IInteractable
         }
     }
 
+    private void StopVehicleCompletely()
+    {
+        if (arcadeVehicleController == null)
+            return;
+
+        // Stop main Rigidbody
+        if (arcadeVehicleController.rb != null)
+        {
+            arcadeVehicleController.rb.velocity = Vector3.zero;
+            arcadeVehicleController.rb.angularVelocity = Vector3.zero;
+        }
+
+        // Stop carBody Rigidbody (important for Arcade Vehicle Physics)
+        if (arcadeVehicleController.carBody != null)
+        {
+            arcadeVehicleController.carBody.velocity = Vector3.zero;
+            arcadeVehicleController.carBody.angularVelocity = Vector3.zero;
+        }
+
+        if (enableDebugLogs) Debug.Log("Vehicle stopped completely - all velocities set to zero");
+
+        // Double-check after a short delay to ensure it stays stopped
+        Invoke(nameof(ForceStopVehicle), 0.1f);
+    }
+
+    private void ForceStopVehicle()
+    {
+        // Only force stop if not occupied
+        if (isOccupied || arcadeVehicleController == null)
+            return;
+
+        // Force stop again to counter any physics momentum
+        if (arcadeVehicleController.rb != null)
+        {
+            arcadeVehicleController.rb.velocity = Vector3.zero;
+            arcadeVehicleController.rb.angularVelocity = Vector3.zero;
+        }
+
+        if (arcadeVehicleController.carBody != null)
+        {
+            arcadeVehicleController.carBody.velocity = Vector3.zero;
+            arcadeVehicleController.carBody.angularVelocity = Vector3.zero;
+        }
+
+        if (enableDebugLogs) Debug.Log("Vehicle force stopped (delayed check)");
+    }
+
     private void ExitVehicle()
     {
         if (currentDriver == null)
@@ -424,12 +471,7 @@ public class Vehicle : MonoBehaviour, IDamageable, IInteractable
         Vector3 exitPosition = exitPoint != null ? exitPoint.position : transform.position + transform.right * 2f;
 
         // Stop the vehicle completely when player exits
-        if (arcadeVehicleController != null && arcadeVehicleController.rb != null)
-        {
-            arcadeVehicleController.rb.velocity = Vector3.zero;
-            arcadeVehicleController.rb.angularVelocity = Vector3.zero;
-            if (enableDebugLogs) Debug.Log("Vehicle stopped - velocity set to zero on exit");
-        }
+        StopVehicleCompletely();
 
         // Disable InputManager_ArcadeVP (original asset's input system)
         if (inputManager != null)
