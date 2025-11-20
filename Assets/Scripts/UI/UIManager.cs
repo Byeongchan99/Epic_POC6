@@ -7,6 +7,7 @@ public class UIManager : MonoBehaviour
     public static UIManager Instance { get; private set; }
 
     [Header("Player Stats UI - Bottom Left")]
+    [SerializeField] private GameObject playerStatsPanel;
     [SerializeField] private Slider healthBar;
     [SerializeField] private Slider staminaBar;
     [SerializeField] private Slider hungerBar;
@@ -52,7 +53,10 @@ public class UIManager : MonoBehaviour
         if (inventoryPanel != null)
             inventoryPanel.SetActive(false);
 
-        // Hide vehicle stats initially
+        // Show player stats, hide vehicle stats initially (player is on foot)
+        if (playerStatsPanel != null)
+            playerStatsPanel.SetActive(true);
+
         if (vehicleStatsPanel != null)
             vehicleStatsPanel.SetActive(false);
     }
@@ -148,8 +152,12 @@ public class UIManager : MonoBehaviour
 
         if (vehicle != null)
         {
+            // Player is in vehicle - show vehicle stats, hide player stats
             if (vehicleStatsPanel != null && !vehicleStatsPanel.activeSelf)
                 vehicleStatsPanel.SetActive(true);
+
+            if (playerStatsPanel != null && playerStatsPanel.activeSelf)
+                playerStatsPanel.SetActive(false);
 
             if (vehicleHealthBar != null)
                 vehicleHealthBar.value = vehicle.GetHealth() / vehicle.GetMaxHealth();
@@ -159,8 +167,12 @@ public class UIManager : MonoBehaviour
         }
         else
         {
+            // Player is on foot - show player stats, hide vehicle stats
             if (vehicleStatsPanel != null && vehicleStatsPanel.activeSelf)
                 vehicleStatsPanel.SetActive(false);
+
+            if (playerStatsPanel != null && !playerStatsPanel.activeSelf)
+                playerStatsPanel.SetActive(true);
         }
     }
 

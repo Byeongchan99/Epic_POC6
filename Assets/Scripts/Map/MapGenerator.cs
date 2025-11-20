@@ -804,8 +804,9 @@ public class MapGenerator : MonoBehaviour
 
     public bool IsTileLand(Vector3 worldPosition)
     {
-        int x = Mathf.RoundToInt(worldPosition.x);
-        int y = Mathf.RoundToInt(worldPosition.z);
+        // Convert world position to tile coordinates
+        int x = Mathf.RoundToInt(worldPosition.x / tileSize);
+        int y = Mathf.RoundToInt(worldPosition.z / tileSize);
         return IsTileLand(x, y);
     }
 
