@@ -513,6 +513,15 @@ public class Vehicle : MonoBehaviour, IDamageable, IInteractable
     public float GetMaxFuel() => maxFuel;
     public bool IsOccupied() => isOccupied;
 
+    public Vector3 GetVelocity()
+    {
+        if (arcadeVehicleController != null && arcadeVehicleController.rb != null)
+        {
+            return arcadeVehicleController.rb.velocity;
+        }
+        return Vector3.zero;
+    }
+
     // Visualize grounded check in Scene View
     private void OnDrawGizmos()
     {

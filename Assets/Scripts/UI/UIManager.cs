@@ -18,6 +18,7 @@ public class UIManager : MonoBehaviour
     [SerializeField] private GameObject vehicleStatsPanel;
     [SerializeField] private Slider vehicleHealthBar;
     [SerializeField] private Slider fuelBar;
+    [SerializeField] private TextMeshProUGUI vehicleAmmoText; // Ammo display for vehicle panel
 
     [Header("Minimap - Bottom Right")]
     [SerializeField] private MinimapController minimapController;
@@ -142,8 +143,15 @@ public class UIManager : MonoBehaviour
 
     private void UpdateAmmoText(int current, int max)
     {
+        string ammoString = $"{current}/{max}";
+
+        // Update player panel ammo text
         if (ammoText != null)
-            ammoText.text = $"{current}/{max}";
+            ammoText.text = ammoString;
+
+        // Update vehicle panel ammo text
+        if (vehicleAmmoText != null)
+            vehicleAmmoText.text = ammoString;
     }
 
     private void UpdateVehicleStats()

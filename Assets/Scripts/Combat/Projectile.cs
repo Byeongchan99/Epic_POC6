@@ -7,6 +7,7 @@ public class Projectile : MonoBehaviour
     private float lifetime;
     private float timer;
     private Vector3 direction;
+    private Vector3 velocity; // Combined velocity (direction * speed + initial velocity)
     private ProjectilePool pool;
     private string ownerTag; // "Player" or "Enemy"
 
@@ -16,6 +17,22 @@ public class Projectile : MonoBehaviour
         this.speed = speed;
         this.lifetime = lifetime;
         this.direction = direction.normalized;
+        this.velocity = this.direction * speed;
+        this.pool = pool;
+        this.ownerTag = ownerTag;
+        this.timer = 0f;
+
+        gameObject.SetActive(true);
+    }
+
+    // Overload with initial velocity (e.g., from vehicle movement)
+    public void Initialize(float damage, float speed, float lifetime, Vector3 direction, ProjectilePool pool, string ownerTag, Vector3 initialVelocity)
+    {
+        this.damage = damage;
+        this.speed = speed;
+        this.lifetime = lifetime;
+        this.direction = direction.normalized;
+        this.velocity = this.direction * speed + initialVelocity; // Add vehicle velocity to projectile velocity
         this.pool = pool;
         this.ownerTag = ownerTag;
         this.timer = 0f;
@@ -25,8 +42,8 @@ public class Projectile : MonoBehaviour
 
     private void Update()
     {
-        // Move projectile
-        transform.Translate(direction * speed * Time.deltaTime, Space.World);
+        // Move projectile with combined velocity
+        transform.Translate(velocity * Time.deltaTime, Space.World);
 
         // Update timer
         timer += Time.deltaTime;

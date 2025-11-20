@@ -19,6 +19,7 @@ public class Gun : MonoBehaviour
     private float nextFireTime;
     private bool isReloading;
     private float reloadTimer;
+    private PlayerController playerController; // For getting vehicle velocity
 
     // Events
     public System.Action<int, int> OnAmmoChanged;
@@ -31,6 +32,12 @@ public class Gun : MonoBehaviour
         if (projectilePool == null)
         {
             projectilePool = ProjectilePool.Instance;
+        }
+
+        // Try to find PlayerController (for vehicle velocity tracking)
+        if (ownerTag == "Player")
+        {
+            playerController = GetComponentInParent<PlayerController>();
         }
 
         OnAmmoChanged?.Invoke(currentAmmo, maxAmmo);
@@ -65,6 +72,17 @@ public class Gun : MonoBehaviour
         // Get direction
         Vector3 direction = GetFireDirection();
 
+        // Get vehicle velocity if player is in vehicle
+        Vector3 vehicleVelocity = Vector3.zero;
+        if (playerController != null && playerController.IsInVehicle())
+        {
+            Vehicle currentVehicle = playerController.GetCurrentVehicle();
+            if (currentVehicle != null)
+            {
+                vehicleVelocity = currentVehicle.GetVelocity();
+            }
+        }
+
         // Spawn projectile from pool
         if (projectilePool != null)
         {
@@ -76,7 +94,16 @@ public class Gun : MonoBehaviour
 
                 projectile.transform.position = firePoint.position;
                 projectile.transform.rotation = Quaternion.LookRotation(direction);
-                projectile.Initialize(damage, bulletSpeed, lifetime, direction, projectilePool, ownerTag);
+
+                // Initialize with vehicle velocity if in vehicle
+                if (vehicleVelocity != Vector3.zero)
+                {
+                    projectile.Initialize(damage, bulletSpeed, lifetime, direction, projectilePool, ownerTag, vehicleVelocity);
+                }
+                else
+                {
+                    projectile.Initialize(damage, bulletSpeed, lifetime, direction, projectilePool, ownerTag);
+                }
 
                 // Consume ammo
                 currentAmmo--;
@@ -105,6 +132,17 @@ public class Gun : MonoBehaviour
         if (Time.time < nextFireTime)
             return;
 
+        // Get vehicle velocity if player is in vehicle
+        Vector3 vehicleVelocity = Vector3.zero;
+        if (playerController != null && playerController.IsInVehicle())
+        {
+            Vehicle currentVehicle = playerController.GetCurrentVehicle();
+            if (currentVehicle != null)
+            {
+                vehicleVelocity = currentVehicle.GetVelocity();
+            }
+        }
+
         // Spawn projectile from pool
         if (projectilePool != null)
         {
@@ -116,7 +154,16 @@ public class Gun : MonoBehaviour
 
                 projectile.transform.position = firePoint.position;
                 projectile.transform.rotation = Quaternion.LookRotation(targetDirection);
-                projectile.Initialize(damage, bulletSpeed, lifetime, targetDirection, projectilePool, ownerTag);
+
+                // Initialize with vehicle velocity if in vehicle
+                if (vehicleVelocity != Vector3.zero)
+                {
+                    projectile.Initialize(damage, bulletSpeed, lifetime, targetDirection, projectilePool, ownerTag, vehicleVelocity);
+                }
+                else
+                {
+                    projectile.Initialize(damage, bulletSpeed, lifetime, targetDirection, projectilePool, ownerTag);
+                }
 
                 // Consume ammo
                 currentAmmo--;
