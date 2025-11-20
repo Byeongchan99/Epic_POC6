@@ -85,6 +85,14 @@ public class Vehicle : MonoBehaviour, IDamageable, IInteractable
         if (arcadeVehicleController != null)
         {
             arcadeVehicleController.enabled = true;
+
+            // Initialize vehicle with zero velocity to prevent spawning in motion
+            if (arcadeVehicleController.rb != null)
+            {
+                arcadeVehicleController.rb.velocity = Vector3.zero;
+                arcadeVehicleController.rb.angularVelocity = Vector3.zero;
+                if (enableDebugLogs) Debug.Log("Vehicle Rigidbody initialized with zero velocity");
+            }
         }
     }
 
@@ -385,6 +393,14 @@ public class Vehicle : MonoBehaviour, IDamageable, IInteractable
             return;
 
         Vector3 exitPosition = exitPoint != null ? exitPoint.position : transform.position + transform.right * 2f;
+
+        // Stop the vehicle completely when player exits
+        if (arcadeVehicleController != null && arcadeVehicleController.rb != null)
+        {
+            arcadeVehicleController.rb.velocity = Vector3.zero;
+            arcadeVehicleController.rb.angularVelocity = Vector3.zero;
+            if (enableDebugLogs) Debug.Log("Vehicle stopped - velocity set to zero on exit");
+        }
 
         // Disable InputManager_ArcadeVP (original asset's input system)
         if (inputManager != null)

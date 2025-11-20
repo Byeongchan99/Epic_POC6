@@ -241,14 +241,20 @@ public class UIManager : MonoBehaviour
             // Store entry for later updates
             missionEntries[missionName] = entry;
 
-            // Find checkbox and uncheck it initially
-            Toggle checkbox = entry.GetComponentInChildren<Toggle>();
-            if (checkbox != null)
-            {
-                checkbox.isOn = false;
-            }
+            // Find checkbox images and show unchecked, hide checked initially
+            Transform uncheckedTransform = entry.transform.Find("CheckboxUnchecked");
+            Transform checkedTransform = entry.transform.Find("CheckboxChecked");
 
-            Debug.Log($"UIManager: Added mission '{missionName}' to list");
+            if (uncheckedTransform != null && checkedTransform != null)
+            {
+                uncheckedTransform.gameObject.SetActive(true);  // Show unchecked
+                checkedTransform.gameObject.SetActive(false);   // Hide checked
+                Debug.Log($"UIManager: Added mission '{missionName}' to list (unchecked)");
+            }
+            else
+            {
+                Debug.LogWarning($"UIManager: CheckboxUnchecked or CheckboxChecked not found in mission entry prefab! Make sure child objects are named correctly.");
+            }
         }
     }
 
@@ -257,15 +263,30 @@ public class UIManager : MonoBehaviour
         if (missionEntries.ContainsKey(missionName))
         {
             GameObject entry = missionEntries[missionName];
-            Toggle checkbox = entry.GetComponentInChildren<Toggle>();
-            if (checkbox != null)
+
+            // Find checkbox images
+            Transform uncheckedTransform = entry.transform.Find("CheckboxUnchecked");
+            Transform checkedTransform = entry.transform.Find("CheckboxChecked");
+
+            if (uncheckedTransform != null && checkedTransform != null)
             {
-                checkbox.isOn = isCompleted;
-                Debug.Log($"UIManager: Updated mission '{missionName}' checkbox to {isCompleted}");
+                if (isCompleted)
+                {
+                    // Mission completed - show checked, hide unchecked
+                    uncheckedTransform.gameObject.SetActive(false);
+                    checkedTransform.gameObject.SetActive(true);
+                }
+                else
+                {
+                    // Mission not completed - show unchecked, hide checked
+                    uncheckedTransform.gameObject.SetActive(true);
+                    checkedTransform.gameObject.SetActive(false);
+                }
+                Debug.Log($"UIManager: Updated mission '{missionName}' checkbox to {(isCompleted ? "checked" : "unchecked")}");
             }
             else
             {
-                Debug.LogWarning($"UIManager: No Toggle (checkbox) found in mission entry for '{missionName}'");
+                Debug.LogWarning($"UIManager: CheckboxUnchecked or CheckboxChecked not found in mission entry for '{missionName}'");
             }
         }
         else
