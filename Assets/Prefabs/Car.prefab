@@ -10089,7 +10089,7 @@ MonoBehaviour:
   turn: 10
   gravity: 7
   downforce: 5
-  AirControl: 0
+  AirControl: 1
   kartLike: 0
   driftMultiplier: 1.5
   rb: {fileID: 4938448536798875350}
@@ -10199,6 +10199,16 @@ MonoBehaviour:
   firePoint: {fileID: 1758340150634730228}
   mainCamera: {fileID: 0}
   arcadeVehicleController: {fileID: 7357005411639265638}
+  isGrounded: 0
+  distanceToGround: 0
+  groundObjectName: 
+  groundLayer: 0
+  vehiclePosition: {x: 0, y: 0, z: 0}
+  sphereRBPosition: {x: 0, y: 0, z: 0}
+  drivableSurfaceMask: 0
+  sphereRadius: 0
+  raycastMaxDistance: 0
+  groundCheckMode: 
 --- !u!114 &7631840795373286182
 MonoBehaviour:
   m_ObjectHideFlags: 0
