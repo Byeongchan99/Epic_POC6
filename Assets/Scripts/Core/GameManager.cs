@@ -8,12 +8,14 @@ public class GameManager : MonoBehaviour
     [SerializeField] private MapGenerator mapGenerator;
     [SerializeField] private GameObject vehiclePrefab;
     [SerializeField] private Transform playerTransform;
+    [SerializeField] private UIManager uiManager;
 
     [Header("Vehicle Spawn Settings")]
     [SerializeField] private float vehicleSpawnDistanceFromPlayer = 5f;
     [SerializeField] private bool spawnVehicleOnStart = true;
 
     private GameObject spawnedVehicle;
+    private bool uiInitialized = false;
 
     private void Awake()
     {
@@ -50,6 +52,12 @@ public class GameManager : MonoBehaviour
     {
         // Called when map generation is complete
         Debug.Log("GameManager: Map generation complete, ready to spawn vehicle");
+
+        // Initialize Minimap
+        InitializeMinimap();
+
+        // Initialize UI (player stats)
+        InitializeUI();
 
         // Spawn vehicle near player after map is ready
         if (spawnVehicleOnStart && vehiclePrefab != null)
@@ -205,5 +213,88 @@ public class GameManager : MonoBehaviour
     public GameObject GetSpawnedVehicle()
     {
         return spawnedVehicle;
+    }
+
+    /// <summary>
+    /// Initialize minimap after map generation is complete
+    /// </summary>
+    private void InitializeMinimap()
+    {
+        if (uiManager == null)
+        {
+            uiManager = FindAnyObjectByType<UIManager>();
+            if (uiManager == null)
+            {
+                Debug.LogWarning("UIManager not found! Minimap will not be initialized.");
+                return;
+            }
+        }
+
+        MinimapController minimapController = uiManager.GetMinimapController();
+        if (minimapController != null && mapGenerator != null)
+        {
+            // Find player if not assigned
+            if (playerTransform == null)
+            {
+                PlayerController player = FindAnyObjectByType<PlayerController>();
+                if (player != null)
+                {
+                    playerTransform = player.transform;
+                }
+            }
+
+            minimapController.Initialize(mapGenerator, playerTransform);
+            Debug.Log("Minimap initialized successfully");
+        }
+        else
+        {
+            Debug.LogWarning("MinimapController or MapGenerator not found!");
+        }
+    }
+
+    /// <summary>
+    /// Initialize UI with player stats
+    /// </summary>
+    private void InitializeUI()
+    {
+        if (uiInitialized)
+            return;
+
+        if (uiManager == null)
+        {
+            uiManager = FindAnyObjectByType<UIManager>();
+            if (uiManager == null)
+            {
+                Debug.LogWarning("UIManager not found!");
+                return;
+            }
+        }
+
+        // Find player components
+        PlayerController playerController = FindAnyObjectByType<PlayerController>();
+        if (playerController == null)
+        {
+            Debug.LogWarning("PlayerController not found! UI will not be initialized.");
+            return;
+        }
+
+        PlayerStats playerStats = playerController.GetComponent<PlayerStats>();
+        Gun playerGun = playerController.GetComponent<Gun>();
+
+        if (playerStats == null)
+        {
+            Debug.LogWarning("PlayerStats not found on Player!");
+        }
+
+        if (playerGun == null)
+        {
+            Debug.LogWarning("Gun not found on Player!");
+        }
+
+        // Initialize UIManager
+        uiManager.Initialize(playerStats, playerController, playerGun);
+        uiInitialized = true;
+
+        Debug.Log("UI initialized successfully");
     }
 }
