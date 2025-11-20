@@ -24,6 +24,18 @@ public class Vehicle : MonoBehaviour, IDamageable, IInteractable
     [Tooltip("Assign your Arcade Vehicle Physics controller component here (optional)")]
     [SerializeField] private ArcadeVehicleController arcadeVehicleController;
 
+    [Header("Debug Info (Read Only)")]
+    [SerializeField] private bool isGrounded;
+    [SerializeField] private float distanceToGround;
+    [SerializeField] private string groundObjectName;
+    [SerializeField] private int groundLayer;
+    [SerializeField] private Vector3 vehiclePosition;
+    [SerializeField] private Vector3 sphereRBPosition;
+    [SerializeField] private int drivableSurfaceMask;
+    [SerializeField] private float sphereRadius;
+    [SerializeField] private float raycastMaxDistance;
+    [SerializeField] private string groundCheckMode;
+
     private float currentHealth;
     private float currentFuel;
     private PlayerController currentDriver;
@@ -75,6 +87,9 @@ public class Vehicle : MonoBehaviour, IDamageable, IInteractable
 
     private void Update()
     {
+        // Update debug info every frame for Inspector visibility
+        UpdateDebugInfo();
+
         if (isOccupied)
         {
             // Handle game-specific logic (stats only, not input!)
@@ -83,6 +98,66 @@ public class Vehicle : MonoBehaviour, IDamageable, IInteractable
             HandleVehicleShooting();
             HandleExit();
             HandleDebugKeys();
+        }
+    }
+
+    private void UpdateDebugInfo()
+    {
+        if (arcadeVehicleController == null)
+            return;
+
+        // Get ArcadeVehicleController settings
+        drivableSurfaceMask = arcadeVehicleController.drivableSurface.value;
+        groundCheckMode = arcadeVehicleController.GroundCheck.ToString();
+
+        if (arcadeVehicleController.rb != null)
+        {
+            SphereCollider sphereCol = arcadeVehicleController.rb.GetComponent<SphereCollider>();
+            if (sphereCol != null)
+            {
+                sphereRadius = sphereCol.radius;
+                raycastMaxDistance = sphereCol.radius + 0.2f;
+            }
+        }
+
+        // Check if grounded using ArcadeVehicleController's method
+        isGrounded = arcadeVehicleController.grounded();
+
+        // Get vehicle positions
+        vehiclePosition = transform.position;
+        if (arcadeVehicleController.rb != null)
+        {
+            sphereRBPosition = arcadeVehicleController.rb.position;
+        }
+
+        // Perform manual raycast to get detailed info (without LayerMask to see everything)
+        if (arcadeVehicleController.rb != null)
+        {
+            RaycastHit hit;
+            Vector3 rayOrigin = arcadeVehicleController.rb.position;
+            float maxDistance = 10f; // Check further down to see what's below
+
+            if (Physics.Raycast(rayOrigin, Vector3.down, out hit, maxDistance))
+            {
+                distanceToGround = hit.distance;
+                groundObjectName = hit.collider.gameObject.name;
+                groundLayer = hit.collider.gameObject.layer;
+
+                // Check if this layer is included in drivableSurface mask
+                int layerBit = 1 << hit.collider.gameObject.layer;
+                bool isInMask = (drivableSurfaceMask & layerBit) != 0;
+
+                if (!isInMask)
+                {
+                    groundObjectName += " (NOT IN DRIVABLE MASK!)";
+                }
+            }
+            else
+            {
+                distanceToGround = -1f;
+                groundObjectName = "No ground detected within 10m";
+                groundLayer = -1;
+            }
         }
     }
 
@@ -437,4 +512,35 @@ public class Vehicle : MonoBehaviour, IDamageable, IInteractable
     public float GetFuel() => currentFuel;
     public float GetMaxFuel() => maxFuel;
     public bool IsOccupied() => isOccupied;
+
+    // Visualize grounded check in Scene View
+    private void OnDrawGizmos()
+    {
+        if (arcadeVehicleController == null || arcadeVehicleController.rb == null)
+            return;
+
+        Vector3 rayOrigin = arcadeVehicleController.rb.position;
+        float maxDistance = raycastMaxDistance > 0 ? raycastMaxDistance : 1f;
+
+        // Draw raycast line - green if grounded, red if not
+        if (isGrounded)
+        {
+            Gizmos.color = Color.green;
+        }
+        else
+        {
+            Gizmos.color = Color.red;
+        }
+
+        Gizmos.DrawLine(rayOrigin, rayOrigin + Vector3.down * maxDistance);
+        Gizmos.DrawWireSphere(rayOrigin, 0.1f);
+
+        // Draw hit point if ground detected
+        if (distanceToGround > 0)
+        {
+            Vector3 hitPoint = rayOrigin + Vector3.down * distanceToGround;
+            Gizmos.color = Color.yellow;
+            Gizmos.DrawWireSphere(hitPoint, 0.2f);
+        }
+    }
 }
