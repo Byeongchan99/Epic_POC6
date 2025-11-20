@@ -38,6 +38,14 @@ public class Gun : MonoBehaviour
         if (ownerTag == "Player")
         {
             playerController = GetComponentInParent<PlayerController>();
+            if (playerController == null)
+            {
+                Debug.LogWarning($"[Gun Start] PlayerController not found in parent hierarchy! Gun is on: {gameObject.name}");
+            }
+            else
+            {
+                Debug.Log($"[Gun Start] PlayerController found successfully on: {playerController.gameObject.name}");
+            }
         }
 
         OnAmmoChanged?.Invoke(currentAmmo, maxAmmo);
@@ -80,7 +88,16 @@ public class Gun : MonoBehaviour
             if (currentVehicle != null)
             {
                 vehicleVelocity = currentVehicle.GetVelocity();
+                Debug.Log($"[Gun Fire] In vehicle - Velocity: {vehicleVelocity.magnitude:F1} m/s ({vehicleVelocity.x:F1}, {vehicleVelocity.y:F1}, {vehicleVelocity.z:F1})");
             }
+            else
+            {
+                Debug.LogWarning("[Gun Fire] In vehicle but currentVehicle is NULL!");
+            }
+        }
+        else
+        {
+            Debug.Log($"[Gun Fire] On foot - playerController null? {playerController == null}");
         }
 
         // Spawn projectile from pool
@@ -140,6 +157,7 @@ public class Gun : MonoBehaviour
             if (currentVehicle != null)
             {
                 vehicleVelocity = currentVehicle.GetVelocity();
+                Debug.Log($"[Gun Fire(dir)] In vehicle - Velocity: {vehicleVelocity.magnitude:F1} m/s");
             }
         }
 
@@ -229,5 +247,11 @@ public class Gun : MonoBehaviour
     public void SetFirePoint(Transform point)
     {
         firePoint = point;
+    }
+
+    public void SetPlayerController(PlayerController controller)
+    {
+        playerController = controller;
+        Debug.Log($"[Gun] PlayerController set to: {(controller != null ? controller.gameObject.name : "NULL")}");
     }
 }

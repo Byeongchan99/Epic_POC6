@@ -268,6 +268,12 @@ public class Vehicle : MonoBehaviour, IDamageable, IInteractable
         currentDriver = player;
         isOccupied = true;
 
+        // Set player controller for vehicle gun (for velocity tracking)
+        if (vehicleGun != null)
+        {
+            vehicleGun.SetPlayerController(player);
+        }
+
         // Enable InputManager_ArcadeVP to allow player control (original asset's input system)
         if (inputManager != null && currentFuel > 0)
         {
@@ -386,6 +392,12 @@ public class Vehicle : MonoBehaviour, IDamageable, IInteractable
         {
             camera.SetTarget(currentDriver.transform);
             camera.EnableVehicleMode(false); // Restore player camera settings
+        }
+
+        // Clear player controller from vehicle gun
+        if (vehicleGun != null)
+        {
+            vehicleGun.SetPlayerController(null);
         }
 
         currentDriver = null;

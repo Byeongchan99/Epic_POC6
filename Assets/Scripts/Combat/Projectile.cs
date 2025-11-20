@@ -37,6 +37,8 @@ public class Projectile : MonoBehaviour
         this.ownerTag = ownerTag;
         this.timer = 0f;
 
+        Debug.Log($"[Projectile Init] BulletSpeed: {speed}, InitialVel: {initialVelocity.magnitude:F1}, FinalVel: {this.velocity.magnitude:F1} m/s");
+
         gameObject.SetActive(true);
     }
 
