@@ -25,17 +25,24 @@ public class MissionManager : MonoBehaviour
 
     private void Start()
     {
-        InitializeMissions();
+        // Wait for map generation to complete before finding missions
+        // MapGenerator spawns mission zones in its Start(), so we need to wait
+        Invoke(nameof(InitializeMissions), 0.5f);
     }
 
     private void InitializeMissions()
     {
+        Debug.Log("MissionManager: Searching for missions in scene...");
+
         // Find all missions in the scene
         MissionBase[] foundMissions = FindObjectsByType<MissionBase>(FindObjectsSortMode.None);
         allMissions.AddRange(foundMissions);
 
+        Debug.Log($"MissionManager: Found {foundMissions.Length} mission(s)");
+
         foreach (MissionBase mission in allMissions)
         {
+            Debug.Log($"Initializing mission: {mission.GetMissionName()}");
             mission.Initialize();
             mission.OnMissionComplete += OnMissionCompleted;
 
@@ -46,7 +53,7 @@ public class MissionManager : MonoBehaviour
             }
         }
 
-        Debug.Log($"Initialized {allMissions.Count} missions");
+        Debug.Log($"MissionManager: Initialized {allMissions.Count} missions");
     }
 
     private void Update()
