@@ -457,7 +457,6 @@ public class MapGenerator : MonoBehaviour
     {
         List<MeshFilter> meshFilters = new List<MeshFilter>();
         List<GameObject> tilesToDestroy = new List<GameObject>();
-        List<BoxCollider> boxColliders = new List<BoxCollider>(); // Store BoxColliders before destroying tiles
         Material sharedMaterial = null;
         int skippedCount = 0;
 
@@ -477,14 +476,6 @@ public class MapGenerator : MonoBehaviour
                     }
 
                     meshFilters.Add(mf);
-
-                    // Store BoxCollider info before destroying
-                    BoxCollider boxCol = child.GetComponent<BoxCollider>();
-                    if (boxCol != null)
-                    {
-                        boxColliders.Add(boxCol);
-                    }
-
                     tilesToDestroy.Add(child.gameObject);
 
                     // Get material from first tile
@@ -573,54 +564,28 @@ public class MapGenerator : MonoBehaviour
             Debug.Log($"Skipping renderer for {combinedName} (invisible collider only)");
         }
 
-        // Instead of MeshCollider, recreate individual BoxColliders for stable physics
-        // MeshCollider with complex meshes causes vehicle floating issues
-        GameObject collidersParent = new GameObject($"{combinedName}_Colliders");
-        collidersParent.transform.parent = combinedObj.transform;
-        collidersParent.transform.localPosition = Vector3.zero;
-        collidersParent.isStatic = true;
+        // Add Mesh Collider with optimized settings
+        MeshCollider combinedCollider = combinedObj.AddComponent<MeshCollider>();
+        combinedCollider.sharedMesh = combinedMeshFilter.mesh;
+        combinedCollider.convex = false; // Non-convex for accurate terrain collision
 
-        int colliderCount = 0;
-        for (int i = 0; i < boxColliders.Count && i < tilesToDestroy.Count; i++)
-        {
-            BoxCollider originalBox = boxColliders[i];
-            GameObject originalTile = tilesToDestroy[i];
+        // Set cooking options for better accuracy
+        combinedCollider.cookingOptions = MeshColliderCookingOptions.CookForFasterSimulation |
+                                          MeshColliderCookingOptions.EnableMeshCleaning |
+                                          MeshColliderCookingOptions.WeldColocatedVertices;
 
-            if (originalBox != null && originalTile != null)
-            {
-                // Create new collider GameObject
-                GameObject colliderObj = new GameObject($"Collider_{colliderCount}");
-                colliderObj.transform.parent = collidersParent.transform;
-                colliderObj.transform.position = originalTile.transform.position;
-                colliderObj.transform.rotation = originalTile.transform.rotation;
-                colliderObj.transform.localScale = originalTile.transform.localScale;
-                colliderObj.isStatic = true;
-                colliderObj.tag = tag;
-
-                // Copy BoxCollider
-                BoxCollider newBox = colliderObj.AddComponent<BoxCollider>();
-                newBox.center = originalBox.center;
-                newBox.size = originalBox.size;
-
-                // Apply Physics Material for proper vehicle physics
-                if (groundPhysicsMaterial != null)
-                {
-                    newBox.material = groundPhysicsMaterial;
-                }
-
-                colliderCount++;
-            }
-        }
-
-        Debug.Log($"✓ Created {colliderCount} individual BoxColliders for stable vehicle physics (no MeshCollider)");
+        // Apply Physics Material for proper vehicle physics (matches Arcade Vehicle Physics asset)
         if (groundPhysicsMaterial != null)
         {
-            Debug.Log($"  Applied '{groundPhysicsMaterial.name}' Physics Material to all BoxColliders");
+            combinedCollider.material = groundPhysicsMaterial;
+            Debug.Log($"Applied '{groundPhysicsMaterial.name}' Physics Material to {combinedName}");
         }
         else
         {
-            Debug.LogWarning($"  Ground Physics Material not assigned! Assign Friction.physicMaterial for proper vehicle physics.");
+            Debug.LogWarning($"Ground Physics Material not assigned in MapGenerator! Assign Friction.physicMaterial for proper vehicle physics.");
         }
+
+        Debug.Log($"MeshCollider created with WeldColocatedVertices for smooth surface");
 
         // Destroy original tiles
         foreach (GameObject tile in tilesToDestroy)
@@ -628,7 +593,7 @@ public class MapGenerator : MonoBehaviour
             Destroy(tile);
         }
 
-        Debug.Log($"✓ Successfully combined {meshFilters.Count} tiles into {combinedName} with {colliderCount} BoxColliders");
+        Debug.Log($"✓ Successfully combined {meshFilters.Count} tiles into {combinedName}");
     }
 
     private void FindLandTiles()
