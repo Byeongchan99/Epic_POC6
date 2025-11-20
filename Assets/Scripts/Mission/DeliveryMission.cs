@@ -58,12 +58,21 @@ public class DeliveryMission : MissionBase
             Debug.Log($"Creating delivery visual at {deliveryPosition}");
             deliveryVisualInstance = Instantiate(deliveryVisualPrefab, deliveryPosition, Quaternion.identity, transform);
             deliveryVisualInstance.name = "DeliveryPoint";
-            deliveryVisualInstance.SetActive(false); // Hide until item is picked up
-            Debug.Log($"Delivery visual created: {deliveryVisualInstance.name} (hidden)");
+            // Keep visible from the start
+            Debug.Log($"Delivery visual created: {deliveryVisualInstance.name}");
         }
         else
         {
             Debug.LogError("deliveryVisualPrefab is NULL! Assign it in Inspector!");
+        }
+
+        // Add both pickup and delivery points to minimap
+        MinimapController minimap = FindAnyObjectByType<MinimapController>();
+        if (minimap != null)
+        {
+            minimap.AddMissionMarker(pickupPosition);
+            minimap.AddMissionMarker(deliveryPosition);
+            Debug.Log("Added pickup and delivery markers to minimap");
         }
 
         Debug.Log("=== DeliveryMission Initialize END ===");
@@ -244,19 +253,11 @@ public class DeliveryMission : MissionBase
         hasPickedUpItem = true;
         Debug.Log("Item picked up! Deliver it to the delivery point.");
 
-        // Visual feedback: hide pickup object, show delivery target
+        // Visual feedback: hide pickup object (delivery is already visible)
         if (pickupVisualInstance != null)
             pickupVisualInstance.SetActive(false);
 
-        if (deliveryVisualInstance != null)
-            deliveryVisualInstance.SetActive(true);
-
-        // Add mission marker to minimap for delivery point
-        MinimapController minimap = FindAnyObjectByType<MinimapController>();
-        if (minimap != null)
-        {
-            minimap.AddMissionMarker(deliveryPosition);
-        }
+        // Both markers are already on minimap from Initialize()
     }
 
     private void DeliverItem()
