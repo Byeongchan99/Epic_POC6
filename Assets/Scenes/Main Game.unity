@@ -1759,6 +1759,8 @@ MonoBehaviour:
   minDistanceBetweenPoints: 100
   pickupVisualPrefab: {fileID: 1314569178573685660, guid: bb8a05248b7ccdc469635fdf84ada104, type: 3}
   deliveryVisualPrefab: {fileID: 7641486068028211367, guid: 378dff8a4fd143a4d8dd4a3e24700543, type: 3}
+  pickupMarkerPrefab: {fileID: 7739957083732825784, guid: 7fa18669229fc4241835c7bb9ad3ce71, type: 3}
+  deliveryMarkerPrefab: {fileID: 7739957083732825784, guid: 08c1eb5a675c9c7418429b7e174f351f, type: 3}
 --- !u!1 &702811449
 GameObject:
   m_ObjectHideFlags: 0
@@ -3036,9 +3038,10 @@ MonoBehaviour:
   smoothSpeed: 10
   followTargetRotation: 0
   rotationSmoothSpeed: 5
-  vehicleOffset: {x: 0, y: 25, z: -13.28}
+  vehicleOffset: {x: 0, y: 30, z: -20}
   vehicleCameraAngle: 45
   vehicleFollowRotation: 1
+  enableRuntimeAdjustment: 1
 --- !u!114 &1371736361
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -4767,7 +4770,8 @@ MonoBehaviour:
   holeWeight: 0.2
   landTilePrefab: {fileID: 7596327752331418150, guid: d0519e023e6e90f4ab831ff4d902e6fb, type: 3}
   waterTilePrefab: {fileID: 5261546581278825493, guid: 7a63fea818ecb84469f2bcc3ed42696a, type: 3}
-  missionZonePrefabs: []
+  missionZonePrefabs:
+  - {fileID: 3032349185609667267, guid: e18311f4da3ec184696bcb5e86be33f9, type: 3}
   missionZoneSpacing: 20
   optimizeMesh: 1
   waterWallHeight: 5

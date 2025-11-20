@@ -89,13 +89,13 @@ public class Vehicle : MonoBehaviour, IDamageable, IInteractable
             // Initialize vehicle with zero velocity to prevent spawning in motion
             if (arcadeVehicleController.rb != null)
             {
-                arcadeVehicleController.rb.velocity = Vector3.zero;
+                arcadeVehicleController.rb.linearVelocity = Vector3.zero;
                 arcadeVehicleController.rb.angularVelocity = Vector3.zero;
 
                 // Also reset carBody rigidbody if it exists
                 if (arcadeVehicleController.carBody != null)
                 {
-                    arcadeVehicleController.carBody.velocity = Vector3.zero;
+                    arcadeVehicleController.carBody.linearVelocity = Vector3.zero;
                     arcadeVehicleController.carBody.angularVelocity = Vector3.zero;
                 }
 
@@ -112,12 +112,12 @@ public class Vehicle : MonoBehaviour, IDamageable, IInteractable
         // Double-check velocity after a short delay to ensure it stays at zero
         if (arcadeVehicleController != null && arcadeVehicleController.rb != null && !isOccupied)
         {
-            arcadeVehicleController.rb.velocity = Vector3.zero;
+            arcadeVehicleController.rb.linearVelocity = Vector3.zero;
             arcadeVehicleController.rb.angularVelocity = Vector3.zero;
 
             if (arcadeVehicleController.carBody != null)
             {
-                arcadeVehicleController.carBody.velocity = Vector3.zero;
+                arcadeVehicleController.carBody.linearVelocity = Vector3.zero;
                 arcadeVehicleController.carBody.angularVelocity = Vector3.zero;
             }
 
@@ -426,7 +426,7 @@ public class Vehicle : MonoBehaviour, IDamageable, IInteractable
         // Stop the vehicle completely when player exits
         if (arcadeVehicleController != null && arcadeVehicleController.rb != null)
         {
-            arcadeVehicleController.rb.velocity = Vector3.zero;
+            arcadeVehicleController.rb.linearVelocity = Vector3.zero;
             arcadeVehicleController.rb.angularVelocity = Vector3.zero;
             if (enableDebugLogs) Debug.Log("Vehicle stopped - velocity set to zero on exit");
         }

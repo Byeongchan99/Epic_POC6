@@ -64,6 +64,10 @@ MonoBehaviour:
         - globalObjectIdString: GlobalObjectId_V1-2-a128fe4a6840bbe49971f3e201f56269-307431054-0
         - globalObjectIdString: GlobalObjectId_V1-2-a128fe4a6840bbe49971f3e201f56269-2073495412-0
         - globalObjectIdString: GlobalObjectId_V1-2-a128fe4a6840bbe49971f3e201f56269-1661483239-0
+        - globalObjectIdString: GlobalObjectId_V1-2-a128fe4a6840bbe49971f3e201f56269-1081312944-0
+        - globalObjectIdString: GlobalObjectId_V1-2-a128fe4a6840bbe49971f3e201f56269-1860232203-0
+        - globalObjectIdString: GlobalObjectId_V1-2-a128fe4a6840bbe49971f3e201f56269-1817532926-0
+        - globalObjectIdString: GlobalObjectId_V1-2-a128fe4a6840bbe49971f3e201f56269-60558585-0
         values:
         - colorIndex: 6
           iconNameOrGuid: cs Script Icon
@@ -233,12 +237,28 @@ MonoBehaviour:
           iconNameOrGuid: cs Script Icon
           isIconRecursive: 0
           isColorRecursive: 0
-        - colorIndex: 0
+        - colorIndex: 2
           iconNameOrGuid: cs Script Icon
           isIconRecursive: 0
           isColorRecursive: 0
         - colorIndex: 0
           iconNameOrGuid: Image Icon
+          isIconRecursive: 0
+          isColorRecursive: 0
+        - colorIndex: 0
+          iconNameOrGuid: Folder Icon
+          isIconRecursive: 0
+          isColorRecursive: 0
+        - colorIndex: 0
+          iconNameOrGuid: Folder Icon
+          isIconRecursive: 0
+          isColorRecursive: 0
+        - colorIndex: 0
+          iconNameOrGuid: Folder Icon
+          isIconRecursive: 0
+          isColorRecursive: 0
+        - colorIndex: 0
+          iconNameOrGuid: Folder Icon
           isIconRecursive: 0
           isColorRecursive: 0
     - goDatas_byGlobalId:

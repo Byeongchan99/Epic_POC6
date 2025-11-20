@@ -51,3 +51,5 @@ MonoBehaviour:
   minDistanceBetweenPoints: 100
   pickupVisualPrefab: {fileID: 1314569178573685660, guid: bb8a05248b7ccdc469635fdf84ada104, type: 3}
   deliveryVisualPrefab: {fileID: 7641486068028211367, guid: 378dff8a4fd143a4d8dd4a3e24700543, type: 3}
+  pickupMarkerPrefab: {fileID: 7739957083732825784, guid: 7fa18669229fc4241835c7bb9ad3ce71, type: 3}
+  deliveryMarkerPrefab: {fileID: 7739957083732825784, guid: 08c1eb5a675c9c7418429b7e174f351f, type: 3}
