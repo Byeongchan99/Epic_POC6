@@ -6,6 +6,9 @@ public class EliminationMission : MissionBase
     [Header("Elimination Mission")]
     [SerializeField] private List<EnemyAI> enemies = new List<EnemyAI>();
 
+    [Header("Minimap Marker")]
+    [SerializeField] private GameObject enemyMarkerPrefab; // Optional: Custom marker for enemies on minimap
+
     public override void Initialize()
     {
         base.Initialize();
@@ -18,13 +21,20 @@ public class EliminationMission : MissionBase
             enemies.AddRange(foundEnemies);
         }
 
-        // Subscribe to death events
+        // Subscribe to death events and add minimap markers
+        MinimapController minimap = FindAnyObjectByType<MinimapController>();
         foreach (EnemyAI enemy in enemies)
         {
             EnemyStats stats = enemy.GetStats();
             if (stats != null)
             {
                 stats.OnDeath += OnEnemyDied;
+            }
+
+            // Add enemy marker to minimap (optional)
+            if (minimap != null && enemyMarkerPrefab != null)
+            {
+                minimap.AddMissionMarker(enemy.transform.position, enemyMarkerPrefab);
             }
         }
 
