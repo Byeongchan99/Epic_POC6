@@ -36,6 +36,12 @@ public class PlayerStats : MonoBehaviour
         currentStamina = maxStamina;
         currentHunger = maxHunger;
         currentThirst = maxThirst;
+
+        // Trigger initial events for UI initialization
+        OnHealthChanged?.Invoke(currentHealth, maxHealth);
+        OnStaminaChanged?.Invoke(currentStamina, maxStamina);
+        OnHungerChanged?.Invoke(currentHunger, maxHunger);
+        OnThirstChanged?.Invoke(currentThirst, maxThirst);
     }
 
     private void Update()
