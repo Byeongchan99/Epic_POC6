@@ -978,7 +978,7 @@ MonoBehaviour:
   waterColor: {r: 0, g: 0, b: 1, a: 1}
   missionZoneColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
   enableDebugLogs: 0
-  missionMarkerPrefab: {fileID: 0}
+  missionMarkerPrefab: {fileID: 7739957083732825784, guid: 4e66f24ffc6b68048b8438ae7df04ea9, type: 3}
 --- !u!1 &488740173
 GameObject:
   m_ObjectHideFlags: 0
@@ -4767,8 +4767,7 @@ MonoBehaviour:
   holeWeight: 0.2
   landTilePrefab: {fileID: 7596327752331418150, guid: d0519e023e6e90f4ab831ff4d902e6fb, type: 3}
   waterTilePrefab: {fileID: 5261546581278825493, guid: 7a63fea818ecb84469f2bcc3ed42696a, type: 3}
-  missionZonePrefabs:
-  - {fileID: 2201897184742064448, guid: 1fa293b8d61cdaa4d8624fc2de236b4f, type: 3}
+  missionZonePrefabs: []
   missionZoneSpacing: 20
   optimizeMesh: 1
   waterWallHeight: 5
