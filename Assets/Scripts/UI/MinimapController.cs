@@ -208,8 +208,8 @@ public class MinimapController : MonoBehaviour
         // Debug: Log the calculation process every 60 frames
         if (Time.frameCount % 60 == 0)
         {
-            Debug.Log($"[Minimap Calc] World({worldPos.x:F1}, {worldPos.z:F1}) / WorldSize({worldWidth:F0}x{worldHeight:F0}) = Norm({normalizedX:F3}, {normalizedY:F3})");
-            Debug.Log($"[Minimap Calc] MinimapRect size: ({minimapWidth:F1} x {minimapHeight:F1})");
+            //Debug.Log($"[Minimap Calc] World({worldPos.x:F1}, {worldPos.z:F1}) / WorldSize({worldWidth:F0}x{worldHeight:F0}) = Norm({normalizedX:F3}, {normalizedY:F3})");
+            //Debug.Log($"[Minimap Calc] MinimapRect size: ({minimapWidth:F1} x {minimapHeight:F1})");
         }
 
         // Convert normalized position to minimap UI coordinates

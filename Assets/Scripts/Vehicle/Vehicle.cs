@@ -517,7 +517,7 @@ public class Vehicle : MonoBehaviour, IDamageable, IInteractable
     {
         if (arcadeVehicleController != null && arcadeVehicleController.rb != null)
         {
-            return arcadeVehicleController.rb.velocity;
+            return arcadeVehicleController.rb.linearVelocity;
         }
         return Vector3.zero;
     }
