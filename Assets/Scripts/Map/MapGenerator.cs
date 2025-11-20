@@ -56,14 +56,6 @@ public class MapGenerator : MonoBehaviour
         public GameObject instance;
     }
 
-    private class TileColliderData
-    {
-        public Vector3 position;
-        public Quaternion rotation;
-        public Vector3 localScale;
-        public Bounds meshBounds;
-    }
-
     void Start()
     {
         GenerateMap();
@@ -465,7 +457,7 @@ public class MapGenerator : MonoBehaviour
     {
         List<MeshFilter> meshFilters = new List<MeshFilter>();
         List<GameObject> tilesToDestroy = new List<GameObject>();
-        List<TileColliderData> tileColliderData = new List<TileColliderData>(); // Store tile transform/bounds
+        List<BoxCollider> boxColliders = new List<BoxCollider>(); // Store BoxColliders before destroying tiles
         Material sharedMaterial = null;
         int skippedCount = 0;
 
@@ -486,15 +478,12 @@ public class MapGenerator : MonoBehaviour
 
                     meshFilters.Add(mf);
 
-                    // Store tile transform and bounds for BoxCollider recreation
-                    TileColliderData colliderData = new TileColliderData
+                    // Store BoxCollider info before destroying
+                    BoxCollider boxCol = child.GetComponent<BoxCollider>();
+                    if (boxCol != null)
                     {
-                        position = child.position,
-                        rotation = child.rotation,
-                        localScale = child.localScale,
-                        meshBounds = mf.sharedMesh.bounds
-                    };
-                    tileColliderData.Add(colliderData);
+                        boxColliders.Add(boxCol);
+                    }
 
                     tilesToDestroy.Add(child.gameObject);
 
@@ -592,36 +581,35 @@ public class MapGenerator : MonoBehaviour
         collidersParent.isStatic = true;
 
         int colliderCount = 0;
-        for (int i = 0; i < tileColliderData.Count; i++)
+        for (int i = 0; i < boxColliders.Count && i < tilesToDestroy.Count; i++)
         {
-            TileColliderData data = tileColliderData[i];
+            BoxCollider originalBox = boxColliders[i];
+            GameObject originalTile = tilesToDestroy[i];
 
-            // Create new collider GameObject
-            GameObject colliderObj = new GameObject($"Collider_{colliderCount}");
-            colliderObj.transform.parent = collidersParent.transform;
-            colliderObj.transform.position = data.position;
-            colliderObj.transform.rotation = data.rotation;
-            colliderObj.transform.localScale = data.localScale;
-            colliderObj.isStatic = true;
-            colliderObj.tag = tag;
-
-            // Create BoxCollider based on mesh bounds
-            BoxCollider newBox = colliderObj.AddComponent<BoxCollider>();
-
-            // For Plane mesh: bounds are in local space, need to scale by localScale
-            Vector3 scaledSize = Vector3.Scale(data.meshBounds.size, data.localScale);
-            Vector3 scaledCenter = Vector3.Scale(data.meshBounds.center, data.localScale);
-
-            newBox.center = scaledCenter;
-            newBox.size = scaledSize;
-
-            // Apply Physics Material for proper vehicle physics
-            if (groundPhysicsMaterial != null)
+            if (originalBox != null && originalTile != null)
             {
-                newBox.material = groundPhysicsMaterial;
-            }
+                // Create new collider GameObject
+                GameObject colliderObj = new GameObject($"Collider_{colliderCount}");
+                colliderObj.transform.parent = collidersParent.transform;
+                colliderObj.transform.position = originalTile.transform.position;
+                colliderObj.transform.rotation = originalTile.transform.rotation;
+                colliderObj.transform.localScale = originalTile.transform.localScale;
+                colliderObj.isStatic = true;
+                colliderObj.tag = tag;
 
-            colliderCount++;
+                // Copy BoxCollider
+                BoxCollider newBox = colliderObj.AddComponent<BoxCollider>();
+                newBox.center = originalBox.center;
+                newBox.size = originalBox.size;
+
+                // Apply Physics Material for proper vehicle physics
+                if (groundPhysicsMaterial != null)
+                {
+                    newBox.material = groundPhysicsMaterial;
+                }
+
+                colliderCount++;
+            }
         }
 
         Debug.Log($"✓ Created {colliderCount} individual BoxColliders for stable vehicle physics (no MeshCollider)");
