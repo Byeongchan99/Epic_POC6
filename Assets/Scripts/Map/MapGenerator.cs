@@ -843,4 +843,9 @@ public class MapGenerator : MonoBehaviour
     {
         return mapHeight;
     }
+
+    public float GetTileSize()
+    {
+        return tileSize;
+    }
 }

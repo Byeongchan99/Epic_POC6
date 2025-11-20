@@ -19,6 +19,7 @@ public class MinimapController : MonoBehaviour
     private PlayerController playerController;
     private int mapWidth;
     private int mapHeight;
+    private float tileSize;
 
     // Mission markers
     private List<GameObject> missionMarkers = new List<GameObject>();
@@ -50,8 +51,9 @@ public class MinimapController : MonoBehaviour
 
         mapWidth = mapGenerator.GetMapWidth();
         mapHeight = mapGenerator.GetMapHeight();
+        tileSize = mapGenerator.GetTileSize();
 
-        Debug.Log($"MinimapController initialized with map size: {mapWidth}x{mapHeight}, player at: {player.position}");
+        Debug.Log($"MinimapController initialized - Map: {mapWidth}x{mapHeight} tiles, TileSize: {tileSize}, WorldSize: {mapWidth * tileSize}x{mapHeight * tileSize}, Player at: {player.position}");
 
         // Validate UI references
         if (minimapImage == null)
@@ -171,9 +173,13 @@ public class MinimapController : MonoBehaviour
             return Vector2.zero;
         }
 
+        // Calculate world size (tiles * tileSize)
+        float worldWidth = mapWidth * tileSize;
+        float worldHeight = mapHeight * tileSize;
+
         // Normalize world position to 0-1 range
-        float normalizedX = worldPos.x / mapWidth;
-        float normalizedY = worldPos.z / mapHeight;
+        float normalizedX = worldPos.x / worldWidth;
+        float normalizedY = worldPos.z / worldHeight;
 
         // Clamp to valid range
         normalizedX = Mathf.Clamp01(normalizedX);
@@ -202,7 +208,7 @@ public class MinimapController : MonoBehaviour
         // Debug: Log the calculation process every 60 frames
         if (Time.frameCount % 60 == 0)
         {
-            Debug.Log($"[Minimap Calc] World({worldPos.x:F1}, {worldPos.z:F1}) / Map({mapWidth}x{mapHeight}) = Norm({normalizedX:F3}, {normalizedY:F3})");
+            Debug.Log($"[Minimap Calc] World({worldPos.x:F1}, {worldPos.z:F1}) / WorldSize({worldWidth:F0}x{worldHeight:F0}) = Norm({normalizedX:F3}, {normalizedY:F3})");
             Debug.Log($"[Minimap Calc] MinimapRect size: ({minimapWidth:F1} x {minimapHeight:F1})");
         }
 
