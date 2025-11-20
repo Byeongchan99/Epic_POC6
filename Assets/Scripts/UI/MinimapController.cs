@@ -12,6 +12,7 @@ public class MinimapController : MonoBehaviour
     [Header("Colors")]
     [SerializeField] private Color landColor = Color.green;
     [SerializeField] private Color waterColor = Color.blue;
+    [SerializeField] private Color missionZoneColor = Color.yellow;
 
     [Header("Debug")]
     [SerializeField] private bool enableDebugLogs = false;
@@ -87,6 +88,9 @@ public class MinimapController : MonoBehaviour
             }
         }
 
+        // Draw mission zones
+        DrawMissionZones();
+
         minimapTexture.Apply();
 
         // Assign to UI
@@ -96,6 +100,47 @@ public class MinimapController : MonoBehaviour
         }
 
         if (enableDebugLogs) Debug.Log("Minimap texture generated");
+    }
+
+    private void DrawMissionZones()
+    {
+        // Find all mission zones in the scene
+        MissionBase[] missions = FindObjectsByType<MissionBase>(FindObjectsSortMode.None);
+
+        foreach (MissionBase mission in missions)
+        {
+            MissionZoneInfo zoneInfo = mission.GetComponent<MissionZoneInfo>();
+            if (zoneInfo == null) continue;
+
+            Vector3 zoneWorldPos = mission.transform.position;
+            Vector2Int zoneSize = zoneInfo.size;
+
+            // Convert world position to tile coordinates
+            int centerX = Mathf.RoundToInt(zoneWorldPos.x / tileSize);
+            int centerY = Mathf.RoundToInt(zoneWorldPos.z / tileSize);
+
+            // Calculate zone bounds in tile coordinates
+            int halfWidth = zoneSize.x / 2;
+            int halfHeight = zoneSize.y / 2;
+
+            // Draw zone outline on minimap
+            for (int x = centerX - halfWidth; x <= centerX + halfWidth; x++)
+            {
+                for (int y = centerY - halfHeight; y <= centerY + halfHeight; y++)
+                {
+                    // Only draw outline (border)
+                    bool isBorder = (x == centerX - halfWidth || x == centerX + halfWidth ||
+                                    y == centerY - halfHeight || y == centerY + halfHeight);
+
+                    if (isBorder && x >= 0 && x < mapWidth && y >= 0 && y < mapHeight)
+                    {
+                        minimapTexture.SetPixel(x, y, missionZoneColor);
+                    }
+                }
+            }
+
+            if (enableDebugLogs) Debug.Log($"Drew mission zone on minimap at tile ({centerX}, {centerY}) size {zoneSize}");
+        }
     }
 
     private void Update()
@@ -260,5 +305,11 @@ public class MinimapController : MonoBehaviour
     public Texture2D GetMinimapTexture()
     {
         return minimapTexture;
+    }
+
+    public void RefreshMissionZones()
+    {
+        // Regenerate the minimap texture to include mission zones
+        GenerateMinimapTexture();
     }
 }

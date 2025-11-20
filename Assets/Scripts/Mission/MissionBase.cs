@@ -31,6 +31,13 @@ public abstract class MissionBase : MonoBehaviour
         isActive = false;
 
         Debug.Log($"Mission completed: {missionName}");
+
+        // Update UI checkbox
+        if (UIManager.Instance != null)
+        {
+            UIManager.Instance.UpdateMissionStatus(missionName, true);
+        }
+
         OnMissionComplete?.Invoke(this);
     }
 

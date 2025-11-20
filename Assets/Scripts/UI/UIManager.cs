@@ -1,6 +1,7 @@
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
+using System.Collections.Generic;
 
 public class UIManager : MonoBehaviour
 {
@@ -36,6 +37,9 @@ public class UIManager : MonoBehaviour
     private PlayerController playerController;
     private Gun playerGun;
     private Gun vehicleGun;
+
+    // Mission tracking
+    private Dictionary<string, GameObject> missionEntries = new Dictionary<string, GameObject>();
 
     private void Awake()
     {
@@ -233,6 +237,40 @@ public class UIManager : MonoBehaviour
             {
                 text.text = missionName;
             }
+
+            // Store entry for later updates
+            missionEntries[missionName] = entry;
+
+            // Find checkbox and uncheck it initially
+            Toggle checkbox = entry.GetComponentInChildren<Toggle>();
+            if (checkbox != null)
+            {
+                checkbox.isOn = false;
+            }
+
+            Debug.Log($"UIManager: Added mission '{missionName}' to list");
+        }
+    }
+
+    public void UpdateMissionStatus(string missionName, bool isCompleted)
+    {
+        if (missionEntries.ContainsKey(missionName))
+        {
+            GameObject entry = missionEntries[missionName];
+            Toggle checkbox = entry.GetComponentInChildren<Toggle>();
+            if (checkbox != null)
+            {
+                checkbox.isOn = isCompleted;
+                Debug.Log($"UIManager: Updated mission '{missionName}' checkbox to {isCompleted}");
+            }
+            else
+            {
+                Debug.LogWarning($"UIManager: No Toggle (checkbox) found in mission entry for '{missionName}'");
+            }
+        }
+        else
+        {
+            Debug.LogWarning($"UIManager: Mission '{missionName}' not found in mission entries");
         }
     }
 
@@ -245,6 +283,8 @@ public class UIManager : MonoBehaviour
                 Destroy(child.gameObject);
             }
         }
+
+        missionEntries.Clear();
     }
 
     public void ConnectVehicleGun(Gun gun)

@@ -54,6 +54,14 @@ public class MissionManager : MonoBehaviour
         }
 
         Debug.Log($"MissionManager: Initialized {allMissions.Count} missions");
+
+        // Refresh minimap to show mission zones
+        MinimapController minimap = FindAnyObjectByType<MinimapController>();
+        if (minimap != null)
+        {
+            minimap.RefreshMissionZones();
+            Debug.Log("MissionManager: Minimap refreshed to show mission zones");
+        }
     }
 
     private void Update()
