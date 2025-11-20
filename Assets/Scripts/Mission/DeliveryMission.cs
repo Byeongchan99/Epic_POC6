@@ -1,4 +1,5 @@
 using UnityEngine;
+using System.Collections.Generic;
 
 public class DeliveryMission : MissionBase
 {
@@ -72,70 +73,100 @@ public class DeliveryMission : MissionBase
     {
         Debug.Log("--- GeneratePointPositions START ---");
 
-        // Get mission zone size from MissionZoneInfo
-        MissionZoneInfo zoneInfo = GetComponent<MissionZoneInfo>();
-        if (zoneInfo == null)
+        // Get MapGenerator for entire map bounds
+        MapGenerator mapGen = FindAnyObjectByType<MapGenerator>();
+        if (mapGen == null)
         {
-            Debug.LogError("MissionZoneInfo not found on DeliveryMission!");
-            // Fallback to default positions
-            pickupPosition = transform.position + new Vector3(-5, 0, -5);
-            deliveryPosition = transform.position + new Vector3(5, 0, 5);
-            Debug.LogWarning($"Using fallback positions - Pickup: {pickupPosition}, Delivery: {deliveryPosition}");
+            Debug.LogError("MapGenerator not found!");
+            pickupPosition = new Vector3(10, 0, 10);
+            deliveryPosition = new Vector3(20, 0, 20);
             return;
         }
 
-        Vector2Int zoneSize = zoneInfo.size;
-        Vector3 zoneCenter = transform.position;
-        Debug.Log($"Zone size: {zoneSize}, Center: {zoneCenter}");
+        int mapWidth = mapGen.GetMapWidth();
+        int mapHeight = mapGen.GetMapHeight();
+        float tileSize = mapGen.GetTileSize();
 
-        // Get MapGenerator for tileSize
-        MapGenerator mapGen = FindAnyObjectByType<MapGenerator>();
-        float tileSize = mapGen != null ? mapGen.GetTileSize() : 1f;
-        Debug.Log($"TileSize: {tileSize}");
+        Debug.Log($"Map size: {mapWidth}x{mapHeight} tiles, TileSize: {tileSize}");
 
-        // Calculate world-space bounds of mission zone
-        float halfWidth = (zoneSize.x * tileSize) / 2f;
-        float halfHeight = (zoneSize.y * tileSize) / 2f;
-        Debug.Log($"Half width: {halfWidth}, Half height: {halfHeight}");
+        // Calculate world-space bounds of entire map
+        float worldWidth = mapWidth * tileSize;
+        float worldHeight = mapHeight * tileSize;
 
-        // Try to find valid positions
-        int maxAttempts = 50;
+        // Try to find valid positions on land tiles
+        int maxAttempts = 100;
         for (int attempt = 0; attempt < maxAttempts; attempt++)
         {
-            // Random position within zone for pickup
-            pickupPosition = new Vector3(
-                zoneCenter.x + Random.Range(-halfWidth, halfWidth),
-                zoneCenter.y,
-                zoneCenter.z + Random.Range(-halfHeight, halfHeight)
+            // Random position anywhere on the map
+            Vector3 randomPickup = new Vector3(
+                Random.Range(0, worldWidth),
+                0,
+                Random.Range(0, worldHeight)
             );
 
-            // Random position within zone for delivery
-            deliveryPosition = new Vector3(
-                zoneCenter.x + Random.Range(-halfWidth, halfWidth),
-                zoneCenter.y,
-                zoneCenter.z + Random.Range(-halfHeight, halfHeight)
+            Vector3 randomDelivery = new Vector3(
+                Random.Range(0, worldWidth),
+                0,
+                Random.Range(0, worldHeight)
             );
+
+            // Check if both positions are on land
+            if (!mapGen.IsTileLand(randomPickup) || !mapGen.IsTileLand(randomDelivery))
+            {
+                continue; // Skip if either is on water
+            }
 
             // Check if distance is sufficient
-            float distance = Vector3.Distance(pickupPosition, deliveryPosition);
+            float distance = Vector3.Distance(randomPickup, randomDelivery);
             if (distance >= minDistanceBetweenPoints)
             {
                 Debug.Log($"Valid positions found on attempt {attempt + 1}, distance: {distance}");
+
                 // Use raycast to find ground level
-                pickupPosition = GetGroundPosition(pickupPosition);
-                deliveryPosition = GetGroundPosition(deliveryPosition);
-                Debug.Log($"After ground position - Pickup: {pickupPosition}, Delivery: {deliveryPosition}");
+                pickupPosition = GetGroundPosition(randomPickup);
+                deliveryPosition = GetGroundPosition(randomDelivery);
+
+                Debug.Log($"Final positions - Pickup: {pickupPosition}, Delivery: {deliveryPosition}");
                 return;
             }
         }
 
-        // Fallback: place at opposite corners
-        Debug.LogWarning("Could not find valid random positions, using fallback corners");
-        pickupPosition = zoneCenter + new Vector3(-halfWidth * 0.7f, 0, -halfHeight * 0.7f);
-        deliveryPosition = zoneCenter + new Vector3(halfWidth * 0.7f, 0, halfHeight * 0.7f);
-        pickupPosition = GetGroundPosition(pickupPosition);
-        deliveryPosition = GetGroundPosition(deliveryPosition);
-        Debug.Log($"Fallback positions - Pickup: {pickupPosition}, Delivery: {deliveryPosition}");
+        // Fallback: find any two land tiles
+        Debug.LogWarning("Could not find valid random positions with sufficient distance, searching for any land tiles...");
+
+        List<Vector3> landPositions = new List<Vector3>();
+        for (int x = 0; x < mapWidth; x += 5) // Sample every 5 tiles for performance
+        {
+            for (int y = 0; y < mapHeight; y += 5)
+            {
+                Vector3 worldPos = new Vector3(x * tileSize, 0, y * tileSize);
+                if (mapGen.IsTileLand(worldPos))
+                {
+                    landPositions.Add(worldPos);
+                }
+            }
+        }
+
+        if (landPositions.Count >= 2)
+        {
+            // Pick two random land positions
+            int index1 = Random.Range(0, landPositions.Count);
+            int index2 = Random.Range(0, landPositions.Count);
+            while (index2 == index1 && landPositions.Count > 1)
+            {
+                index2 = Random.Range(0, landPositions.Count);
+            }
+
+            pickupPosition = GetGroundPosition(landPositions[index1]);
+            deliveryPosition = GetGroundPosition(landPositions[index2]);
+            Debug.Log($"Fallback positions - Pickup: {pickupPosition}, Delivery: {deliveryPosition}");
+        }
+        else
+        {
+            Debug.LogError("Could not find any land tiles for mission positions!");
+            pickupPosition = new Vector3(worldWidth / 2, 0, worldHeight / 2);
+            deliveryPosition = new Vector3(worldWidth / 2 + 10, 0, worldHeight / 2 + 10);
+        }
     }
 
     private Vector3 GetGroundPosition(Vector3 position)
