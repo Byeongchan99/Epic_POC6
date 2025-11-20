@@ -33,6 +33,7 @@ public class MapGenerator : MonoBehaviour
     [Header("Optimization")]
     [SerializeField] private bool optimizeMesh = true;
     [SerializeField] private float waterWallHeight = 5f;
+    [SerializeField] private PhysicMaterial groundPhysicsMaterial; // Assign Friction.physicMaterial from Arcade Vehicle Physics
 
     [Header("References")]
     [SerializeField] private Transform mapParent;
@@ -525,6 +526,15 @@ public class MapGenerator : MonoBehaviour
         {
             combinedMeshFilter.mesh.CombineMeshes(combine, true, true);
             Debug.Log($"Mesh combining successful! Total vertices: {combinedMeshFilter.mesh.vertexCount}");
+
+            // OPTIMIZATION: Remove duplicate vertices and optimize mesh
+            combinedMeshFilter.mesh.Optimize();
+            Debug.Log($"Mesh optimized. Vertices after optimization: {combinedMeshFilter.mesh.vertexCount}");
+
+            // Recalculate normals for smooth surface
+            combinedMeshFilter.mesh.RecalculateNormals();
+            combinedMeshFilter.mesh.RecalculateTangents();
+            Debug.Log("Normals and tangents recalculated for smooth surface");
         }
         catch (System.Exception e)
         {
@@ -554,9 +564,28 @@ public class MapGenerator : MonoBehaviour
             Debug.Log($"Skipping renderer for {combinedName} (invisible collider only)");
         }
 
-        // Add Mesh Collider
+        // Add Mesh Collider with optimized settings
         MeshCollider combinedCollider = combinedObj.AddComponent<MeshCollider>();
         combinedCollider.sharedMesh = combinedMeshFilter.mesh;
+        combinedCollider.convex = false; // Non-convex for accurate terrain collision
+
+        // Set cooking options for better accuracy
+        combinedCollider.cookingOptions = MeshColliderCookingOptions.CookForFasterSimulation |
+                                          MeshColliderCookingOptions.EnableMeshCleaning |
+                                          MeshColliderCookingOptions.WeldColocatedVertices;
+
+        // Apply Physics Material for proper vehicle physics (matches Arcade Vehicle Physics asset)
+        if (groundPhysicsMaterial != null)
+        {
+            combinedCollider.material = groundPhysicsMaterial;
+            Debug.Log($"Applied '{groundPhysicsMaterial.name}' Physics Material to {combinedName}");
+        }
+        else
+        {
+            Debug.LogWarning($"Ground Physics Material not assigned in MapGenerator! Assign Friction.physicMaterial for proper vehicle physics.");
+        }
+
+        Debug.Log($"MeshCollider created with WeldColocatedVertices for smooth surface");
 
         // Destroy original tiles
         foreach (GameObject tile in tilesToDestroy)
