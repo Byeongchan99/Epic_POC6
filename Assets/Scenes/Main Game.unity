@@ -2349,6 +2349,11 @@ MonoBehaviour:
   cameraAngle: 60
   smoothFollow: 1
   smoothSpeed: 10
+  followTargetRotation: 0
+  rotationSmoothSpeed: 5
+  vehicleOffset: {x: 0, y: 20, z: -10}
+  vehicleCameraAngle: 45
+  vehicleFollowRotation: 1
 --- !u!114 &1371736361
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3851,6 +3856,7 @@ MonoBehaviour:
   missionZoneSpacing: 20
   optimizeMesh: 1
   waterWallHeight: 5
+  groundPhysicsMaterial: {fileID: 13400000, guid: ce8f2e0169709cc4da4d8131aec6cef1, type: 2}
   mapParent: {fileID: 1081312945}
 --- !u!1 &2136691306
 GameObject:
