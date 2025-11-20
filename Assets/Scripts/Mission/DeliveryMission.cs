@@ -11,6 +11,10 @@ public class DeliveryMission : MissionBase
     [SerializeField] private GameObject pickupVisualPrefab; // Prefab for pickup point visual
     [SerializeField] private GameObject deliveryVisualPrefab; // Prefab for delivery point visual
 
+    [Header("Minimap Marker Prefabs")]
+    [SerializeField] private GameObject pickupMarkerPrefab; // Minimap marker for pickup point (A)
+    [SerializeField] private GameObject deliveryMarkerPrefab; // Minimap marker for delivery point (B)
+
     private bool hasPickedUpItem = false;
     private Transform player;
     private Vector3 pickupPosition;
@@ -66,13 +70,13 @@ public class DeliveryMission : MissionBase
             Debug.LogError("deliveryVisualPrefab is NULL! Assign it in Inspector!");
         }
 
-        // Add both pickup and delivery points to minimap
+        // Add both pickup and delivery points to minimap with custom markers
         MinimapController minimap = FindAnyObjectByType<MinimapController>();
         if (minimap != null)
         {
-            minimap.AddMissionMarker(pickupPosition);
-            minimap.AddMissionMarker(deliveryPosition);
-            Debug.Log("Added pickup and delivery markers to minimap");
+            minimap.AddMissionMarker(pickupPosition, pickupMarkerPrefab);
+            minimap.AddMissionMarker(deliveryPosition, deliveryMarkerPrefab);
+            Debug.Log("Added pickup and delivery markers to minimap with custom prefabs");
         }
 
         Debug.Log("=== DeliveryMission Initialize END ===");

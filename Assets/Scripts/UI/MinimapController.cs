@@ -272,13 +272,20 @@ public class MinimapController : MonoBehaviour
 
     public void AddMissionMarker(Vector3 missionWorldPos)
     {
-        if (missionMarkerPrefab == null)
+        AddMissionMarker(missionWorldPos, missionMarkerPrefab);
+    }
+
+    public void AddMissionMarker(Vector3 missionWorldPos, GameObject customMarkerPrefab)
+    {
+        GameObject prefabToUse = customMarkerPrefab != null ? customMarkerPrefab : missionMarkerPrefab;
+
+        if (prefabToUse == null)
         {
             Debug.LogWarning("Mission marker prefab not assigned");
             return;
         }
 
-        GameObject marker = Instantiate(missionMarkerPrefab, minimapRect);
+        GameObject marker = Instantiate(prefabToUse, minimapRect);
         Vector2 minimapPos = WorldToMinimapPosition(missionWorldPos);
         marker.GetComponent<RectTransform>().anchoredPosition = minimapPos;
         missionMarkers.Add(marker);
