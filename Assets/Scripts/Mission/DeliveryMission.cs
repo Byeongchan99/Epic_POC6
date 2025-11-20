@@ -7,6 +7,10 @@ public class DeliveryMission : MissionBase
     [SerializeField] private Transform deliveryPoint;
     [SerializeField] private float interactionRange = 2f;
 
+    [Header("Visual Feedback")]
+    [SerializeField] private GameObject pickupVisual; // Visual object to hide after pickup
+    [SerializeField] private GameObject deliveryVisual; // Visual object to show after pickup
+
     private bool hasPickedUpItem = false;
     private Transform player;
 
@@ -20,6 +24,13 @@ public class DeliveryMission : MissionBase
         {
             player = playerController.transform;
         }
+
+        // Initial state: show pickup, hide delivery
+        if (pickupVisual != null)
+            pickupVisual.SetActive(true);
+
+        if (deliveryVisual != null)
+            deliveryVisual.SetActive(false);
 
         Debug.Log("Delivery mission initialized");
     }
@@ -69,7 +80,19 @@ public class DeliveryMission : MissionBase
         hasPickedUpItem = true;
         Debug.Log("Item picked up! Deliver it to the delivery point.");
 
-        // TODO: Show visual feedback (disable pickup point visual)
+        // Visual feedback: hide pickup object, show delivery target
+        if (pickupVisual != null)
+            pickupVisual.SetActive(false);
+
+        if (deliveryVisual != null)
+            deliveryVisual.SetActive(true);
+
+        // Add mission marker to minimap for delivery point
+        MinimapController minimap = FindAnyObjectByType<MinimapController>();
+        if (minimap != null && deliveryPoint != null)
+        {
+            minimap.AddMissionMarker(deliveryPoint.position);
+        }
     }
 
     private void DeliverItem()
