@@ -13,10 +13,30 @@ MonoBehaviour:
   m_Name: vFolders Data
   m_EditorClassIdentifier: 
   folderDatas_byGuid:
-    keys: []
-    values: []
+    keys:
+    - 1198c326db41c3149a80c784d739cac0
+    - 5530039ac03c31a4da8714c074e397d8
+    - d07420525418d8b4380b265743d8534a
+    - 13942234cf2f03a49a1288ab8831b291
+    values:
+    - iconNameOrGuid: 
+      colorIndex: 1
+      isIconRecursive: 0
+      isColorRecursive: 0
+    - iconNameOrGuid: 
+      colorIndex: 6
+      isIconRecursive: 0
+      isColorRecursive: 0
+    - iconNameOrGuid: 
+      colorIndex: 5
+      isIconRecursive: 0
+      isColorRecursive: 0
+    - iconNameOrGuid: 
+      colorIndex: 9
+      isIconRecursive: 0
+      isColorRecursive: 0
   bookmarks:
-  - guid: 556e223fa9fdc0c41b57c463e93042ec
-  - guid: 61a69aef112a7574a9f59cdd2bd559aa
+  - guid: 1198c326db41c3149a80c784d739cac0
   - guid: 5530039ac03c31a4da8714c074e397d8
-  - guid: c16d792f8e8249642b6e2be6b3a49e79
+  - guid: d07420525418d8b4380b265743d8534a
+  - guid: 13942234cf2f03a49a1288ab8831b291

@@ -8,7 +8,7 @@ public class MissionZoneInfo : MonoBehaviour
 {
     [Header("Zone Size")]
     [Tooltip("Size of the mission zone area in tiles (X, Y)")]
-    public Vector2Int size = new Vector2Int(15, 15);
+    public Vector2Int size = new Vector2Int(10, 10);
 
     [Header("Visualization")]
     [SerializeField] private Color gizmoColor = Color.yellow;

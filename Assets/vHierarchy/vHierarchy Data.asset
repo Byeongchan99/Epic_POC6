@@ -20,6 +20,19 @@ MonoBehaviour:
         keys:
         - globalObjectIdString: GlobalObjectId_V1-2-a128fe4a6840bbe49971f3e201f56269-487199727-0
         - globalObjectIdString: GlobalObjectId_V1-2-a128fe4a6840bbe49971f3e201f56269-236562229-0
+        - globalObjectIdString: GlobalObjectId_V1-2-a128fe4a6840bbe49971f3e201f56269-360197874-0
+        - globalObjectIdString: GlobalObjectId_V1-2-a128fe4a6840bbe49971f3e201f56269-36957247-0
+        - globalObjectIdString: GlobalObjectId_V1-2-a128fe4a6840bbe49971f3e201f56269-1258978199-0
+        - globalObjectIdString: GlobalObjectId_V1-2-a128fe4a6840bbe49971f3e201f56269-1919723013-0
+        - globalObjectIdString: GlobalObjectId_V1-2-a128fe4a6840bbe49971f3e201f56269-957068052-0
+        - globalObjectIdString: GlobalObjectId_V1-2-a128fe4a6840bbe49971f3e201f56269-4115022076182911177-3458952745182735096
+        - globalObjectIdString: GlobalObjectId_V1-2-a128fe4a6840bbe49971f3e201f56269-1642060627-0
+        - globalObjectIdString: GlobalObjectId_V1-2-a128fe4a6840bbe49971f3e201f56269-410087039-0
+        - globalObjectIdString: GlobalObjectId_V1-2-a128fe4a6840bbe49971f3e201f56269-832575517-0
+        - globalObjectIdString: GlobalObjectId_V1-2-a128fe4a6840bbe49971f3e201f56269-1371736358-0
+        - globalObjectIdString: GlobalObjectId_V1-2-a128fe4a6840bbe49971f3e201f56269-9113633616334826049-3458952745182735096
+        - globalObjectIdString: GlobalObjectId_V1-2-a128fe4a6840bbe49971f3e201f56269-609533764-0
+        - globalObjectIdString: GlobalObjectId_V1-2-a128fe4a6840bbe49971f3e201f56269-307431054-0
         values:
         - colorIndex: 6
           iconNameOrGuid: 
@@ -27,6 +40,58 @@ MonoBehaviour:
           isColorRecursive: 0
         - colorIndex: 6
           iconNameOrGuid: 
+          isIconRecursive: 0
+          isColorRecursive: 0
+        - colorIndex: 0
+          iconNameOrGuid: Folder Icon
+          isIconRecursive: 0
+          isColorRecursive: 0
+        - colorIndex: 0
+          iconNameOrGuid: Folder Icon
+          isIconRecursive: 0
+          isColorRecursive: 0
+        - colorIndex: 0
+          iconNameOrGuid: Folder Icon
+          isIconRecursive: 0
+          isColorRecursive: 0
+        - colorIndex: 0
+          iconNameOrGuid: Folder Icon
+          isIconRecursive: 0
+          isColorRecursive: 0
+        - colorIndex: 0
+          iconNameOrGuid: Folder Icon
+          isIconRecursive: 0
+          isColorRecursive: 0
+        - colorIndex: 0
+          iconNameOrGuid: AvatarMask On Icon
+          isIconRecursive: 0
+          isColorRecursive: 0
+        - colorIndex: 0
+          iconNameOrGuid: GameManager Icon
+          isIconRecursive: 0
+          isColorRecursive: 0
+        - colorIndex: 0
+          iconNameOrGuid: DirectionalLight Icon
+          isIconRecursive: 0
+          isColorRecursive: 0
+        - colorIndex: 0
+          iconNameOrGuid: ProbeVolume Icon
+          isIconRecursive: 0
+          isColorRecursive: 0
+        - colorIndex: 0
+          iconNameOrGuid: Camera Icon
+          isIconRecursive: 0
+          isColorRecursive: 0
+        - colorIndex: 0
+          iconNameOrGuid: Transform Icon
+          isIconRecursive: 0
+          isColorRecursive: 0
+        - colorIndex: 0
+          iconNameOrGuid: Folder Icon
+          isIconRecursive: 0
+          isColorRecursive: 0
+        - colorIndex: 0
+          iconNameOrGuid: Folder Icon
           isIconRecursive: 0
           isColorRecursive: 0
   bookmarks: []

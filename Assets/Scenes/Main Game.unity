@@ -823,53 +823,6 @@ MonoBehaviour:
   m_LightCookieSize: {x: 1, y: 1}
   m_LightCookieOffset: {x: 0, y: 0}
   m_SoftShadowQuality: 1
---- !u!1 &413754834
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 413754836}
-  - component: {fileID: 413754835}
-  m_Layer: 0
-  m_Name: Elimination Mission 1
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!114 &413754835
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 413754834}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 94822d5258217594c8d12f95ad94fa35, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  missionName: "\uC18C\uD0D5 \uC784\uBB34 1"
-  missionDescription: "\uBAA8\uB4E0 \uC801 \uCC98\uCE58"
-  enemies: []
---- !u!4 &413754836
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 413754834}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &414787404
 GameObject:
   m_ObjectHideFlags: 0
@@ -1023,6 +976,7 @@ MonoBehaviour:
   playerIcon: {fileID: 945374481}
   landColor: {r: 0, g: 1, b: 0, a: 1}
   waterColor: {r: 0, g: 0, b: 1, a: 1}
+  enableDebugLogs: 0
   missionMarkerPrefab: {fileID: 0}
 --- !u!1 &488740173
 GameObject:
@@ -2454,56 +2408,6 @@ Transform:
   - {fileID: 236562230}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!1 &966074364
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 966074366}
-  - component: {fileID: 966074365}
-  m_Layer: 0
-  m_Name: Interaction Mission 1
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!114 &966074365
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 966074364}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: a9b45918f1061774ab9766c3fca4315a, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  missionName: "\uC870\uC791 \uC784\uBB34 1"
-  missionDescription: 
-  interactionPoint: {fileID: 0}
-  interactionRange: 2
-  minigameType: 0
-  requiredHoldTime: 3
---- !u!4 &966074366
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 966074364}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1081312944
 GameObject:
   m_ObjectHideFlags: 0
@@ -3111,7 +3015,7 @@ MonoBehaviour:
   smoothSpeed: 10
   followTargetRotation: 0
   rotationSmoothSpeed: 5
-  vehicleOffset: {x: 0, y: 30, z: -10}
+  vehicleOffset: {x: 0, y: 25, z: -13.28}
   vehicleCameraAngle: 45
   vehicleFollowRotation: 1
 --- !u!114 &1371736361
@@ -4298,9 +4202,10 @@ MonoBehaviour:
   mapGenerator: {fileID: 2073495414}
   vehiclePrefab: {fileID: 1556026621076152818, guid: 7797ccb4606edf04b9ebfce2ef4cbb21, type: 3}
   playerTransform: {fileID: 1266583120}
-  uiManager: {fileID: 0}
+  uiManager: {fileID: 487199729}
   vehicleSpawnDistanceFromPlayer: 5
   spawnVehicleOnStart: 1
+  enableDebugLogs: 0
 --- !u!1 &1705890065
 GameObject:
   m_ObjectHideFlags: 0
@@ -4426,55 +4331,6 @@ MonoBehaviour:
   m_OnValueChanged:
     m_PersistentCalls:
       m_Calls: []
---- !u!1 &1881622360
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 1881622362}
-  - component: {fileID: 1881622361}
-  m_Layer: 0
-  m_Name: Delivery Mission 1
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!114 &1881622361
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1881622360}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 204a44f193dd70444b9c08044145d3b8, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  missionName: "\uC6B4\uBC18 \uC784\uBB34 1"
-  missionDescription: "\uBB3C\uCCB4\uB97C \uBAA9\uD45C \uC9C0\uC810\uC73C\uB85C \uC6B4\uBC18"
-  pickupPoint: {fileID: 0}
-  deliveryPoint: {fileID: 0}
-  interactionRange: 2
---- !u!4 &1881622362
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1881622360}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1913639999
 GameObject:
   m_ObjectHideFlags: 0
@@ -4890,11 +4746,13 @@ MonoBehaviour:
   holeWeight: 0.2
   landTilePrefab: {fileID: 7596327752331418150, guid: d0519e023e6e90f4ab831ff4d902e6fb, type: 3}
   waterTilePrefab: {fileID: 5261546581278825493, guid: 7a63fea818ecb84469f2bcc3ed42696a, type: 3}
-  missionZonePrefabs: []
+  missionZonePrefabs:
+  - {fileID: 2201897184742064448, guid: 1fa293b8d61cdaa4d8624fc2de236b4f, type: 3}
   missionZoneSpacing: 20
   optimizeMesh: 1
   waterWallHeight: 5
   groundPhysicsMaterial: {fileID: 13400000, guid: ce8f2e0169709cc4da4d8131aec6cef1, type: 2}
+  enableDebugLogs: 0
   mapParent: {fileID: 1081312945}
 --- !u!1 &2136691306
 GameObject:
@@ -5030,6 +4888,3 @@ SceneRoots:
   - {fileID: 1258978200}
   - {fileID: 1919723014}
   - {fileID: 957068053}
-  - {fileID: 413754836}
-  - {fileID: 1881622362}
-  - {fileID: 966074366}
