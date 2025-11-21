@@ -37,6 +37,9 @@ public class PlayerController : MonoBehaviour
     private bool isInVehicle;
     private Vehicle currentVehicle;
 
+    // Controls
+    private bool controlsEnabled = true;
+
     private void Awake()
     {
         controller = GetComponent<CharacterController>();
@@ -88,6 +91,10 @@ public class PlayerController : MonoBehaviour
     private void Update()
     {
         if (isInVehicle)
+            return;
+
+        // Skip input handling if controls are disabled (e.g., during minigame)
+        if (!controlsEnabled)
             return;
 
         if (!isRolling)
@@ -310,5 +317,17 @@ public class PlayerController : MonoBehaviour
         }
 
         return transform.forward;
+    }
+
+    // Enable/disable player controls (for minigames, cutscenes, etc.)
+    public void SetControlsEnabled(bool enabled)
+    {
+        controlsEnabled = enabled;
+        if (enableDebugLogs) Debug.Log($"Player controls {(enabled ? "enabled" : "disabled")}");
+    }
+
+    public bool AreControlsEnabled()
+    {
+        return controlsEnabled;
     }
 }

@@ -6,8 +6,10 @@ public class MissionManager : MonoBehaviour
     public static MissionManager Instance { get; private set; }
 
     [SerializeField] private List<MissionBase> allMissions = new List<MissionBase>();
+    [SerializeField] private GameObject escapeZonePrefab;
 
     private int completedMissionCount = 0;
+    private bool escapeZoneSpawned = false;
 
     public System.Action OnAllMissionsComplete;
 
@@ -83,11 +85,45 @@ public class MissionManager : MonoBehaviour
         Debug.Log($"Mission completed: {mission.GetMissionName()} ({completedMissionCount}/{allMissions.Count})");
 
         // Check if all missions are complete
-        if (completedMissionCount >= allMissions.Count)
+        if (completedMissionCount >= allMissions.Count && !escapeZoneSpawned)
         {
             OnAllMissionsComplete?.Invoke();
-            Debug.Log("All missions completed! Player can now escape!");
+            Debug.Log("All missions completed! Spawning escape zone...");
+            SpawnEscapeZone();
         }
+    }
+
+    private void SpawnEscapeZone()
+    {
+        if (escapeZonePrefab == null)
+        {
+            Debug.LogError("Escape zone prefab not assigned!");
+            return;
+        }
+
+        if (escapeZoneSpawned)
+        {
+            Debug.LogWarning("Escape zone already spawned!");
+            return;
+        }
+
+        // Find MapGenerator to get a random land position
+        MapGenerator mapGenerator = FindAnyObjectByType<MapGenerator>();
+        if (mapGenerator == null)
+        {
+            Debug.LogError("MapGenerator not found! Cannot spawn escape zone.");
+            return;
+        }
+
+        // Get random land position
+        Vector3 spawnPosition = mapGenerator.GetRandomLandPosition();
+        spawnPosition.y = 0f; // Ensure it's on the ground
+
+        // Spawn escape zone
+        GameObject escapeZone = Instantiate(escapeZonePrefab, spawnPosition, Quaternion.identity);
+        escapeZoneSpawned = true;
+
+        Debug.Log($"Escape zone spawned at {spawnPosition}");
     }
 
     public void RegisterMission(MissionBase mission)

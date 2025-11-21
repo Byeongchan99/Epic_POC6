@@ -12,17 +12,29 @@ public class InteractionMission : MissionBase
 
     [Header("Minigame Settings")]
     [SerializeField] private float requiredHoldTime = 3f; // For mouse hold minigame
-    [SerializeField] private KeyCode[] keySequence = { KeyCode.W, KeyCode.A, KeyCode.S, KeyCode.D }; // For key sequence minigame
+
+    [Header("Key Sequence Settings")]
+    [SerializeField] private Difficulty difficulty = Difficulty.Easy;
+    [SerializeField] private KeyCode[] availableKeys = { KeyCode.W, KeyCode.A, KeyCode.S, KeyCode.D }; // Keys to use for random generation
 
     private Transform player;
+    private PlayerController playerController;
     private bool minigameStarted = false;
     private float minigameProgress = 0f;
 
     // Key sequence minigame state
+    private KeyCode[] generatedSequence; // Randomly generated sequence
     private int currentKeyIndex = 0;
 
     // Minimap marker reference
     private GameObject minimapMarker;
+
+    public enum Difficulty
+    {
+        Easy = 4,      // 4 keys
+        Medium = 6,    // 6 keys
+        Hard = 8       // 8 keys
+    }
 
     public enum MinigameType
     {
@@ -35,7 +47,7 @@ public class InteractionMission : MissionBase
         base.Initialize();
 
         // Find player
-        PlayerController playerController = FindAnyObjectByType<PlayerController>();
+        playerController = FindAnyObjectByType<PlayerController>();
         if (playerController != null)
         {
             player = playerController.transform;
@@ -114,16 +126,29 @@ public class InteractionMission : MissionBase
         currentKeyIndex = 0; // Reset key sequence progress
         Debug.Log("Minigame started!");
 
+        // Disable player controls
+        if (playerController != null)
+        {
+            playerController.SetControlsEnabled(false);
+            Debug.Log("Player controls disabled during minigame");
+        }
+
+        // Generate random key sequence for key sequence minigame
+        if (minigameType == MinigameType.KeySequence)
+        {
+            GenerateRandomKeySequence();
+        }
+
         // Show minigame UI
         if (UIManager.Instance != null)
         {
             UIManager.Instance.ShowMinigamePanel(true);
 
             // If key sequence minigame, show the required keys
-            if (minigameType == MinigameType.KeySequence && keySequence.Length > 0)
+            if (minigameType == MinigameType.KeySequence && generatedSequence != null && generatedSequence.Length > 0)
             {
                 string sequenceText = "Press: ";
-                foreach (KeyCode key in keySequence)
+                foreach (KeyCode key in generatedSequence)
                 {
                     sequenceText += key.ToString() + " ";
                 }
@@ -134,6 +159,25 @@ public class InteractionMission : MissionBase
                 UIManager.Instance.UpdateMinigameText("Hold Left Mouse Button!");
             }
         }
+    }
+
+    private void GenerateRandomKeySequence()
+    {
+        if (availableKeys == null || availableKeys.Length == 0)
+        {
+            Debug.LogError("No available keys for random sequence generation!");
+            return;
+        }
+
+        int sequenceLength = (int)difficulty;
+        generatedSequence = new KeyCode[sequenceLength];
+
+        for (int i = 0; i < sequenceLength; i++)
+        {
+            generatedSequence[i] = availableKeys[Random.Range(0, availableKeys.Length)];
+        }
+
+        Debug.Log($"Generated sequence ({difficulty}): {string.Join(", ", generatedSequence)}");
     }
 
     private void UpdateMinigame()
@@ -182,6 +226,13 @@ public class InteractionMission : MissionBase
         Debug.Log("Minigame succeeded!");
         minigameStarted = false;
 
+        // Re-enable player controls
+        if (playerController != null)
+        {
+            playerController.SetControlsEnabled(true);
+            Debug.Log("Player controls re-enabled after minigame success");
+        }
+
         // Hide minigame UI
         if (UIManager.Instance != null)
         {
@@ -205,37 +256,44 @@ public class InteractionMission : MissionBase
 
     private void UpdateKeySequenceMinigame()
     {
-        // Check if player presses the correct key
-        if (currentKeyIndex < keySequence.Length)
+        if (generatedSequence == null || generatedSequence.Length == 0)
         {
-            KeyCode expectedKey = keySequence[currentKeyIndex];
+            Debug.LogError("No generated sequence available!");
+            FailMinigame();
+            return;
+        }
+
+        // Check if player presses the correct key
+        if (currentKeyIndex < generatedSequence.Length)
+        {
+            KeyCode expectedKey = generatedSequence[currentKeyIndex];
 
             if (Input.GetKeyDown(expectedKey))
             {
                 currentKeyIndex++;
-                Debug.Log($"Correct key! Progress: {currentKeyIndex}/{keySequence.Length}");
+                Debug.Log($"Correct key! Progress: {currentKeyIndex}/{generatedSequence.Length}");
 
                 // Update UI to show progress
                 if (UIManager.Instance != null)
                 {
                     string sequenceText = "Press: ";
-                    for (int i = 0; i < keySequence.Length; i++)
+                    for (int i = 0; i < generatedSequence.Length; i++)
                     {
                         if (i < currentKeyIndex)
                         {
-                            sequenceText += $"<color=green>{keySequence[i]}</color> ";
+                            sequenceText += $"<color=green>{generatedSequence[i]}</color> ";
                         }
                         else
                         {
-                            sequenceText += keySequence[i].ToString() + " ";
+                            sequenceText += generatedSequence[i].ToString() + " ";
                         }
                     }
                     UIManager.Instance.UpdateMinigameText(sequenceText);
-                    UIManager.Instance.UpdateMinigameProgress((float)currentKeyIndex / keySequence.Length);
+                    UIManager.Instance.UpdateMinigameProgress((float)currentKeyIndex / generatedSequence.Length);
                 }
 
                 // Check if sequence is complete
-                if (currentKeyIndex >= keySequence.Length)
+                if (currentKeyIndex >= generatedSequence.Length)
                 {
                     SucceedMinigame();
                 }
@@ -261,6 +319,13 @@ public class InteractionMission : MissionBase
         minigameStarted = false;
         minigameProgress = 0f;
         currentKeyIndex = 0;
+
+        // Re-enable player controls
+        if (playerController != null)
+        {
+            playerController.SetControlsEnabled(true);
+            Debug.Log("Player controls re-enabled after minigame failure");
+        }
 
         // Hide minigame UI
         if (UIManager.Instance != null)

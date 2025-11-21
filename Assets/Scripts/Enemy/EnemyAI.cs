@@ -22,6 +22,7 @@ public class EnemyAI : MonoBehaviour
     private NavMeshAgent agent;
     private EnemyStats stats;
     private Transform player;
+    private PlayerController playerController;
 
     // States
     private IEnemyState currentState;
@@ -36,7 +37,7 @@ public class EnemyAI : MonoBehaviour
         stats = GetComponent<EnemyStats>();
 
         // Find player
-        PlayerController playerController = FindAnyObjectByType<PlayerController>();
+        playerController = FindAnyObjectByType<PlayerController>();
         if (playerController != null)
         {
             player = playerController.transform;
@@ -128,6 +129,10 @@ public class EnemyAI : MonoBehaviour
     public float GetDistanceToPlayer()
     {
         if (player == null)
+            return float.MaxValue;
+
+        // Cannot detect player when in vehicle
+        if (playerController != null && playerController.IsInVehicle())
             return float.MaxValue;
 
         return Vector3.Distance(transform.position, player.position);
