@@ -30,6 +30,11 @@ public class MapGenerator : MonoBehaviour
     [SerializeField] private List<GameObject> missionZonePrefabs = new List<GameObject>();
     [SerializeField] private int missionZoneSpacing = 20; // Minimum distance between zones
 
+    [Header("Farming Zones")]
+    [SerializeField] private List<GameObject> farmingZonePrefabs = new List<GameObject>();
+    [SerializeField] private int farmingZoneCount = 5; // Number of farming zones to spawn
+    [SerializeField] private int farmingZoneSpacing = 15; // Minimum distance between zones
+
     [Header("Optimization")]
     [SerializeField] private bool optimizeMesh = true;
     [SerializeField] private float waterWallHeight = 5f;
@@ -45,6 +50,7 @@ public class MapGenerator : MonoBehaviour
     private int[,] mapData;
     private List<Vector2Int> landTiles = new List<Vector2Int>();
     private List<MissionZoneData> placedMissionZones = new List<MissionZoneData>();
+    private List<FarmingZoneData> placedFarmingZones = new List<FarmingZoneData>();
 
     public enum TileType
     {
@@ -57,6 +63,13 @@ public class MapGenerator : MonoBehaviour
         public Vector2Int position;
         public Vector2Int size;
         public GameObject instance;
+    }
+
+    private class FarmingZoneData
+    {
+        public Vector2Int position;
+        public Vector2Int size;
+        public GameObject prefab;
     }
 
     void Start()
@@ -82,6 +95,9 @@ public class MapGenerator : MonoBehaviour
         // Place mission zones and carve out land for them
         PlaceMissionZones();
 
+        // Place farming zones and carve out land for them
+        PlaceFarmingZones();
+
         // Spawn tiles
         SpawnTiles();
 
@@ -97,6 +113,7 @@ public class MapGenerator : MonoBehaviour
         if (enableDebugLogs) Debug.Log($"Map generated with seed: {seed}");
         if (enableDebugLogs) Debug.Log($"Total land tiles: {landTiles.Count}");
         if (enableDebugLogs) Debug.Log($"Mission zones placed: {placedMissionZones.Count}");
+        if (enableDebugLogs) Debug.Log($"Farming zones placed: {placedFarmingZones.Count}");
 
         // Notify all listeners that map generation is complete
         OnMapGenerationComplete?.Invoke();
@@ -179,6 +196,128 @@ public class MapGenerator : MonoBehaviour
             else
             {
                 Debug.LogWarning($"Could not find valid position for mission zone of size {zoneSize}");
+            }
+        }
+    }
+
+    private void PlaceFarmingZones()
+    {
+        if (farmingZonePrefabs == null || farmingZonePrefabs.Count == 0)
+        {
+            if (enableDebugLogs) Debug.Log("No farming zone prefabs assigned, skipping farming zones");
+            return;
+        }
+
+        if (farmingZoneCount <= 0)
+        {
+            if (enableDebugLogs) Debug.Log("Farming zone count is 0, skipping farming zones");
+            return;
+        }
+
+        placedFarmingZones.Clear();
+
+        for (int i = 0; i < farmingZoneCount; i++)
+        {
+            // Randomly select a prefab from the list
+            GameObject zonePrefab = farmingZonePrefabs[UnityEngine.Random.Range(0, farmingZonePrefabs.Count)];
+            if (zonePrefab == null) continue;
+
+            // Get farming zone size from MissionZoneInfo component (reusing same component)
+            MissionZoneInfo zoneInfo = zonePrefab.GetComponent<MissionZoneInfo>();
+            Vector2Int zoneSize = zoneInfo != null ? zoneInfo.size : new Vector2Int(10, 10);
+
+            // Find valid position
+            Vector2Int position = FindFarmingZonePosition(zoneSize);
+
+            if (position != Vector2Int.zero)
+            {
+                // Carve out land for this farming zone
+                CarveLandForZone(position, zoneSize);
+
+                // Store data (will instantiate after tiles are spawned)
+                placedFarmingZones.Add(new FarmingZoneData
+                {
+                    position = position,
+                    size = zoneSize,
+                    prefab = zonePrefab
+                });
+
+                if (enableDebugLogs) Debug.Log($"Farming zone {i + 1} placement reserved at {position} with size {zoneSize}");
+            }
+            else
+            {
+                Debug.LogWarning($"Could not find valid position for farming zone {i + 1} of size {zoneSize}");
+            }
+        }
+
+        if (enableDebugLogs) Debug.Log($"Placed {placedFarmingZones.Count} farming zones");
+    }
+
+    private Vector2Int FindFarmingZonePosition(Vector2Int size)
+    {
+        int maxAttempts = 100;
+
+        for (int i = 0; i < maxAttempts; i++)
+        {
+            int x = UnityEngine.Random.Range(size.x / 2, mapWidth - size.x / 2);
+            int y = UnityEngine.Random.Range(size.y / 2, mapHeight - size.y / 2);
+            Vector2Int candidate = new Vector2Int(x, y);
+
+            // Check if zone area is on land
+            if (!IsZoneAreaOnLand(candidate, size))
+            {
+                continue; // Skip if zone would be on water or isolated
+            }
+
+            // Check if position is valid (not too close to mission zones or other farming zones)
+            bool tooClose = false;
+
+            // Check distance to mission zones
+            foreach (var zone in placedMissionZones)
+            {
+                float distance = Vector2Int.Distance(candidate, zone.position);
+                if (distance < farmingZoneSpacing)
+                {
+                    tooClose = true;
+                    break;
+                }
+            }
+
+            if (tooClose) continue;
+
+            // Check distance to other farming zones
+            foreach (var zone in placedFarmingZones)
+            {
+                float distance = Vector2Int.Distance(candidate, zone.position);
+                if (distance < farmingZoneSpacing)
+                {
+                    tooClose = true;
+                    break;
+                }
+            }
+
+            if (!tooClose)
+            {
+                return candidate;
+            }
+        }
+
+        return Vector2Int.zero;
+    }
+
+    private void CarveLandForZone(Vector2Int center, Vector2Int size)
+    {
+        int halfWidth = size.x / 2;
+        int halfHeight = size.y / 2;
+
+        for (int x = center.x - halfWidth; x <= center.x + halfWidth; x++)
+        {
+            for (int y = center.y - halfHeight; y <= center.y + halfHeight; y++)
+            {
+                if (x >= 0 && x < mapWidth && y >= 0 && y < mapHeight)
+                {
+                    mapData[x, y] = (int)TileType.Land;
+                }
             }
         }
     }
@@ -344,6 +483,9 @@ public class MapGenerator : MonoBehaviour
 
         // Instantiate mission zone prefabs after tiles
         SpawnMissionZonePrefabs();
+
+        // Instantiate farming zone prefabs after tiles
+        SpawnFarmingZonePrefabs();
     }
 
     private void SpawnMissionZonePrefabs()
@@ -364,6 +506,26 @@ public class MapGenerator : MonoBehaviour
         }
 
         if (enableDebugLogs) Debug.Log($"Spawned {placedMissionZones.Count} mission zones");
+    }
+
+    private void SpawnFarmingZonePrefabs()
+    {
+        foreach (var zoneData in placedFarmingZones)
+        {
+            Vector3 worldPos = new Vector3(zoneData.position.x * tileSize, 0, zoneData.position.y * tileSize);
+            GameObject zone = Instantiate(zoneData.prefab, worldPos, Quaternion.identity);
+            zone.name = zoneData.prefab.name + "_Farming_Instance";
+
+            // Bake NavMesh for this zone if it has NavMeshSurface
+            NavMeshSurface surface = zone.GetComponent<NavMeshSurface>();
+            if (surface != null)
+            {
+                surface.BuildNavMesh();
+                if (enableDebugLogs) Debug.Log($"NavMesh baked for {zone.name}");
+            }
+        }
+
+        if (enableDebugLogs) Debug.Log($"Spawned {placedFarmingZones.Count} farming zones");
     }
 
     private void OptimizeMap()
