@@ -17,6 +17,8 @@ public class Item : MonoBehaviour, IInteractable
 
     public void Interact(PlayerController player)
     {
+        Debug.Log($"[Item] Interact called for {itemType}");
+
         // Pick up item
         PlayerInventory inventory = player.GetComponent<PlayerInventory>();
 
@@ -27,6 +29,10 @@ public class Item : MonoBehaviour, IInteractable
 
             // Destroy item
             Destroy(gameObject);
+        }
+        else
+        {
+            Debug.LogError($"[Item] PlayerInventory not found on {player.name}! Cannot pick up item.");
         }
     }
 

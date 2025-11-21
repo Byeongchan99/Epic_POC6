@@ -1,7 +1,7 @@
 using UnityEngine;
 
 [RequireComponent(typeof(CharacterController))]
-public class PlayerController : MonoBehaviour
+public class PlayerController : MonoBehaviour, IDamageable
 {
     [Header("Movement")]
     [SerializeField] private float baseSpeed = 5f;
@@ -329,5 +329,19 @@ public class PlayerController : MonoBehaviour
     public bool AreControlsEnabled()
     {
         return controlsEnabled;
+    }
+
+    // IDamageable implementation
+    public void TakeDamage(float damage)
+    {
+        if (stats != null)
+        {
+            stats.TakeDamage(damage);
+            if (enableDebugLogs) Debug.Log($"[PlayerController] Took {damage} damage from projectile");
+        }
+        else
+        {
+            Debug.LogWarning("[PlayerController] PlayerStats not found, cannot take damage!");
+        }
     }
 }

@@ -138,6 +138,7 @@ public class Vehicle : MonoBehaviour, IDamageable, IInteractable
             ConsumeFuel();
             CheckFuelForInput();
             HandleVehicleShooting();
+            HandleBrake();
             HandleExit();
             HandleDebugKeys();
         }
@@ -301,6 +302,29 @@ public class Vehicle : MonoBehaviour, IDamageable, IInteractable
         }
 
         return transform.forward;
+    }
+
+    private void HandleBrake()
+    {
+        if (arcadeVehicleController == null || inputManager == null)
+            return;
+
+        // Check if Space bar is pressed for braking
+        if (Input.GetKey(KeyCode.Space))
+        {
+            // Apply brake by providing brake input
+            // ProvideInputs parameters: (throttle, steering, brake)
+            // Get current steering to maintain it during braking
+            float currentSteering = Input.GetAxis("Horizontal");
+
+            // Apply full brake (1.0) while maintaining steering
+            arcadeVehicleController.ProvideInputs(0, currentSteering, 1.0f);
+
+            if (enableDebugLogs && Time.frameCount % 30 == 0) // Log every 30 frames to avoid spam
+            {
+                Debug.Log("Vehicle brake applied (Space bar)");
+            }
+        }
     }
 
     private void HandleExit()

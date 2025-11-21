@@ -15,12 +15,19 @@ public class DeliveryMission : MissionBase
     [SerializeField] private GameObject pickupMarkerPrefab; // Minimap marker for pickup point (A)
     [SerializeField] private GameObject deliveryMarkerPrefab; // Minimap marker for delivery point (B)
 
+    [Header("Timer")]
+    [SerializeField] private float deliveryTimeLimit = 60f; // Time limit in seconds (default: 60 seconds)
+
     private bool hasPickedUpItem = false;
     private Transform player;
     private Vector3 pickupPosition;
     private Vector3 deliveryPosition;
     private GameObject pickupVisualInstance;
     private GameObject deliveryVisualInstance;
+
+    // Timer
+    private bool isTimerRunning = false;
+    private float elapsedTime = 0f;
 
     public override void Initialize()
     {
@@ -217,6 +224,30 @@ public class DeliveryMission : MissionBase
         if (player == null)
             return;
 
+        // Update timer if running
+        if (isTimerRunning)
+        {
+            elapsedTime += Time.deltaTime;
+
+            // Calculate remaining time
+            float remainingTime = deliveryTimeLimit - elapsedTime;
+
+            // Show timer UI
+            if (UIManager.Instance != null)
+            {
+                int minutes = Mathf.FloorToInt(remainingTime / 60);
+                int seconds = Mathf.FloorToInt(remainingTime % 60);
+                UIManager.Instance.ShowNotification($"배달 시간: {minutes:00}:{seconds:00}", 0.2f);
+            }
+
+            // Check if time ran out
+            if (elapsedTime >= deliveryTimeLimit)
+            {
+                FailMission();
+                return;
+            }
+        }
+
         if (!hasPickedUpItem)
         {
             // Check if player is near pickup point
@@ -257,6 +288,11 @@ public class DeliveryMission : MissionBase
         hasPickedUpItem = true;
         Debug.Log("Item picked up! Deliver it to the delivery point.");
 
+        // Start timer
+        isTimerRunning = true;
+        elapsedTime = 0f;
+        Debug.Log($"Timer started! Deliver within {deliveryTimeLimit} seconds.");
+
         // Visual feedback: hide pickup object (delivery is already visible)
         if (pickupVisualInstance != null)
             pickupVisualInstance.SetActive(false);
@@ -268,9 +304,41 @@ public class DeliveryMission : MissionBase
     {
         if (hasPickedUpItem)
         {
-            Debug.Log("Item delivered!");
+            // Stop timer
+            isTimerRunning = false;
+
+            // Hide notification
+            if (UIManager.Instance != null)
+            {
+                UIManager.Instance.HideNotification();
+            }
+
+            Debug.Log($"Item delivered in {elapsedTime:F1} seconds!");
             CompleteMission();
         }
+    }
+
+    private void FailMission()
+    {
+        // Stop timer
+        isTimerRunning = false;
+
+        Debug.Log("Delivery mission failed! Time ran out.");
+
+        // Show failure notification
+        if (UIManager.Instance != null)
+        {
+            UIManager.Instance.HideNotification();
+            UIManager.Instance.ShowNotification("배달 실패! 시간 초과", 3f);
+        }
+
+        // Reset mission state (optional - depends on game design)
+        hasPickedUpItem = false;
+        elapsedTime = 0f;
+
+        // Show pickup visual again
+        if (pickupVisualInstance != null)
+            pickupVisualInstance.SetActive(true);
     }
 
     private void OnDrawGizmos()

@@ -8,6 +8,7 @@ public class MinimapController : MonoBehaviour
     [SerializeField] private RawImage minimapImage;
     [SerializeField] private RectTransform minimapRect;
     [SerializeField] private Image playerIcon;
+    [SerializeField] private Image vehicleIcon; // Icon for vehicle when not occupied
 
     [Header("Colors")]
     [SerializeField] private Color landColor = Color.green;
@@ -28,6 +29,9 @@ public class MinimapController : MonoBehaviour
     // Mission markers
     private List<GameObject> missionMarkers = new List<GameObject>();
     [SerializeField] private GameObject missionMarkerPrefab;
+
+    // Vehicle tracking
+    private Vehicle trackedVehicle; // The spawned vehicle to track
 
     public void Initialize(MapGenerator generator, Transform player)
     {
@@ -164,7 +168,14 @@ public class MinimapController : MonoBehaviour
             return;
         }
 
+        // Find vehicle if not tracked yet
+        if (trackedVehicle == null)
+        {
+            trackedVehicle = FindAnyObjectByType<Vehicle>();
+        }
+
         UpdatePlayerIcon();
+        UpdateVehicleIcon();
     }
 
     private void UpdatePlayerIcon()
@@ -204,6 +215,35 @@ public class MinimapController : MonoBehaviour
         else
         {
             Debug.LogWarning("MinimapController: playerIcon or its RectTransform is null!");
+        }
+    }
+
+    private void UpdateVehicleIcon()
+    {
+        // Only show vehicle icon if it exists and player is NOT in it
+        if (vehicleIcon == null)
+            return;
+
+        bool playerInVehicle = playerController != null && playerController.IsInVehicle();
+
+        if (trackedVehicle != null && !playerInVehicle)
+        {
+            // Show vehicle icon at vehicle position
+            vehicleIcon.gameObject.SetActive(true);
+
+            Vector3 vehicleWorldPos = trackedVehicle.transform.position;
+            Vector2 vehicleMinimapPos = WorldToMinimapPosition(vehicleWorldPos);
+
+            vehicleIcon.rectTransform.anchoredPosition = vehicleMinimapPos;
+
+            // Rotate vehicle icon to match rotation
+            float angle = -trackedVehicle.transform.eulerAngles.y;
+            vehicleIcon.rectTransform.rotation = Quaternion.Euler(0, 0, angle);
+        }
+        else
+        {
+            // Hide vehicle icon when player is in vehicle or vehicle doesn't exist
+            vehicleIcon.gameObject.SetActive(false);
         }
     }
 
