@@ -174,7 +174,25 @@ public class UIManager : MonoBehaviour
             RectTransform rectTransform = crosshairImage.rectTransform;
             if (rectTransform != null)
             {
-                rectTransform.position = mousePosition;
+                // Get the Canvas to convert screen coordinates properly
+                Canvas canvas = crosshairImage.canvas;
+                if (canvas != null)
+                {
+                    Vector2 localPoint;
+                    RectTransformUtility.ScreenPointToLocalPointInRectangle(
+                        canvas.transform as RectTransform,
+                        mousePosition,
+                        canvas.renderMode == RenderMode.ScreenSpaceOverlay ? null : canvas.worldCamera,
+                        out localPoint
+                    );
+
+                    rectTransform.anchoredPosition = localPoint;
+                }
+                else
+                {
+                    // Fallback: direct position assignment
+                    rectTransform.anchoredPosition = mousePosition;
+                }
             }
             else
             {
