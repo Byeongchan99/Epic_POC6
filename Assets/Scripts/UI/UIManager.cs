@@ -33,6 +33,15 @@ public class UIManager : MonoBehaviour
     [SerializeField] private Transform inventoryItemContainer;
     [SerializeField] private RawImage fullMapImage;
 
+    [Header("Minigame UI")]
+    [SerializeField] private GameObject minigamePanel;
+    [SerializeField] private TextMeshProUGUI minigameText;
+    [SerializeField] private Slider minigameProgressBar;
+
+    [Header("Interaction Prompt")]
+    [SerializeField] private GameObject interactionPrompt;
+    [SerializeField] private TextMeshProUGUI interactionPromptText;
+
     private PlayerStats playerStats;
     private PlayerController playerController;
     private Gun playerGun;
@@ -65,6 +74,14 @@ public class UIManager : MonoBehaviour
 
         if (vehicleStatsPanel != null)
             vehicleStatsPanel.SetActive(false);
+
+        // Hide minigame UI initially
+        if (minigamePanel != null)
+            minigamePanel.SetActive(false);
+
+        // Hide interaction prompt initially
+        if (interactionPrompt != null)
+            interactionPrompt.SetActive(false);
     }
 
     public void Initialize(PlayerStats stats, PlayerController controller, Gun gun)
@@ -361,6 +378,51 @@ public class UIManager : MonoBehaviour
         if (playerGun != null)
         {
             UpdateAmmoText(playerGun.GetCurrentAmmo(), playerGun.GetMaxAmmo());
+        }
+    }
+
+    // Minigame UI methods
+    public void ShowMinigamePanel(bool show)
+    {
+        if (minigamePanel != null)
+        {
+            minigamePanel.SetActive(show);
+
+            // Reset progress bar when showing
+            if (show && minigameProgressBar != null)
+            {
+                minigameProgressBar.value = 0f;
+            }
+        }
+    }
+
+    public void UpdateMinigameText(string text)
+    {
+        if (minigameText != null)
+        {
+            minigameText.text = text;
+        }
+    }
+
+    public void UpdateMinigameProgress(float progress)
+    {
+        if (minigameProgressBar != null)
+        {
+            minigameProgressBar.value = progress;
+        }
+    }
+
+    // Interaction prompt methods
+    public void ShowInteractionPrompt(bool show, string text = "")
+    {
+        if (interactionPrompt != null)
+        {
+            interactionPrompt.SetActive(show);
+        }
+
+        if (interactionPromptText != null && show)
+        {
+            interactionPromptText.text = text;
         }
     }
 }
