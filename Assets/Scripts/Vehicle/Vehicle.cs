@@ -320,6 +320,21 @@ public class Vehicle : MonoBehaviour, IDamageable, IInteractable
             // Apply full brake (1.0) while maintaining steering
             arcadeVehicleController.ProvideInputs(0, currentSteering, 1.0f);
 
+            // Additional strong deceleration by directly reducing velocity
+            if (arcadeVehicleController.rb != null)
+            {
+                // Reduce velocity by 95% per second (very strong braking)
+                float brakeFactor = 0.05f; // Keep only 5% of velocity per second
+                arcadeVehicleController.rb.linearVelocity *= Mathf.Pow(brakeFactor, Time.deltaTime);
+            }
+
+            // Also apply to carBody if it exists
+            if (arcadeVehicleController.carBody != null)
+            {
+                float brakeFactor = 0.05f;
+                arcadeVehicleController.carBody.linearVelocity *= Mathf.Pow(brakeFactor, Time.deltaTime);
+            }
+
             if (enableDebugLogs && Time.frameCount % 30 == 0) // Log every 30 frames to avoid spam
             {
                 Debug.Log("Vehicle brake applied (Space bar)");

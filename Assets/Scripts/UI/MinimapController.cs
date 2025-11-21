@@ -247,7 +247,7 @@ public class MinimapController : MonoBehaviour
         }
     }
 
-    private Vector2 WorldToMinimapPosition(Vector3 worldPos)
+    public Vector2 WorldToMinimapPosition(Vector3 worldPos)
     {
         if (mapWidth <= 0 || mapHeight <= 0)
         {
@@ -308,6 +308,52 @@ public class MinimapController : MonoBehaviour
         );
 
         return minimapPos;
+    }
+
+    // Overload for custom RectTransform (e.g., full map in inventory)
+    public Vector2 WorldToMinimapPosition(Vector3 worldPos, RectTransform customRect)
+    {
+        if (mapWidth <= 0 || mapHeight <= 0)
+        {
+            Debug.LogWarning($"MinimapController: Invalid map dimensions ({mapWidth}x{mapHeight})");
+            return Vector2.zero;
+        }
+
+        if (customRect == null)
+        {
+            Debug.LogWarning("MinimapController: customRect is null");
+            return Vector2.zero;
+        }
+
+        // Calculate world size (tiles * tileSize)
+        float worldWidth = mapWidth * tileSize;
+        float worldHeight = mapHeight * tileSize;
+
+        // Normalize world position to 0-1 range
+        float normalizedX = worldPos.x / worldWidth;
+        float normalizedY = worldPos.z / worldHeight;
+
+        // Clamp to valid range
+        normalizedX = Mathf.Clamp01(normalizedX);
+        normalizedY = Mathf.Clamp01(normalizedY);
+
+        // Get custom rect dimensions
+        float rectWidth = customRect.rect.width;
+        float rectHeight = customRect.rect.height;
+
+        if (rectWidth <= 0 || rectHeight <= 0)
+        {
+            rectWidth = customRect.sizeDelta.x;
+            rectHeight = customRect.sizeDelta.y;
+        }
+
+        // Convert normalized position to UI coordinates
+        Vector2 mapPos = new Vector2(
+            normalizedX * rectWidth - rectWidth / 2,
+            normalizedY * rectHeight - rectHeight / 2
+        );
+
+        return mapPos;
     }
 
     public GameObject AddMissionMarker(Vector3 missionWorldPos)

@@ -31,7 +31,10 @@ public class UIManager : MonoBehaviour
     [Header("Inventory Panel - Tab")]
     [SerializeField] private GameObject inventoryPanel;
     [SerializeField] private Transform inventoryItemContainer;
+    [SerializeField] private GameObject inventoryItemPrefab;
     [SerializeField] private RawImage fullMapImage;
+    [SerializeField] private Image fullMapPlayerIcon;
+    [SerializeField] private Image fullMapVehicleIcon;
 
     [Header("Minigame UI")]
     [SerializeField] private GameObject minigamePanel;
@@ -52,11 +55,15 @@ public class UIManager : MonoBehaviour
 
     private PlayerStats playerStats;
     private PlayerController playerController;
+    private PlayerInventory playerInventory;
     private Gun playerGun;
     private Gun vehicleGun;
 
     // Mission tracking
     private Dictionary<string, GameObject> missionEntries = new Dictionary<string, GameObject>();
+
+    // Inventory tracking
+    private Dictionary<Item.ItemType, InventoryItemUI> inventoryItemUIs = new Dictionary<Item.ItemType, InventoryItemUI>();
 
     // Notification state
     private float notificationTimer = 0f;
@@ -118,6 +125,16 @@ public class UIManager : MonoBehaviour
         playerStats = stats;
         playerController = controller;
         playerGun = gun;
+
+        // Get PlayerInventory
+        if (controller != null)
+        {
+            playerInventory = controller.GetComponent<PlayerInventory>();
+            if (playerInventory != null)
+            {
+                playerInventory.OnInventoryChanged += OnInventoryChanged;
+            }
+        }
 
         // Subscribe to events
         if (playerStats != null)
@@ -311,8 +328,60 @@ public class UIManager : MonoBehaviour
 
     private void UpdateInventoryDisplay()
     {
-        // This will be implemented when we create the inventory system
-        Debug.Log("Update inventory display");
+        if (playerInventory == null || inventoryItemContainer == null || inventoryItemPrefab == null)
+        {
+            Debug.LogWarning("UIManager: Cannot update inventory display - missing references");
+            return;
+        }
+
+        // Get all items from inventory
+        Dictionary<Item.ItemType, int> items = playerInventory.GetAllItems();
+
+        // Update or create UI for each item type
+        foreach (Item.ItemType itemType in System.Enum.GetValues(typeof(Item.ItemType)))
+        {
+            int quantity = items.ContainsKey(itemType) ? items[itemType] : 0;
+
+            // Only show items that exist
+            if (quantity > 0)
+            {
+                if (!inventoryItemUIs.ContainsKey(itemType))
+                {
+                    // Create new item UI
+                    GameObject itemUIObj = Instantiate(inventoryItemPrefab, inventoryItemContainer);
+                    InventoryItemUI itemUI = itemUIObj.GetComponent<InventoryItemUI>();
+
+                    if (itemUI != null)
+                    {
+                        itemUI.Initialize(itemType, quantity, playerInventory);
+                        inventoryItemUIs[itemType] = itemUI;
+                    }
+                }
+                else
+                {
+                    // Update existing item UI
+                    inventoryItemUIs[itemType].UpdateQuantity(quantity);
+                }
+            }
+            else
+            {
+                // Remove item UI if quantity is 0
+                if (inventoryItemUIs.ContainsKey(itemType))
+                {
+                    Destroy(inventoryItemUIs[itemType].gameObject);
+                    inventoryItemUIs.Remove(itemType);
+                }
+            }
+        }
+    }
+
+    private void OnInventoryChanged(Item.ItemType type, int quantity)
+    {
+        // If inventory panel is open, update display immediately
+        if (inventoryPanel != null && inventoryPanel.activeSelf)
+        {
+            UpdateInventoryDisplay();
+        }
     }
 
     private void UpdateFullMap()
@@ -321,6 +390,76 @@ public class UIManager : MonoBehaviour
         if (minimapController != null && fullMapImage != null)
         {
             fullMapImage.texture = minimapController.GetMinimapTexture();
+
+            // Update player and vehicle icons on full map
+            UpdateFullMapIcons();
+        }
+    }
+
+    private void UpdateFullMapIcons()
+    {
+        if (minimapController == null || fullMapImage == null || playerController == null)
+            return;
+
+        RectTransform fullMapRect = fullMapImage.rectTransform;
+        if (fullMapRect == null)
+            return;
+
+        // Update player icon
+        if (fullMapPlayerIcon != null)
+        {
+            Vector3 playerWorldPos;
+            float playerAngle;
+
+            if (playerController.IsInVehicle())
+            {
+                // Player is in vehicle - show player icon at vehicle position
+                Vehicle vehicle = playerController.GetCurrentVehicle();
+                if (vehicle != null)
+                {
+                    playerWorldPos = vehicle.transform.position;
+                    playerAngle = -vehicle.transform.eulerAngles.y;
+                }
+                else
+                {
+                    playerWorldPos = playerController.transform.position;
+                    playerAngle = -playerController.transform.eulerAngles.y;
+                }
+            }
+            else
+            {
+                // Player is on foot
+                playerWorldPos = playerController.transform.position;
+                playerAngle = -playerController.transform.eulerAngles.y;
+            }
+
+            Vector2 playerMapPos = minimapController.WorldToMinimapPosition(playerWorldPos, fullMapRect);
+            fullMapPlayerIcon.rectTransform.anchoredPosition = playerMapPos;
+            fullMapPlayerIcon.rectTransform.rotation = Quaternion.Euler(0, 0, playerAngle);
+            fullMapPlayerIcon.gameObject.SetActive(true);
+        }
+
+        // Update vehicle icon
+        if (fullMapVehicleIcon != null)
+        {
+            Vehicle vehicle = FindAnyObjectByType<Vehicle>();
+            bool playerInVehicle = playerController.IsInVehicle();
+
+            if (vehicle != null && !playerInVehicle)
+            {
+                // Show vehicle icon when player is NOT in it
+                Vector3 vehicleWorldPos = vehicle.transform.position;
+                Vector2 vehicleMapPos = minimapController.WorldToMinimapPosition(vehicleWorldPos, fullMapRect);
+
+                fullMapVehicleIcon.rectTransform.anchoredPosition = vehicleMapPos;
+                fullMapVehicleIcon.rectTransform.rotation = Quaternion.Euler(0, 0, -vehicle.transform.eulerAngles.y);
+                fullMapVehicleIcon.gameObject.SetActive(true);
+            }
+            else
+            {
+                // Hide vehicle icon when player is in it or vehicle doesn't exist
+                fullMapVehicleIcon.gameObject.SetActive(false);
+            }
         }
     }
 
