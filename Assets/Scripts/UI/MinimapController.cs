@@ -28,6 +28,7 @@ public class MinimapController : MonoBehaviour
 
     // Mission markers
     private List<GameObject> missionMarkers = new List<GameObject>();
+    private List<Vector3> missionMarkerPositions = new List<Vector3>();
     [SerializeField] private GameObject missionMarkerPrefab;
 
     // Vehicle tracking
@@ -375,6 +376,7 @@ public class MinimapController : MonoBehaviour
         Vector2 minimapPos = WorldToMinimapPosition(missionWorldPos);
         marker.GetComponent<RectTransform>().anchoredPosition = minimapPos;
         missionMarkers.Add(marker);
+        missionMarkerPositions.Add(missionWorldPos);
         return marker;
     }
 
@@ -384,6 +386,8 @@ public class MinimapController : MonoBehaviour
         {
             Destroy(missionMarkers[index]);
             missionMarkers.RemoveAt(index);
+            if (index < missionMarkerPositions.Count)
+                missionMarkerPositions.RemoveAt(index);
         }
     }
 
@@ -391,7 +395,10 @@ public class MinimapController : MonoBehaviour
     {
         if (marker != null && missionMarkers.Contains(marker))
         {
+            int index = missionMarkers.IndexOf(marker);
             missionMarkers.Remove(marker);
+            if (index >= 0 && index < missionMarkerPositions.Count)
+                missionMarkerPositions.RemoveAt(index);
             Destroy(marker);
         }
     }
@@ -403,6 +410,12 @@ public class MinimapController : MonoBehaviour
             Destroy(marker);
         }
         missionMarkers.Clear();
+        missionMarkerPositions.Clear();
+    }
+
+    public List<Vector3> GetMissionMarkerPositions()
+    {
+        return new List<Vector3>(missionMarkerPositions);
     }
 
     public Texture2D GetMinimapTexture()

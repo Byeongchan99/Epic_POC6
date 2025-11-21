@@ -35,6 +35,7 @@ public class UIManager : MonoBehaviour
     [SerializeField] private RawImage fullMapImage;
     [SerializeField] private Image fullMapPlayerIcon;
     [SerializeField] private Image fullMapVehicleIcon;
+    [SerializeField] private Transform fullMapMarkerContainer;
 
     [Header("Minigame UI")]
     [SerializeField] private GameObject minigamePanel;
@@ -64,6 +65,9 @@ public class UIManager : MonoBehaviour
 
     // Inventory tracking
     private Dictionary<Item.ItemType, InventoryItemUI> inventoryItemUIs = new Dictionary<Item.ItemType, InventoryItemUI>();
+
+    // FullMap mission markers
+    private List<GameObject> fullMapMissionMarkers = new List<GameObject>();
 
     // Notification state
     private float notificationTimer = 0f;
@@ -393,6 +397,9 @@ public class UIManager : MonoBehaviour
 
             // Update player and vehicle icons on full map
             UpdateFullMapIcons();
+
+            // Update mission markers on full map
+            UpdateFullMapMissionMarkers();
         }
     }
 
@@ -460,6 +467,52 @@ public class UIManager : MonoBehaviour
                 // Hide vehicle icon when player is in it or vehicle doesn't exist
                 fullMapVehicleIcon.gameObject.SetActive(false);
             }
+        }
+    }
+
+    private void UpdateFullMapMissionMarkers()
+    {
+        if (minimapController == null || fullMapImage == null || fullMapMarkerContainer == null)
+            return;
+
+        RectTransform fullMapRect = fullMapImage.rectTransform;
+        if (fullMapRect == null)
+            return;
+
+        // Get mission marker positions from minimap controller
+        List<Vector3> markerPositions = minimapController.GetMissionMarkerPositions();
+
+        // Clear old markers
+        foreach (GameObject marker in fullMapMissionMarkers)
+        {
+            if (marker != null)
+                Destroy(marker);
+        }
+        fullMapMissionMarkers.Clear();
+
+        // Create new markers at the correct positions
+        foreach (Vector3 worldPos in markerPositions)
+        {
+            // Create a simple marker (we'll use a duplicate of the minimap marker prefab)
+            GameObject marker = new GameObject("FullMapMissionMarker");
+            marker.transform.SetParent(fullMapMarkerContainer, false);
+
+            // Add Image component
+            Image markerImage = marker.AddComponent<Image>();
+
+            // Try to copy settings from minimap marker (optional - for consistent appearance)
+            // For now, use a simple yellow circle
+            markerImage.color = Color.yellow;
+
+            // Set RectTransform
+            RectTransform markerRect = marker.GetComponent<RectTransform>();
+            markerRect.sizeDelta = new Vector2(20, 20); // Marker size
+
+            // Position marker
+            Vector2 mapPos = minimapController.WorldToMinimapPosition(worldPos, fullMapRect);
+            markerRect.anchoredPosition = mapPos;
+
+            fullMapMissionMarkers.Add(marker);
         }
     }
 
