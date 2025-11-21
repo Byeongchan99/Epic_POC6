@@ -344,4 +344,13 @@ public class PlayerController : MonoBehaviour, IDamageable
             Debug.LogWarning("[PlayerController] PlayerStats not found, cannot take damage!");
         }
     }
+
+    public bool IsDead()
+    {
+        if (stats != null)
+        {
+            return stats.GetHealth() <= 0;
+        }
+        return false;
+    }
 }
