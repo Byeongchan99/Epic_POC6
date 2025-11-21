@@ -305,4 +305,20 @@ public class GameManager : MonoBehaviour
 
         if (enableDebugLogs) Debug.Log("UI initialized successfully");
     }
+
+    /// <summary>
+    /// Called when player successfully escapes
+    /// </summary>
+    public void OnPlayerEscaped()
+    {
+        Debug.Log("=== PLAYER ESCAPED! GAME WON! ===");
+
+        // Pause game
+        Time.timeScale = 0f;
+
+        // TODO: Show game result UI panel
+        // For now, just show a debug message
+        Debug.Log("All missions completed and player escaped successfully!");
+        Debug.Log("Game paused. Press Escape to quit or implement a proper game result UI.");
+    }
 }
