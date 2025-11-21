@@ -42,6 +42,11 @@ public class UIManager : MonoBehaviour
     [SerializeField] private GameObject interactionPrompt;
     [SerializeField] private TextMeshProUGUI interactionPromptText;
 
+    [Header("Notification")]
+    [SerializeField] private GameObject notificationPanel;
+    [SerializeField] private TextMeshProUGUI notificationText;
+    [SerializeField] private float notificationDuration = 5f;
+
     private PlayerStats playerStats;
     private PlayerController playerController;
     private Gun playerGun;
@@ -49,6 +54,9 @@ public class UIManager : MonoBehaviour
 
     // Mission tracking
     private Dictionary<string, GameObject> missionEntries = new Dictionary<string, GameObject>();
+
+    // Notification state
+    private float notificationTimer = 0f;
 
     private void Awake()
     {
@@ -82,6 +90,10 @@ public class UIManager : MonoBehaviour
         // Hide interaction prompt initially
         if (interactionPrompt != null)
             interactionPrompt.SetActive(false);
+
+        // Hide notification initially
+        if (notificationPanel != null)
+            notificationPanel.SetActive(false);
     }
 
     public void Initialize(PlayerStats stats, PlayerController controller, Gun gun)
@@ -120,6 +132,16 @@ public class UIManager : MonoBehaviour
         if (playerController != null && playerController.IsInVehicle())
         {
             UpdateVehicleStats();
+        }
+
+        // Update notification timer
+        if (notificationTimer > 0f)
+        {
+            notificationTimer -= Time.deltaTime;
+            if (notificationTimer <= 0f && notificationPanel != null)
+            {
+                notificationPanel.SetActive(false);
+            }
         }
     }
 
@@ -424,5 +446,31 @@ public class UIManager : MonoBehaviour
         {
             interactionPromptText.text = text;
         }
+    }
+
+    // Notification methods
+    public void ShowNotification(string message, float duration = -1f)
+    {
+        if (notificationPanel != null)
+        {
+            notificationPanel.SetActive(true);
+        }
+
+        if (notificationText != null)
+        {
+            notificationText.text = message;
+        }
+
+        // Use default duration if not specified
+        notificationTimer = duration > 0f ? duration : notificationDuration;
+    }
+
+    public void HideNotification()
+    {
+        if (notificationPanel != null)
+        {
+            notificationPanel.SetActive(false);
+        }
+        notificationTimer = 0f;
     }
 }

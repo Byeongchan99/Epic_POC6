@@ -34,6 +34,12 @@ public class EscapeZone : MonoBehaviour
             minimapMarker = minimap.AddMissionMarker(transform.position, escapeMarkerPrefab);
             Debug.Log("Escape zone marker added to minimap");
         }
+
+        // Show notification to player
+        if (UIManager.Instance != null)
+        {
+            UIManager.Instance.ShowNotification("All missions complete! Head to the escape zone to escape!", 8f);
+        }
     }
 
     private void Update()

@@ -24,9 +24,11 @@ public class ChaseState : IEnemyState
 
     public void Execute()
     {
-        if (player == null)
+        Transform target = enemy.GetTargetTransform();
+
+        if (target == null)
         {
-            // No player, return to patrol
+            // No target, return to patrol
             enemy.ChangeState(enemy.GetPatrolState());
             return;
         }
@@ -48,8 +50,8 @@ public class ChaseState : IEnemyState
             return;
         }
 
-        // Chase player
-        agent.SetDestination(player.position);
+        // Chase target (player or vehicle)
+        agent.SetDestination(target.position);
     }
 
     public void Exit()

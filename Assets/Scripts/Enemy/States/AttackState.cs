@@ -27,9 +27,11 @@ public class AttackState : IEnemyState
 
     public void Execute()
     {
-        if (player == null)
+        Transform target = enemy.GetTargetTransform();
+
+        if (target == null)
         {
-            // No player, return to patrol
+            // No target, return to patrol
             enemy.ChangeState(enemy.GetPatrolState());
             return;
         }
@@ -44,7 +46,7 @@ public class AttackState : IEnemyState
             return;
         }
 
-        // Rotate towards player
+        // Rotate towards target (player or vehicle)
         Vector3 direction = enemy.GetDirectionToPlayer();
         if (direction.magnitude > 0.1f)
         {
@@ -56,7 +58,7 @@ public class AttackState : IEnemyState
             );
         }
 
-        // Fire at player
+        // Fire at target (player or vehicle)
         if (gun != null)
         {
             gun.Fire(direction);

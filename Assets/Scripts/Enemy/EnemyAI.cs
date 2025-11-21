@@ -131,9 +131,15 @@ public class EnemyAI : MonoBehaviour
         if (player == null)
             return float.MaxValue;
 
-        // Cannot detect player when in vehicle
+        // If player is in vehicle, target the vehicle instead
         if (playerController != null && playerController.IsInVehicle())
-            return float.MaxValue;
+        {
+            Vehicle vehicle = playerController.GetCurrentVehicle();
+            if (vehicle != null)
+            {
+                return Vector3.Distance(transform.position, vehicle.transform.position);
+            }
+        }
 
         return Vector3.Distance(transform.position, player.position);
     }
@@ -143,9 +149,47 @@ public class EnemyAI : MonoBehaviour
         if (player == null)
             return transform.forward;
 
-        Vector3 direction = player.position - transform.position;
+        Vector3 targetPosition;
+
+        // If player is in vehicle, aim at the vehicle
+        if (playerController != null && playerController.IsInVehicle())
+        {
+            Vehicle vehicle = playerController.GetCurrentVehicle();
+            if (vehicle != null)
+            {
+                targetPosition = vehicle.transform.position;
+            }
+            else
+            {
+                targetPosition = player.position;
+            }
+        }
+        else
+        {
+            targetPosition = player.position;
+        }
+
+        Vector3 direction = targetPosition - transform.position;
         direction.y = 0;
         return direction.normalized;
+    }
+
+    public Transform GetTargetTransform()
+    {
+        if (player == null)
+            return null;
+
+        // If player is in vehicle, return vehicle transform
+        if (playerController != null && playerController.IsInVehicle())
+        {
+            Vehicle vehicle = playerController.GetCurrentVehicle();
+            if (vehicle != null)
+            {
+                return vehicle.transform;
+            }
+        }
+
+        return player;
     }
 
     private void OnDrawGizmosSelected()
