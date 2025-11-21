@@ -428,6 +428,14 @@ public class Vehicle : MonoBehaviour, IDamageable, IInteractable
         {
             arcadeVehicleController.rb.linearVelocity = Vector3.zero;
             arcadeVehicleController.rb.angularVelocity = Vector3.zero;
+
+            // Also stop carBody rigidbody if it exists
+            if (arcadeVehicleController.carBody != null)
+            {
+                arcadeVehicleController.carBody.linearVelocity = Vector3.zero;
+                arcadeVehicleController.carBody.angularVelocity = Vector3.zero;
+            }
+
             if (enableDebugLogs) Debug.Log("Vehicle stopped - velocity set to zero on exit");
         }
 
