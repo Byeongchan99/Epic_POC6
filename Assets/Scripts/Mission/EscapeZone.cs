@@ -55,11 +55,17 @@ public class EscapeZone : MonoBehaviour
         {
             stayTimer += Time.deltaTime;
 
-            // Show progress UI
+            // Show timer UI (both notification and interaction prompt)
             if (UIManager.Instance != null)
             {
+                int remainingSeconds = Mathf.CeilToInt(requiredStayTime - stayTimer);
                 float progress = stayTimer / requiredStayTime;
-                UIManager.Instance.ShowInteractionPrompt(true, $"Escaping... {Mathf.CeilToInt(requiredStayTime - stayTimer)}s");
+
+                // Show large notification with timer
+                UIManager.Instance.ShowNotification($"탈출 중... {remainingSeconds}초", 0.2f);
+
+                // Also show interaction prompt
+                UIManager.Instance.ShowInteractionPrompt(true, $"탈출 지역에서 대기 중 ({remainingSeconds}초)");
             }
 
             // Check if player stayed long enough
@@ -78,6 +84,7 @@ public class EscapeZone : MonoBehaviour
                 // Hide UI
                 if (UIManager.Instance != null)
                 {
+                    UIManager.Instance.HideNotification();
                     UIManager.Instance.ShowInteractionPrompt(false, "");
                 }
             }
@@ -91,6 +98,7 @@ public class EscapeZone : MonoBehaviour
         // Hide UI
         if (UIManager.Instance != null)
         {
+            UIManager.Instance.HideNotification();
             UIManager.Instance.ShowInteractionPrompt(false, "");
         }
 
