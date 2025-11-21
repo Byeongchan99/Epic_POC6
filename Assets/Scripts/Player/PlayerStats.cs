@@ -156,7 +156,7 @@ public class PlayerStats : MonoBehaviour
         OnDeath?.Invoke();
 
         // Game over logic here
-        Time.timeScale = 0;
+        //Time.timeScale = 0;
     }
 
     // Getters

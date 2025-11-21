@@ -80,6 +80,7 @@ MonoBehaviour:
         - globalObjectIdString: GlobalObjectId_V1-2-a128fe4a6840bbe49971f3e201f56269-674506920-0
         - globalObjectIdString: GlobalObjectId_V1-2-a128fe4a6840bbe49971f3e201f56269-91395858-0
         - globalObjectIdString: GlobalObjectId_V1-2-a128fe4a6840bbe49971f3e201f56269-1062926173-0
+        - globalObjectIdString: GlobalObjectId_V1-2-a128fe4a6840bbe49971f3e201f56269-390750437-0
         values:
         - colorIndex: 6
           iconNameOrGuid: cs Script Icon
@@ -319,6 +320,10 @@ MonoBehaviour:
           isColorRecursive: 0
         - colorIndex: 0
           iconNameOrGuid: Folder Icon
+          isIconRecursive: 0
+          isColorRecursive: 0
+        - colorIndex: 0
+          iconNameOrGuid: Image Icon
           isIconRecursive: 0
           isColorRecursive: 0
     - goDatas_byGlobalId:
