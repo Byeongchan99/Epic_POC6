@@ -44,6 +44,8 @@ public class Vehicle : MonoBehaviour, IDamageable, IInteractable
     private PlayerController currentDriver;
     private bool isOccupied;
     private InputManager_ArcadeVP inputManager;
+    private float enterTime; // Time when player entered vehicle
+    private const float exitCooldown = 0.3f; // Prevent immediate exit after entering
 
     private void Start()
     {
@@ -303,6 +305,10 @@ public class Vehicle : MonoBehaviour, IDamageable, IInteractable
 
     private void HandleExit()
     {
+        // Prevent immediate exit after entering (cooldown)
+        if (Time.time - enterTime < exitCooldown)
+            return;
+
         if (Input.GetKeyDown(KeyCode.F))
         {
             ExitVehicle();
@@ -336,6 +342,7 @@ public class Vehicle : MonoBehaviour, IDamageable, IInteractable
 
         currentDriver = player;
         isOccupied = true;
+        enterTime = Time.time; // Record enter time to prevent immediate exit
 
         // Set player controller for vehicle gun (for velocity tracking)
         if (vehicleGun != null)
