@@ -21,7 +21,7 @@ public class Vehicle : MonoBehaviour, IDamageable, IInteractable
 
     [Header("Arcade Vehicle Physics")]
     // Reference to Arcade Vehicle Physics component (to be added in Unity)
-    private MonoBehaviour arcadeVehicleController;
+    private ArcadeVP.ArcadeVehicleController arcadeVehicleController;
 
     private float currentHealth;
     private float currentFuel;
@@ -37,8 +37,7 @@ public class Vehicle : MonoBehaviour, IDamageable, IInteractable
             mainCamera = Camera.main;
 
         // Find Arcade Vehicle Physics component (if exists)
-        // This will be replaced with actual component from the asset
-        arcadeVehicleController = GetComponent<MonoBehaviour>();
+        arcadeVehicleController = GetComponent<ArcadeVP.ArcadeVehicleController>();
     }
 
     private void Update()
@@ -185,6 +184,21 @@ public class Vehicle : MonoBehaviour, IDamageable, IInteractable
         if (camera != null)
         {
             camera.SetTarget(currentDriver.transform);
+        }
+
+        // Stop the vehicle completely
+        if (arcadeVehicleController != null)
+        {
+            if (arcadeVehicleController.rb != null)
+            {
+                arcadeVehicleController.rb.linearVelocity = Vector3.zero;
+                arcadeVehicleController.rb.angularVelocity = Vector3.zero;
+            }
+            if (arcadeVehicleController.carBody != null)
+            {
+                arcadeVehicleController.carBody.linearVelocity = Vector3.zero;
+                arcadeVehicleController.carBody.angularVelocity = Vector3.zero;
+            }
         }
 
         currentDriver = null;
