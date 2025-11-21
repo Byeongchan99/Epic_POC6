@@ -12,6 +12,9 @@ public class EscapeZone : MonoBehaviour
     [Header("Minimap Marker")]
     [SerializeField] private GameObject escapeMarkerPrefab;
 
+    [Header("Debug")]
+    [SerializeField] private bool enableDebugLogs = true;
+
     private Transform player;
     private PlayerController playerController;
     private float stayTimer = 0f;
@@ -25,6 +28,11 @@ public class EscapeZone : MonoBehaviour
         if (playerController != null)
         {
             player = playerController.transform;
+            if (enableDebugLogs) Debug.Log($"[EscapeZone] Player found at {player.position}");
+        }
+        else
+        {
+            Debug.LogError("[EscapeZone] PlayerController not found!");
         }
 
         // Add minimap marker
@@ -32,7 +40,11 @@ public class EscapeZone : MonoBehaviour
         if (minimap != null && escapeMarkerPrefab != null)
         {
             minimapMarker = minimap.AddMissionMarker(transform.position, escapeMarkerPrefab);
-            Debug.Log("Escape zone marker added to minimap");
+            if (enableDebugLogs) Debug.Log("[EscapeZone] Escape zone marker added to minimap");
+        }
+        else if (enableDebugLogs)
+        {
+            Debug.LogWarning($"[EscapeZone] Minimap or marker prefab missing. Minimap: {minimap != null}, Prefab: {escapeMarkerPrefab != null}");
         }
 
         // Show notification to player
@@ -40,16 +52,33 @@ public class EscapeZone : MonoBehaviour
         {
             UIManager.Instance.ShowNotification("모든 임무 완료! 탈출 지역으로 이동하세요!", 8f);
         }
+
+        if (enableDebugLogs) Debug.Log($"[EscapeZone] Initialized at {transform.position}, radius: {escapeRadius}");
     }
 
     private void Update()
     {
         if (player == null)
+        {
+            if (enableDebugLogs && Time.frameCount % 60 == 0) // Log every 60 frames
+                Debug.LogWarning("[EscapeZone] Player reference is null!");
             return;
+        }
 
         // Check if player is in escape zone
         float distance = Vector3.Distance(player.position, transform.position);
+        bool wasInZone = playerInZone;
         playerInZone = distance <= escapeRadius;
+
+        // Log zone entry/exit
+        if (playerInZone && !wasInZone && enableDebugLogs)
+        {
+            Debug.Log($"[EscapeZone] Player ENTERED escape zone! Distance: {distance:F2}m");
+        }
+        else if (!playerInZone && wasInZone && enableDebugLogs)
+        {
+            Debug.Log($"[EscapeZone] Player LEFT escape zone! Distance: {distance:F2}m");
+        }
 
         if (playerInZone)
         {
@@ -66,6 +95,12 @@ public class EscapeZone : MonoBehaviour
 
                 // Also show interaction prompt
                 UIManager.Instance.ShowInteractionPrompt(true, $"탈출 지역에서 대기 중 ({remainingSeconds}초)");
+            }
+
+            // Log progress every second
+            if (enableDebugLogs && Mathf.FloorToInt(stayTimer) > Mathf.FloorToInt(stayTimer - Time.deltaTime))
+            {
+                Debug.Log($"[EscapeZone] Escape timer: {stayTimer:F1}s / {requiredStayTime}s");
             }
 
             // Check if player stayed long enough
@@ -87,13 +122,15 @@ public class EscapeZone : MonoBehaviour
                     UIManager.Instance.HideNotification();
                     UIManager.Instance.ShowInteractionPrompt(false, "");
                 }
+
+                if (enableDebugLogs) Debug.Log("[EscapeZone] Timer reset - player left zone");
             }
         }
     }
 
     private void TriggerEscape()
     {
-        Debug.Log("Player escaped!");
+        if (enableDebugLogs) Debug.Log("[EscapeZone] ESCAPE TRIGGERED!");
 
         // Hide UI
         if (UIManager.Instance != null)
@@ -116,8 +153,11 @@ public class EscapeZone : MonoBehaviour
         }
         else
         {
-            Debug.LogWarning("GameManager not found! Cannot show game result.");
+            Debug.LogWarning("[EscapeZone] GameManager not found! Cannot show game result.");
         }
+
+        // Disable this script to prevent multiple triggers
+        enabled = false;
     }
 
     private void OnDrawGizmos()
@@ -125,6 +165,17 @@ public class EscapeZone : MonoBehaviour
         // Draw escape zone
         Gizmos.color = gizmoColor;
         Gizmos.DrawWireSphere(transform.position, escapeRadius);
+
+        // Draw distance line to player (in editor)
+        if (player != null && Application.isPlaying)
+        {
+            float distance = Vector3.Distance(player.position, transform.position);
+            Gizmos.color = playerInZone ? Color.green : Color.red;
+            Gizmos.DrawLine(transform.position, player.position);
+
+            // Draw player position marker
+            Gizmos.DrawWireSphere(player.position, 0.5f);
+        }
     }
 
     private void OnDrawGizmosSelected()
