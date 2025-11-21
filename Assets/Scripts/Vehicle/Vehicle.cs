@@ -210,7 +210,27 @@ public class Vehicle : MonoBehaviour, IDamageable, IInteractable
         if (currentFuel <= 0 && inputManager.enabled)
         {
             inputManager.enabled = false;
-            if (enableDebugLogs) Debug.Log("Out of fuel! Vehicle input disabled.");
+
+            // Reset all inputs to zero to stop the vehicle
+            if (arcadeVehicleController != null)
+            {
+                arcadeVehicleController.ProvideInputs(0, 0, 0);
+
+                // Reset velocities to fully stop the vehicle
+                if (arcadeVehicleController.rb != null)
+                {
+                    arcadeVehicleController.rb.linearVelocity = Vector3.zero;
+                    arcadeVehicleController.rb.angularVelocity = Vector3.zero;
+                }
+
+                if (arcadeVehicleController.carBody != null)
+                {
+                    arcadeVehicleController.carBody.linearVelocity = Vector3.zero;
+                    arcadeVehicleController.carBody.angularVelocity = Vector3.zero;
+                }
+            }
+
+            if (enableDebugLogs) Debug.Log("Out of fuel! Vehicle stopped.");
         }
         else if (currentFuel > 0 && !inputManager.enabled)
         {
