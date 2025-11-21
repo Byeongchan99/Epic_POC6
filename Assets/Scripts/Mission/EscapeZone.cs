@@ -38,7 +38,7 @@ public class EscapeZone : MonoBehaviour
         // Show notification to player
         if (UIManager.Instance != null)
         {
-            UIManager.Instance.ShowNotification("All missions complete! Head to the escape zone to escape!", 8f);
+            UIManager.Instance.ShowNotification("모든 임무 완료! 탈출 지역으로 이동하세요!", 8f);
         }
     }
 

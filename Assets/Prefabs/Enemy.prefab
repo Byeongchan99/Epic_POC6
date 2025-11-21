@@ -195,9 +195,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: cb70d0bc177991344aec730cb9dd4780, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  detectionRange: 15
-  chaseRange: 20
-  attackRange: 10
+  detectionRange: 30
+  chaseRange: 40
+  attackRange: 20
   patrolPoints: []
   gun: {fileID: 6748858053709116758}
   firePoint: {fileID: 820501599174226660}
@@ -223,3 +223,4 @@ MonoBehaviour:
   firePoint: {fileID: 820501599174226660}
   projectilePool: {fileID: 0}
   ownerTag: Player
+  enableDebugLogs: 0

@@ -3398,7 +3398,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &1268207151
 RectTransform:
   m_ObjectHideFlags: 0
@@ -3515,6 +3515,10 @@ MonoBehaviour:
   vehicleCameraAngle: 45
   vehicleFollowRotation: 1
   enableRuntimeAdjustment: 1
+  enableMouseFollow: 1
+  maxMouseOffset: 5
+  mouseFollowSpeed: 3
+  mouseDeadZone: 0.1
 --- !u!114 &1371736361
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -5769,6 +5773,14 @@ MonoBehaviour:
   - {fileID: 3032349185609667267, guid: e18311f4da3ec184696bcb5e86be33f9, type: 3}
   - {fileID: 3089691796614765321, guid: b37113ada026a9247b2a15efbe695bff, type: 3}
   missionZoneSpacing: 20
+  farmingZonePrefabs:
+  - {fileID: 1031068627561729534, guid: 84403a62bb6ac4a4e91506d1e8ebc2c2, type: 3}
+  - {fileID: 4196540992252362662, guid: 554c9bd46e96ee4478369e69e8615186, type: 3}
+  - {fileID: 3200555293199210660, guid: b2f59ed588fbae34985543345d7eab8e, type: 3}
+  - {fileID: 7275704384928093861, guid: 86d1289df8683034997656ac11c5c435, type: 3}
+  - {fileID: 2395403497149656160, guid: 3eb6673cca26b694889b7a63f0f97827, type: 3}
+  farmingZoneCount: 10
+  farmingZoneSpacing: 15
   optimizeMesh: 1
   waterWallHeight: 5
   groundPhysicsMaterial: {fileID: 13400000, guid: ce8f2e0169709cc4da4d8131aec6cef1, type: 2}
