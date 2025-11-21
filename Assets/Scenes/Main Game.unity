@@ -3576,7 +3576,7 @@ MonoBehaviour:
   followTargetRotation: 0
   rotationSmoothSpeed: 5
   vehicleOffset: {x: 0, y: 30, z: -20}
-  vehicleCameraAngle: 45
+  vehicleCameraAngle: 37
   vehicleFollowRotation: 1
   enableRuntimeAdjustment: 1
   enableMouseFollow: 1

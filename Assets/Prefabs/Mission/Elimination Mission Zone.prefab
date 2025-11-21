@@ -49,7 +49,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 94822d5258217594c8d12f95ad94fa35, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  missionName: "\uC801 \uC18C\uD0D5"
+  missionName: "\uC801 \uC18C\uD0D5 \uC784\uBB34"
   missionDescription: "\uC774 \uC9C0\uC5ED\uC758 \uBAA8\uB4E0 \uC801\uC744 \uCC98\uCE58\uD558\uC138\uC694."
   enemies: []
   enemyMarkerPrefab: {fileID: 7739957083732825784, guid: 4e66f24ffc6b68048b8438ae7df04ea9, type: 3}
