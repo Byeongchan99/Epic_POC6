@@ -274,7 +274,7 @@ public class Vehicle : MonoBehaviour, IDamageable, IInteractable
 
     private void HandleExit()
     {
-        if (Input.GetKeyDown(KeyCode.E))
+        if (Input.GetKeyDown(KeyCode.F))
         {
             ExitVehicle();
         }
@@ -424,10 +424,17 @@ public class Vehicle : MonoBehaviour, IDamageable, IInteractable
         Vector3 exitPosition = exitPoint != null ? exitPoint.position : transform.position + transform.right * 2f;
 
         // Stop the vehicle completely when player exits
-        if (arcadeVehicleController != null && arcadeVehicleController.rb != null)
+        if (arcadeVehicleController != null)
         {
-            arcadeVehicleController.rb.linearVelocity = Vector3.zero;
-            arcadeVehicleController.rb.angularVelocity = Vector3.zero;
+            // Reset all inputs to zero to stop the vehicle
+            arcadeVehicleController.ProvideInputs(0, 0, 0);
+
+            // Reset velocities
+            if (arcadeVehicleController.rb != null)
+            {
+                arcadeVehicleController.rb.linearVelocity = Vector3.zero;
+                arcadeVehicleController.rb.angularVelocity = Vector3.zero;
+            }
 
             // Also stop carBody rigidbody if it exists
             if (arcadeVehicleController.carBody != null)
@@ -436,7 +443,7 @@ public class Vehicle : MonoBehaviour, IDamageable, IInteractable
                 arcadeVehicleController.carBody.angularVelocity = Vector3.zero;
             }
 
-            if (enableDebugLogs) Debug.Log("Vehicle stopped - velocity set to zero on exit");
+            if (enableDebugLogs) Debug.Log("Vehicle stopped - inputs and velocity set to zero on exit");
         }
 
         // Disable InputManager_ArcadeVP (original asset's input system)
@@ -558,7 +565,7 @@ public class Vehicle : MonoBehaviour, IDamageable, IInteractable
 
     public string GetInteractionPrompt()
     {
-        return "Press F to enter vehicle";
+        return "Press F to enter/exit vehicle";
     }
 
     // Repair and refuel
