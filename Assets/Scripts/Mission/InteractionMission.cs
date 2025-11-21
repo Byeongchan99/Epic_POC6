@@ -7,6 +7,9 @@ public class InteractionMission : MissionBase
     [SerializeField] private float interactionRange = 2f;
     [SerializeField] private MinigameType minigameType = MinigameType.MouseHold;
 
+    [Header("Minimap Marker")]
+    [SerializeField] private GameObject interactionMarkerPrefab; // Optional: Custom marker for interaction point on minimap
+
     [Header("Minigame Settings")]
     [SerializeField] private float requiredHoldTime = 3f; // For mouse hold minigame
     [SerializeField] private KeyCode[] keySequence = { KeyCode.W, KeyCode.A, KeyCode.S, KeyCode.D }; // For key sequence minigame
@@ -17,6 +20,9 @@ public class InteractionMission : MissionBase
 
     // Key sequence minigame state
     private int currentKeyIndex = 0;
+
+    // Minimap marker reference
+    private GameObject minimapMarker;
 
     public enum MinigameType
     {
@@ -33,6 +39,17 @@ public class InteractionMission : MissionBase
         if (playerController != null)
         {
             player = playerController.transform;
+        }
+
+        // Add minimap marker for interaction point
+        if (interactionPoint != null)
+        {
+            MinimapController minimap = FindAnyObjectByType<MinimapController>();
+            if (minimap != null && interactionMarkerPrefab != null)
+            {
+                minimapMarker = minimap.AddMissionMarker(interactionPoint.position, interactionMarkerPrefab);
+                Debug.Log("Interaction mission marker added to minimap");
+            }
         }
 
         Debug.Log("Interaction mission initialized");
@@ -169,6 +186,18 @@ public class InteractionMission : MissionBase
         if (UIManager.Instance != null)
         {
             UIManager.Instance.ShowMinigamePanel(false);
+        }
+
+        // Remove minimap marker
+        if (minimapMarker != null)
+        {
+            MinimapController minimap = FindAnyObjectByType<MinimapController>();
+            if (minimap != null)
+            {
+                minimap.RemoveMissionMarker(minimapMarker);
+                minimapMarker = null;
+                Debug.Log("Interaction mission marker removed from minimap");
+            }
         }
 
         CompleteMission();

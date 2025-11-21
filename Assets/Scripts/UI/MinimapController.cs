@@ -270,25 +270,26 @@ public class MinimapController : MonoBehaviour
         return minimapPos;
     }
 
-    public void AddMissionMarker(Vector3 missionWorldPos)
+    public GameObject AddMissionMarker(Vector3 missionWorldPos)
     {
-        AddMissionMarker(missionWorldPos, missionMarkerPrefab);
+        return AddMissionMarker(missionWorldPos, missionMarkerPrefab);
     }
 
-    public void AddMissionMarker(Vector3 missionWorldPos, GameObject customMarkerPrefab)
+    public GameObject AddMissionMarker(Vector3 missionWorldPos, GameObject customMarkerPrefab)
     {
         GameObject prefabToUse = customMarkerPrefab != null ? customMarkerPrefab : missionMarkerPrefab;
 
         if (prefabToUse == null)
         {
             Debug.LogWarning("Mission marker prefab not assigned");
-            return;
+            return null;
         }
 
         GameObject marker = Instantiate(prefabToUse, minimapRect);
         Vector2 minimapPos = WorldToMinimapPosition(missionWorldPos);
         marker.GetComponent<RectTransform>().anchoredPosition = minimapPos;
         missionMarkers.Add(marker);
+        return marker;
     }
 
     public void RemoveMissionMarker(int index)
@@ -297,6 +298,15 @@ public class MinimapController : MonoBehaviour
         {
             Destroy(missionMarkers[index]);
             missionMarkers.RemoveAt(index);
+        }
+    }
+
+    public void RemoveMissionMarker(GameObject marker)
+    {
+        if (marker != null && missionMarkers.Contains(marker))
+        {
+            missionMarkers.Remove(marker);
+            Destroy(marker);
         }
     }
 
