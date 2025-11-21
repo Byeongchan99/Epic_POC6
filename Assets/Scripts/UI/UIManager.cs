@@ -101,10 +101,15 @@ public class UIManager : MonoBehaviour
         // Setup crosshair
         if (crosshairImage != null)
         {
+            Debug.Log("UIManager: Crosshair image found, setting up cursor");
             // Hide hardware cursor
             Cursor.visible = false;
             // Lock cursor to game window
             Cursor.lockState = CursorLockMode.Confined;
+        }
+        else
+        {
+            Debug.LogWarning("UIManager: Crosshair image is NULL! Please assign it in the Inspector.");
         }
     }
 
@@ -162,7 +167,7 @@ public class UIManager : MonoBehaviour
 
     private void UpdateCrosshair()
     {
-        if (crosshairImage != null)
+        if (crosshairImage != null && crosshairImage.gameObject.activeInHierarchy)
         {
             // Update crosshair position to follow mouse
             Vector2 mousePosition = Input.mousePosition;
@@ -170,6 +175,10 @@ public class UIManager : MonoBehaviour
             if (rectTransform != null)
             {
                 rectTransform.position = mousePosition;
+            }
+            else
+            {
+                Debug.LogWarning("UIManager: Crosshair RectTransform is null!");
             }
         }
     }
