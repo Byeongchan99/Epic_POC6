@@ -243,7 +243,7 @@ public class UIManager : MonoBehaviour
 
     private void UpdateAmmoText(int current, int max)
     {
-        string ammoString = $"{current}/{max}";
+        string ammoString = $"남은 틴약: {current}/{max}";
 
         // Update player panel ammo text
         if (ammoText != null)

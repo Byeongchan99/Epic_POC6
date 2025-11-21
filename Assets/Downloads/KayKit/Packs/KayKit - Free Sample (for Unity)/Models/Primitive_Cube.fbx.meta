@@ -1,5 +1,12 @@
 fileFormatVersion: 2
 guid: 3ba7be119ce61d049b5c2c042bf3be19
+AssetOrigin:
+  serializedVersion: 1
+  productId: 290681
+  packageName: KayKit - Free Sample Pack (for Unity)
+  packageVersion: 1.1.1
+  assetPath: Assets/KayKit/Packs/KayKit - Free Sample (for Unity)/Models/Primitive_Cube.fbx
+  uploadId: 814916
 ModelImporter:
   serializedVersion: 22200
   internalIDToNameTable: []
@@ -16,8 +23,6 @@ ModelImporter:
     optimizeGameObjects: 0
     removeConstantScaleCurves: 0
     motionNodeName: 
-    rigImportErrors: 
-    rigImportWarnings: 
     animationImportErrors: 
     animationImportWarnings: 
     animationRetargetingWarnings: 
@@ -32,7 +37,7 @@ ModelImporter:
     extraExposedTransformPaths: []
     extraUserProperties: []
     clipAnimations: []
-    isReadable: 0
+    isReadable: 1
   meshes:
     lODScreenPercentages: []
     globalScale: 1
@@ -107,10 +112,3 @@ ModelImporter:
   userData: 
   assetBundleName: 
   assetBundleVariant: 
-AssetOrigin:
-  serializedVersion: 1
-  productId: 290681
-  packageName: KayKit - Free Sample Pack (for Unity)
-  packageVersion: 1.1.1
-  assetPath: Assets/KayKit/Packs/KayKit - Free Sample (for Unity)/Models/Primitive_Cube.fbx
-  uploadId: 814916
