@@ -192,11 +192,11 @@ public class Gun : MonoBehaviour
                 // Initialize with vehicle velocity if in vehicle
                 if (vehicleVelocity != Vector3.zero)
                 {
-                    projectile.Initialize(damage, bulletSpeed, lifetime, targetDirection, projectilePool, ownerTag, vehicleVelocity, enableDebugLogs);
+                    projectile.Initialize(damage, bulletSpeed, lifetime, targetDirection, projectilePool, ownerTag, obstacleLayer, vehicleVelocity, enableDebugLogs);
                 }
                 else
                 {
-                    projectile.Initialize(damage, bulletSpeed, lifetime, targetDirection, projectilePool, ownerTag, enableDebugLogs);
+                    projectile.Initialize(damage, bulletSpeed, lifetime, targetDirection, projectilePool, ownerTag, obstacleLayer, enableDebugLogs);
                 }
 
                 // Consume ammo
