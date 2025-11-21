@@ -16,6 +16,10 @@ public class Gun : MonoBehaviour
     [SerializeField] private ProjectilePool projectilePool;
     [SerializeField] private string ownerTag = "Player"; // "Player" or "Enemy"
 
+    [Header("Collision Settings")]
+    [Tooltip("Layers that projectiles should collide with (walls, terrain, etc.)")]
+    [SerializeField] private LayerMask obstacleLayer = -1; // Default: all layers
+
     [Header("Debug")]
     [SerializeField] private bool enableDebugLogs = false;
 
@@ -124,11 +128,11 @@ public class Gun : MonoBehaviour
                 // Initialize with vehicle velocity if in vehicle
                 if (vehicleVelocity != Vector3.zero)
                 {
-                    projectile.Initialize(damage, bulletSpeed, lifetime, direction, projectilePool, ownerTag, vehicleVelocity, enableDebugLogs);
+                    projectile.Initialize(damage, bulletSpeed, lifetime, direction, projectilePool, ownerTag, obstacleLayer, vehicleVelocity, enableDebugLogs);
                 }
                 else
                 {
-                    projectile.Initialize(damage, bulletSpeed, lifetime, direction, projectilePool, ownerTag, enableDebugLogs);
+                    projectile.Initialize(damage, bulletSpeed, lifetime, direction, projectilePool, ownerTag, obstacleLayer, enableDebugLogs);
                 }
 
                 // Consume ammo

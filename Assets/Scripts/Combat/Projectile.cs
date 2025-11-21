@@ -10,9 +10,10 @@ public class Projectile : MonoBehaviour
     private Vector3 velocity; // Combined velocity (direction * speed + initial velocity)
     private ProjectilePool pool;
     private string ownerTag; // "Player" or "Enemy"
+    private LayerMask obstacleLayer; // Layer for walls/obstacles
     private bool enableDebugLogs = false; // Set by Gun when initializing
 
-    public void Initialize(float damage, float speed, float lifetime, Vector3 direction, ProjectilePool pool, string ownerTag, bool debugLogs = false)
+    public void Initialize(float damage, float speed, float lifetime, Vector3 direction, ProjectilePool pool, string ownerTag, LayerMask obstacleLayer, bool debugLogs = false)
     {
         this.damage = damage;
         this.speed = speed;
@@ -21,6 +22,7 @@ public class Projectile : MonoBehaviour
         this.velocity = this.direction * speed;
         this.pool = pool;
         this.ownerTag = ownerTag;
+        this.obstacleLayer = obstacleLayer;
         this.timer = 0f;
         this.enableDebugLogs = debugLogs;
 
@@ -28,7 +30,7 @@ public class Projectile : MonoBehaviour
     }
 
     // Overload with initial velocity (e.g., from vehicle movement)
-    public void Initialize(float damage, float speed, float lifetime, Vector3 direction, ProjectilePool pool, string ownerTag, Vector3 initialVelocity, bool debugLogs = false)
+    public void Initialize(float damage, float speed, float lifetime, Vector3 direction, ProjectilePool pool, string ownerTag, LayerMask obstacleLayer, Vector3 initialVelocity, bool debugLogs = false)
     {
         this.damage = damage;
         this.speed = speed;
@@ -37,6 +39,7 @@ public class Projectile : MonoBehaviour
         this.velocity = this.direction * speed + initialVelocity; // Add vehicle velocity to projectile velocity
         this.pool = pool;
         this.ownerTag = ownerTag;
+        this.obstacleLayer = obstacleLayer;
         this.timer = 0f;
         this.enableDebugLogs = debugLogs;
 
@@ -78,9 +81,13 @@ public class Projectile : MonoBehaviour
             return;
         }
 
-        // Hit terrain/wall
-        if (other.CompareTag("Terrain") || other.CompareTag("Wall"))
+        // Hit obstacle (check layer)
+        if (((1 << other.gameObject.layer) & obstacleLayer) != 0)
         {
+            if (enableDebugLogs)
+            {
+                Debug.Log($"Projectile hit obstacle: {other.gameObject.name} (Layer: {LayerMask.LayerToName(other.gameObject.layer)})");
+            }
             ReturnToPool();
         }
     }

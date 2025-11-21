@@ -46,6 +46,9 @@ public class PlayerStats : MonoBehaviour
 
     private void Update()
     {
+        // Debug keys
+        HandleDebugKeys();
+
         // Stamina regeneration
         if (currentStamina < maxStamina)
         {
@@ -73,6 +76,25 @@ public class PlayerStats : MonoBehaviour
         if (currentThirst <= 0)
         {
             TakeDamage(thirstDamageRate * Time.deltaTime);
+        }
+    }
+
+    private void HandleDebugKeys()
+    {
+        // F3: Restore all player stats (health, stamina, hunger, thirst)
+        if (Input.GetKeyDown(KeyCode.F3))
+        {
+            currentHealth = maxHealth;
+            currentStamina = maxStamina;
+            currentHunger = maxHunger;
+            currentThirst = maxThirst;
+
+            OnHealthChanged?.Invoke(currentHealth, maxHealth);
+            OnStaminaChanged?.Invoke(currentStamina, maxStamina);
+            OnHungerChanged?.Invoke(currentHunger, maxHunger);
+            OnThirstChanged?.Invoke(currentThirst, maxThirst);
+
+            Debug.Log("[Debug] All player stats restored! (F3)");
         }
     }
 

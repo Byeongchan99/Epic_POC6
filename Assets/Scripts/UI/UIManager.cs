@@ -148,8 +148,8 @@ public class UIManager : MonoBehaviour
             ToggleInventory();
         }
 
-        // Update vehicle stats if in vehicle
-        if (playerController != null && playerController.IsInVehicle())
+        // Always update vehicle stats to handle transitions
+        if (playerController != null)
         {
             UpdateVehicleStats();
         }
