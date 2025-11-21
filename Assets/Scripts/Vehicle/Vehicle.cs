@@ -1,5 +1,4 @@
 using UnityEngine;
-using ArcadeVP;
 
 public class Vehicle : MonoBehaviour, IDamageable, IInteractable
 {
@@ -21,29 +20,13 @@ public class Vehicle : MonoBehaviour, IDamageable, IInteractable
     [SerializeField] private Camera mainCamera;
 
     [Header("Arcade Vehicle Physics")]
-    [Tooltip("Assign your Arcade Vehicle Physics controller component here (optional)")]
-    [SerializeField] private ArcadeVehicleController arcadeVehicleController;
-
-    [Header("Debug")]
-    [SerializeField] private bool enableDebugLogs = false;
-
-    [Header("Debug Info (Read Only)")]
-    [SerializeField] private bool isGrounded;
-    [SerializeField] private float distanceToGround;
-    [SerializeField] private string groundObjectName;
-    [SerializeField] private int groundLayer;
-    [SerializeField] private Vector3 vehiclePosition;
-    [SerializeField] private Vector3 sphereRBPosition;
-    [SerializeField] private int drivableSurfaceMask;
-    [SerializeField] private float sphereRadius;
-    [SerializeField] private float raycastMaxDistance;
-    [SerializeField] private string groundCheckMode;
+    // Reference to Arcade Vehicle Physics component (to be added in Unity)
+    private ArcadeVP.ArcadeVehicleController arcadeVehicleController;
 
     private float currentHealth;
     private float currentFuel;
     private PlayerController currentDriver;
     private bool isOccupied;
-    private InputManager_ArcadeVP inputManager;
 
     private void Start()
     {
@@ -53,172 +36,42 @@ public class Vehicle : MonoBehaviour, IDamageable, IInteractable
         if (mainCamera == null)
             mainCamera = Camera.main;
 
-        // Auto-find Arcade Vehicle Physics components if not assigned
-        if (arcadeVehicleController == null)
-        {
-            arcadeVehicleController = GetComponent<ArcadeVehicleController>();
-
-            if (arcadeVehicleController != null)
-            {
-                if (enableDebugLogs) Debug.Log("ArcadeVehicleController found and assigned automatically");
-            }
-            else
-            {
-                Debug.LogWarning("ArcadeVehicleController not found on vehicle! Vehicle movement will not work.");
-            }
-        }
-
-        // Find InputManager_ArcadeVP (original asset's input handler)
-        inputManager = GetComponent<InputManager_ArcadeVP>();
-        if (inputManager == null)
-        {
-            Debug.LogWarning("InputManager_ArcadeVP not found! Add this component for vehicle input control.");
-        }
-        else
-        {
-            // Disable input manager until player enters vehicle
-            inputManager.enabled = false;
-            if (enableDebugLogs) Debug.Log("InputManager_ArcadeVP found and disabled until player enters");
-        }
-
-        // Keep ArcadeVehicleController always enabled for continuous physics
-        if (arcadeVehicleController != null)
-        {
-            arcadeVehicleController.enabled = true;
-
-            // Initialize vehicle with zero velocity to prevent spawning in motion
-            if (arcadeVehicleController.rb != null)
-            {
-                arcadeVehicleController.rb.linearVelocity = Vector3.zero;
-                arcadeVehicleController.rb.angularVelocity = Vector3.zero;
-
-                // Also reset carBody rigidbody if it exists
-                if (arcadeVehicleController.carBody != null)
-                {
-                    arcadeVehicleController.carBody.linearVelocity = Vector3.zero;
-                    arcadeVehicleController.carBody.angularVelocity = Vector3.zero;
-                }
-
-                if (enableDebugLogs) Debug.Log("Vehicle Rigidbody initialized with zero velocity");
-            }
-        }
-
-        // Schedule a second initialization after physics has settled
-        Invoke(nameof(ResetVelocityDelayed), 0.1f);
-    }
-
-    private void ResetVelocityDelayed()
-    {
-        // Double-check velocity after a short delay to ensure it stays at zero
-        if (arcadeVehicleController != null && arcadeVehicleController.rb != null && !isOccupied)
-        {
-            arcadeVehicleController.rb.linearVelocity = Vector3.zero;
-            arcadeVehicleController.rb.angularVelocity = Vector3.zero;
-
-            if (arcadeVehicleController.carBody != null)
-            {
-                arcadeVehicleController.carBody.linearVelocity = Vector3.zero;
-                arcadeVehicleController.carBody.angularVelocity = Vector3.zero;
-            }
-
-            if (enableDebugLogs) Debug.Log("Vehicle velocity reset (delayed check)");
-        }
+        // Find Arcade Vehicle Physics component (if exists)
+        arcadeVehicleController = GetComponent<ArcadeVP.ArcadeVehicleController>();
     }
 
     private void Update()
     {
-        // Update debug info every frame for Inspector visibility
-        UpdateDebugInfo();
-
         if (isOccupied)
         {
-            // Handle game-specific logic (stats only, not input!)
+            HandleVehicleControls();
             ConsumeFuel();
-            CheckFuelForInput();
             HandleVehicleShooting();
             HandleExit();
             HandleDebugKeys();
         }
     }
 
-    private void UpdateDebugInfo()
+    private void HandleVehicleControls()
     {
-        if (arcadeVehicleController == null)
+        // Fuel check
+        if (currentFuel <= 0)
+        {
+            // Can't move without fuel
+            Debug.Log("Out of fuel!");
             return;
-
-        // Get ArcadeVehicleController settings
-        drivableSurfaceMask = arcadeVehicleController.drivableSurface.value;
-        groundCheckMode = arcadeVehicleController.GroundCheck.ToString();
-
-        if (arcadeVehicleController.rb != null)
-        {
-            SphereCollider sphereCol = arcadeVehicleController.rb.GetComponent<SphereCollider>();
-            if (sphereCol != null)
-            {
-                sphereRadius = sphereCol.radius;
-                raycastMaxDistance = sphereCol.radius + 0.2f;
-            }
         }
 
-        // Check if grounded using ArcadeVehicleController's method
-        isGrounded = arcadeVehicleController.grounded();
+        // Note: Actual vehicle controls will be handled by Arcade Vehicle Physics asset
+        // This is just for reference
 
-        // Get vehicle positions
-        vehiclePosition = transform.position;
-        if (arcadeVehicleController.rb != null)
+        // Check for boost
+        if (Input.GetKey(KeyCode.LeftShift) && currentFuel > 0)
         {
-            sphereRBPosition = arcadeVehicleController.rb.position;
-        }
-
-        // Perform manual raycast to get detailed info (without LayerMask to see everything)
-        if (arcadeVehicleController.rb != null)
-        {
-            RaycastHit hit;
-            Vector3 rayOrigin = arcadeVehicleController.rb.position;
-            float maxDistance = 10f; // Check further down to see what's below
-
-            if (Physics.Raycast(rayOrigin, Vector3.down, out hit, maxDistance))
-            {
-                distanceToGround = hit.distance;
-                groundObjectName = hit.collider.gameObject.name;
-                groundLayer = hit.collider.gameObject.layer;
-
-                // Check if this layer is included in drivableSurface mask
-                int layerBit = 1 << hit.collider.gameObject.layer;
-                bool isInMask = (drivableSurfaceMask & layerBit) != 0;
-
-                if (!isInMask)
-                {
-                    groundObjectName += " (NOT IN DRIVABLE MASK!)";
-                }
-            }
-            else
-            {
-                distanceToGround = -1f;
-                groundObjectName = "No ground detected within 10m";
-                groundLayer = -1;
-            }
+            // Boost logic (Arcade Vehicle Physics will handle movement)
+            // We just consume extra fuel
         }
     }
-
-    private void CheckFuelForInput()
-    {
-        if (inputManager == null)
-            return;
-
-        // Disable input if out of fuel, enable if has fuel
-        if (currentFuel <= 0 && inputManager.enabled)
-        {
-            inputManager.enabled = false;
-            if (enableDebugLogs) Debug.Log("Out of fuel! Vehicle input disabled.");
-        }
-        else if (currentFuel > 0 && !inputManager.enabled)
-        {
-            inputManager.enabled = true;
-            if (enableDebugLogs) Debug.Log("Vehicle refueled! Input enabled.");
-        }
-    }
-
 
     private void ConsumeFuel()
     {
@@ -298,122 +151,22 @@ public class Vehicle : MonoBehaviour, IDamageable, IInteractable
     public void EnterVehicle(PlayerController player)
     {
         if (isOccupied)
-        {
-            if (enableDebugLogs) Debug.Log("Vehicle already occupied!");
             return;
-        }
-
-        if (enableDebugLogs) Debug.Log($"EnterVehicle called - ArcadeVehicleController: {(arcadeVehicleController != null ? "Found" : "NULL")}");
 
         currentDriver = player;
         isOccupied = true;
 
-        // Set player controller for vehicle gun (for velocity tracking)
-        if (vehicleGun != null)
-        {
-            vehicleGun.SetPlayerController(player);
-
-            // Connect vehicle gun to UIManager for ammo display
-            UIManager uiManager = UIManager.Instance;
-            if (uiManager != null)
-            {
-                uiManager.ConnectVehicleGun(vehicleGun);
-            }
-        }
-
-        // Enable InputManager_ArcadeVP to allow player control (original asset's input system)
-        if (inputManager != null && currentFuel > 0)
-        {
-            inputManager.enabled = true;
-            if (enableDebugLogs) Debug.Log("InputManager enabled - vehicle control active");
-        }
-
-        // Diagnostic: Check ArcadeVehicleController setup
-        if (arcadeVehicleController != null)
-        {
-            if (enableDebugLogs) Debug.Log($"[Vehicle Setup Check]");
-            if (enableDebugLogs) Debug.Log($"  - rb (main Rigidbody): {(arcadeVehicleController.rb != null ? "OK" : "MISSING!")}");
-            if (enableDebugLogs) Debug.Log($"  - carBody (Rigidbody): {(arcadeVehicleController.carBody != null ? "OK" : "MISSING!")}");
-            if (enableDebugLogs) Debug.Log($"  - MaxSpeed: {arcadeVehicleController.MaxSpeed}");
-            if (enableDebugLogs) Debug.Log($"  - Acceleration: {arcadeVehicleController.accelaration}");
-            if (enableDebugLogs) Debug.Log($"  - Turn: {arcadeVehicleController.turn}");
-            if (enableDebugLogs) Debug.Log($"  - MovementMode: {arcadeVehicleController.movementMode}");
-
-            if (arcadeVehicleController.rb != null)
-            {
-                if (enableDebugLogs) Debug.Log($"  - rb.mass: {arcadeVehicleController.rb.mass}");
-                if (enableDebugLogs) Debug.Log($"  - rb.isKinematic: {arcadeVehicleController.rb.isKinematic}");
-
-                // Check for required SphereCollider
-                SphereCollider sphereCol = arcadeVehicleController.rb.GetComponent<SphereCollider>();
-                if (sphereCol != null)
-                {
-                    if (enableDebugLogs) Debug.Log($"  - SphereCollider: OK (radius: {sphereCol.radius})");
-                }
-                else
-                {
-                    Debug.LogError($"  - SphereCollider: MISSING! ArcadeVehicleController requires a SphereCollider on rb GameObject!");
-                }
-            }
-
-            // Check and auto-fix LayerMask for drivable surface
-            if (enableDebugLogs) Debug.Log($"  - Drivable Surface LayerMask (before): {arcadeVehicleController.drivableSurface.value}");
-
-            // Auto-fix: Set to Everything if it's 0 (Nothing)
-            if (arcadeVehicleController.drivableSurface.value == 0)
-            {
-                arcadeVehicleController.drivableSurface = ~0; // Everything
-                Debug.LogWarning($"  - AUTO-FIXED: drivableSurface was 0 (Nothing), changed to Everything");
-            }
-
-            if (enableDebugLogs) Debug.Log($"  - Drivable Surface LayerMask (after): {arcadeVehicleController.drivableSurface.value}");
-
-            // Start grounded check monitoring
-            Invoke(nameof(CheckGroundedStatus), 0.5f);
-        }
-
         // Tell player to enter vehicle
         player.EnterVehicle(this);
 
-        // Switch camera target and enable vehicle mode
-        TopDownCamera camera = FindAnyObjectByType<TopDownCamera>();
+        // Switch camera target
+        TopDownCamera camera = FindObjectOfType<TopDownCamera>();
         if (camera != null)
         {
             camera.SetTarget(transform);
-            camera.EnableVehicleMode(true); // Use vehicle-specific camera settings
-            if (enableDebugLogs) Debug.Log("Camera switched to vehicle with vehicle mode enabled");
-        }
-        else
-        {
-            Debug.LogWarning("TopDownCamera not found!");
         }
 
-        if (enableDebugLogs) Debug.Log("Player entered vehicle - ready to drive!");
-    }
-
-    private void CheckGroundedStatus()
-    {
-        if (!isOccupied || arcadeVehicleController == null)
-            return;
-
-        // Check if vehicle is grounded
-        bool grounded = arcadeVehicleController.grounded();
-        if (enableDebugLogs) Debug.Log($"[Grounded Check] Vehicle is {(grounded ? "GROUNDED" : "NOT GROUNDED (this prevents movement!)")}");
-
-        if (!grounded)
-        {
-            Debug.LogWarning("Vehicle is not grounded! Check:");
-            Debug.LogWarning("  1. Vehicle has SphereCollider on rb GameObject");
-            Debug.LogWarning("  2. drivableSurface LayerMask includes ground layer");
-            Debug.LogWarning("  3. Ground has proper layer assigned");
-            Debug.LogWarning("  4. Vehicle Y position is close to ground");
-        }
-
-        // Continue monitoring while occupied
-        if (isOccupied)
-        {
-            Invoke(nameof(CheckGroundedStatus), 2f);
-        }
+        Debug.Log("Player entered vehicle");
     }
 
     private void ExitVehicle()
@@ -423,49 +176,35 @@ public class Vehicle : MonoBehaviour, IDamageable, IInteractable
 
         Vector3 exitPosition = exitPoint != null ? exitPoint.position : transform.position + transform.right * 2f;
 
-        // Stop the vehicle completely when player exits
-        if (arcadeVehicleController != null && arcadeVehicleController.rb != null)
-        {
-            arcadeVehicleController.rb.linearVelocity = Vector3.zero;
-            arcadeVehicleController.rb.angularVelocity = Vector3.zero;
-            if (enableDebugLogs) Debug.Log("Vehicle stopped - velocity set to zero on exit");
-        }
-
-        // Disable InputManager_ArcadeVP (original asset's input system)
-        if (inputManager != null)
-        {
-            inputManager.enabled = false;
-            if (enableDebugLogs) Debug.Log("InputManager disabled - vehicle input deactivated");
-        }
-
         // Tell player to exit
         currentDriver.ExitVehicle(exitPosition);
 
-        // Switch camera back to player and disable vehicle mode
-        TopDownCamera camera = FindAnyObjectByType<TopDownCamera>();
+        // Switch camera back to player
+        TopDownCamera camera = FindObjectOfType<TopDownCamera>();
         if (camera != null)
         {
             camera.SetTarget(currentDriver.transform);
-            camera.EnableVehicleMode(false); // Restore player camera settings
         }
 
-        // Clear player controller from vehicle gun
-        if (vehicleGun != null)
+        // Stop the vehicle completely
+        if (arcadeVehicleController != null)
         {
-            vehicleGun.SetPlayerController(null);
-
-            // Disconnect vehicle gun from UIManager
-            UIManager uiManager = UIManager.Instance;
-            if (uiManager != null)
+            if (arcadeVehicleController.rb != null)
             {
-                uiManager.DisconnectVehicleGun();
+                arcadeVehicleController.rb.linearVelocity = Vector3.zero;
+                arcadeVehicleController.rb.angularVelocity = Vector3.zero;
+            }
+            if (arcadeVehicleController.carBody != null)
+            {
+                arcadeVehicleController.carBody.linearVelocity = Vector3.zero;
+                arcadeVehicleController.carBody.angularVelocity = Vector3.zero;
             }
         }
 
         currentDriver = null;
         isOccupied = false;
 
-        if (enableDebugLogs) Debug.Log("Player exited vehicle");
+        Debug.Log("Player exited vehicle");
     }
 
     private void OnCollisionEnter(Collision collision)
@@ -488,15 +227,10 @@ public class Vehicle : MonoBehaviour, IDamageable, IInteractable
             }
         }
 
-        // Collision with wall/terrain (only take damage if moving fast enough)
+        // Collision with wall/terrain
         if (collision.gameObject.CompareTag("Terrain") || collision.gameObject.CompareTag("Wall"))
         {
-            // Only take damage if collision impact is strong enough
-            float impactVelocity = collision.relativeVelocity.magnitude;
-            if (impactVelocity > 5f) // Threshold: only damage if moving faster than 5 units/sec
-            {
-                TakeDamage(collisionDamageToSelf);
-            }
+            TakeDamage(collisionDamageToSelf);
         }
     }
 
@@ -506,7 +240,7 @@ public class Vehicle : MonoBehaviour, IDamageable, IInteractable
         currentHealth -= damage;
         currentHealth = Mathf.Max(currentHealth, 0);
 
-        if (enableDebugLogs) Debug.Log($"Vehicle took {damage} damage. Health: {currentHealth}/{maxHealth}");
+        Debug.Log($"Vehicle took {damage} damage. Health: {currentHealth}/{maxHealth}");
 
         if (currentHealth <= 0)
         {
@@ -521,7 +255,7 @@ public class Vehicle : MonoBehaviour, IDamageable, IInteractable
 
     private void Die()
     {
-        if (enableDebugLogs) Debug.Log("Vehicle destroyed!");
+        Debug.Log("Vehicle destroyed!");
 
         // Eject player if occupied
         if (isOccupied && currentDriver != null)
@@ -536,15 +270,9 @@ public class Vehicle : MonoBehaviour, IDamageable, IInteractable
     // IInteractable implementation
     public void Interact(PlayerController player)
     {
-        if (enableDebugLogs) Debug.Log($"Vehicle.Interact() called by {player.gameObject.name}. isOccupied: {isOccupied}");
-
         if (!isOccupied)
         {
             EnterVehicle(player);
-        }
-        else
-        {
-            if (enableDebugLogs) Debug.Log("Vehicle is already occupied!");
         }
     }
 
@@ -558,26 +286,26 @@ public class Vehicle : MonoBehaviour, IDamageable, IInteractable
     {
         currentHealth += amount;
         currentHealth = Mathf.Min(currentHealth, maxHealth);
-        if (enableDebugLogs) Debug.Log($"Vehicle repaired. Health: {currentHealth}/{maxHealth}");
+        Debug.Log($"Vehicle repaired. Health: {currentHealth}/{maxHealth}");
     }
 
     public void RepairFull()
     {
         currentHealth = maxHealth;
-        if (enableDebugLogs) Debug.Log("Vehicle fully repaired!");
+        Debug.Log("Vehicle fully repaired!");
     }
 
     public void Refuel(float amount)
     {
         currentFuel += amount;
         currentFuel = Mathf.Min(currentFuel, maxFuel);
-        if (enableDebugLogs) Debug.Log($"Vehicle refueled. Fuel: {currentFuel}/{maxFuel}");
+        Debug.Log($"Vehicle refueled. Fuel: {currentFuel}/{maxFuel}");
     }
 
     public void RefuelFull()
     {
         currentFuel = maxFuel;
-        if (enableDebugLogs) Debug.Log("Vehicle fully refueled!");
+        Debug.Log("Vehicle fully refueled!");
     }
 
     // Getters
@@ -586,44 +314,4 @@ public class Vehicle : MonoBehaviour, IDamageable, IInteractable
     public float GetFuel() => currentFuel;
     public float GetMaxFuel() => maxFuel;
     public bool IsOccupied() => isOccupied;
-
-    public Vector3 GetVelocity()
-    {
-        if (arcadeVehicleController != null && arcadeVehicleController.rb != null)
-        {
-            return arcadeVehicleController.rb.linearVelocity;
-        }
-        return Vector3.zero;
-    }
-
-    // Visualize grounded check in Scene View
-    private void OnDrawGizmos()
-    {
-        if (arcadeVehicleController == null || arcadeVehicleController.rb == null)
-            return;
-
-        Vector3 rayOrigin = arcadeVehicleController.rb.position;
-        float maxDistance = raycastMaxDistance > 0 ? raycastMaxDistance : 1f;
-
-        // Draw raycast line - green if grounded, red if not
-        if (isGrounded)
-        {
-            Gizmos.color = Color.green;
-        }
-        else
-        {
-            Gizmos.color = Color.red;
-        }
-
-        Gizmos.DrawLine(rayOrigin, rayOrigin + Vector3.down * maxDistance);
-        Gizmos.DrawWireSphere(rayOrigin, 0.1f);
-
-        // Draw hit point if ground detected
-        if (distanceToGround > 0)
-        {
-            Vector3 hitPoint = rayOrigin + Vector3.down * distanceToGround;
-            Gizmos.color = Color.yellow;
-            Gizmos.DrawWireSphere(hitPoint, 0.2f);
-        }
-    }
 }
