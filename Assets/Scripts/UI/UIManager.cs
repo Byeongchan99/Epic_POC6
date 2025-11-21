@@ -47,6 +47,9 @@ public class UIManager : MonoBehaviour
     [SerializeField] private TextMeshProUGUI notificationText;
     [SerializeField] private float notificationDuration = 5f;
 
+    [Header("Crosshair")]
+    [SerializeField] private Image crosshairImage;
+
     private PlayerStats playerStats;
     private PlayerController playerController;
     private Gun playerGun;
@@ -94,6 +97,15 @@ public class UIManager : MonoBehaviour
         // Hide notification initially
         if (notificationPanel != null)
             notificationPanel.SetActive(false);
+
+        // Setup crosshair
+        if (crosshairImage != null)
+        {
+            // Hide hardware cursor
+            Cursor.visible = false;
+            // Lock cursor to game window
+            Cursor.lockState = CursorLockMode.Confined;
+        }
     }
 
     public void Initialize(PlayerStats stats, PlayerController controller, Gun gun)
@@ -122,6 +134,9 @@ public class UIManager : MonoBehaviour
 
     private void Update()
     {
+        // Update crosshair position
+        UpdateCrosshair();
+
         // Toggle inventory with Tab
         if (Input.GetKeyDown(KeyCode.Tab))
         {
@@ -142,6 +157,16 @@ public class UIManager : MonoBehaviour
             {
                 notificationPanel.SetActive(false);
             }
+        }
+    }
+
+    private void UpdateCrosshair()
+    {
+        if (crosshairImage != null)
+        {
+            // Update crosshair position to follow mouse
+            Vector2 mousePosition = Input.mousePosition;
+            crosshairImage.transform.position = mousePosition;
         }
     }
 
@@ -243,6 +268,13 @@ public class UIManager : MonoBehaviour
 
             // Pause game when inventory is open (optional)
             Time.timeScale = isActive ? 0f : 1f;
+
+            // Show/hide cursor and crosshair based on inventory state
+            if (crosshairImage != null)
+            {
+                Cursor.visible = isActive; // Show cursor when inventory is open
+                crosshairImage.gameObject.SetActive(!isActive); // Hide crosshair when inventory is open
+            }
         }
     }
 
