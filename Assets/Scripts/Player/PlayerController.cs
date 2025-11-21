@@ -90,6 +90,12 @@ public class PlayerController : MonoBehaviour, IDamageable
 
     private void Update()
     {
+        // F4: Respawn destroyed vehicle (debug key - works even when in vehicle or controls disabled)
+        if (Input.GetKeyDown(KeyCode.F4))
+        {
+            RespawnVehicle();
+        }
+
         if (isInVehicle)
             return;
 
@@ -352,5 +358,45 @@ public class PlayerController : MonoBehaviour, IDamageable
             return stats.GetHealth() <= 0;
         }
         return false;
+    }
+
+    // Debug: Respawn destroyed vehicle
+    private void RespawnVehicle()
+    {
+        // Find all vehicles in the scene, including inactive ones
+        Vehicle[] allVehicles = FindObjectsByType<Vehicle>(FindObjectsInactive.Include, FindObjectsSortMode.None);
+
+        if (allVehicles.Length == 0)
+        {
+            Debug.LogWarning("No vehicles found in the scene!");
+            return;
+        }
+
+        // Find the first inactive (destroyed) vehicle
+        Vehicle destroyedVehicle = null;
+        foreach (Vehicle vehicle in allVehicles)
+        {
+            if (!vehicle.gameObject.activeSelf)
+            {
+                destroyedVehicle = vehicle;
+                break;
+            }
+        }
+
+        if (destroyedVehicle != null)
+        {
+            // Activate the vehicle
+            destroyedVehicle.gameObject.SetActive(true);
+
+            // Restore health and fuel
+            destroyedVehicle.RepairFull();
+            destroyedVehicle.RefuelFull();
+
+            Debug.Log("Vehicle respawned with full health and fuel!");
+        }
+        else
+        {
+            Debug.Log("No destroyed vehicles found. All vehicles are already active.");
+        }
     }
 }
