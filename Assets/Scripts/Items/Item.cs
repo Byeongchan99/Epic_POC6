@@ -15,6 +15,20 @@ public class Item : MonoBehaviour, IInteractable
         Fuel        // Refuels vehicle
     }
 
+    private void Start()
+    {
+        // Check if this item has a collider
+        Collider col = GetComponent<Collider>();
+        if (col == null)
+        {
+            Debug.LogWarning($"[Item] {gameObject.name} ({itemType}) does NOT have a Collider! Add a Collider component to make this item interactable.", this);
+        }
+        else
+        {
+            Debug.Log($"[Item] {gameObject.name} ({itemType}) has Collider: {col.GetType().Name}", this);
+        }
+    }
+
     public void Interact(PlayerController player)
     {
         // Pick up item
@@ -37,4 +51,21 @@ public class Item : MonoBehaviour, IInteractable
 
     public ItemType GetItemType() => itemType;
     public float GetValue() => value;
+
+    // Visualize interaction range in Scene View
+    private void OnDrawGizmosSelected()
+    {
+        // Draw the interaction range sphere (matches PlayerController's interactionRadius of 3f)
+        Gizmos.color = Color.green;
+        Gizmos.DrawWireSphere(transform.position, 3f);
+
+        // Check if collider exists
+        Collider col = GetComponent<Collider>();
+        if (col == null)
+        {
+            // Draw red sphere to indicate missing collider
+            Gizmos.color = Color.red;
+            Gizmos.DrawWireSphere(transform.position, 0.5f);
+        }
+    }
 }

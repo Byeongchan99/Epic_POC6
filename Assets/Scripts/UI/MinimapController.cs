@@ -8,6 +8,7 @@ public class MinimapController : MonoBehaviour
     [SerializeField] private RawImage minimapImage;
     [SerializeField] private RectTransform minimapRect;
     [SerializeField] private Image playerIcon;
+    [SerializeField] private Image vehicleIcon; // Vehicle icon on minimap
 
     [Header("Colors")]
     [SerializeField] private Color landColor = Color.green;
@@ -24,6 +25,9 @@ public class MinimapController : MonoBehaviour
     private int mapWidth;
     private int mapHeight;
     private float tileSize;
+
+    // Vehicle tracking
+    private List<Vehicle> vehicles = new List<Vehicle>();
 
     // Mission markers
     private List<GameObject> missionMarkers = new List<GameObject>();
@@ -66,8 +70,22 @@ public class MinimapController : MonoBehaviour
             Debug.LogWarning("MinimapController: minimapRect is not assigned!");
         if (playerIcon == null)
             Debug.LogWarning("MinimapController: playerIcon is not assigned!");
+        if (vehicleIcon == null)
+            Debug.LogWarning("MinimapController: vehicleIcon is not assigned! Vehicles won't be shown on minimap.");
 
         GenerateMinimapTexture();
+
+        // Find all vehicles in scene for minimap tracking
+        FindVehicles();
+    }
+
+    private void FindVehicles()
+    {
+        vehicles.Clear();
+        Vehicle[] foundVehicles = FindObjectsByType<Vehicle>(FindObjectsSortMode.None);
+        vehicles.AddRange(foundVehicles);
+
+        if (enableDebugLogs) Debug.Log($"MinimapController: Found {vehicles.Count} vehicle(s) in scene");
     }
 
     private void GenerateMinimapTexture()
@@ -165,22 +183,13 @@ public class MinimapController : MonoBehaviour
         }
 
         UpdatePlayerIcon();
+        UpdateVehicleIcons();
     }
 
     private void UpdatePlayerIcon()
     {
-        // Determine which transform to track (player or vehicle if in vehicle)
+        // Always show player icon at player position (not vehicle)
         Transform trackedTransform = playerTransform;
-
-        if (playerController != null && playerController.IsInVehicle())
-        {
-            // Player is in vehicle, track vehicle position instead
-            Vehicle currentVehicle = playerController.GetCurrentVehicle();
-            if (currentVehicle != null)
-            {
-                trackedTransform = currentVehicle.transform;
-            }
-        }
 
         // Convert world position to minimap position
         Vector3 worldPos = trackedTransform.position;
@@ -204,6 +213,72 @@ public class MinimapController : MonoBehaviour
         else
         {
             Debug.LogWarning("MinimapController: playerIcon or its RectTransform is null!");
+        }
+
+        // Hide player icon if in vehicle
+        if (playerController != null && playerController.IsInVehicle())
+        {
+            playerIcon.enabled = false;
+        }
+        else
+        {
+            playerIcon.enabled = true;
+        }
+    }
+
+    private void UpdateVehicleIcons()
+    {
+        // For now, only show the first vehicle (player's vehicle)
+        // If there are no vehicles or vehicleIcon is not assigned, skip
+        if (vehicleIcon == null || vehicles.Count == 0)
+        {
+            if (vehicleIcon != null)
+                vehicleIcon.enabled = false;
+            return;
+        }
+
+        // Show the first vehicle on minimap
+        Vehicle vehicle = vehicles[0];
+        if (vehicle != null)
+        {
+            Vector3 vehicleWorldPos = vehicle.transform.position;
+            Vector2 vehicleMinimapPos = WorldToMinimapPosition(vehicleWorldPos);
+
+            vehicleIcon.rectTransform.anchoredPosition = vehicleMinimapPos;
+
+            // Rotate vehicle icon to match rotation
+            float angle = -vehicle.transform.eulerAngles.y;
+            vehicleIcon.rectTransform.rotation = Quaternion.Euler(0, 0, angle);
+
+            vehicleIcon.enabled = true;
+        }
+        else
+        {
+            vehicleIcon.enabled = false;
+        }
+    }
+
+    /// <summary>
+    /// Call this when a new vehicle is spawned to add it to minimap tracking
+    /// </summary>
+    public void RegisterVehicle(Vehicle vehicle)
+    {
+        if (!vehicles.Contains(vehicle))
+        {
+            vehicles.Add(vehicle);
+            if (enableDebugLogs) Debug.Log($"MinimapController: Registered vehicle {vehicle.name}");
+        }
+    }
+
+    /// <summary>
+    /// Call this when a vehicle is destroyed to remove it from minimap tracking
+    /// </summary>
+    public void UnregisterVehicle(Vehicle vehicle)
+    {
+        if (vehicles.Contains(vehicle))
+        {
+            vehicles.Remove(vehicle);
+            if (enableDebugLogs) Debug.Log($"MinimapController: Unregistered vehicle {vehicle.name}");
         }
     }
 

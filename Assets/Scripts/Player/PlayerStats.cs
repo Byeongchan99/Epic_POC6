@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public class PlayerStats : MonoBehaviour
+public class PlayerStats : MonoBehaviour, IDamageable
 {
     [Header("Health")]
     [SerializeField] private float maxHealth = 100f;
@@ -135,6 +135,12 @@ public class PlayerStats : MonoBehaviour
 
         // Game over logic here
         Time.timeScale = 0;
+    }
+
+    // IDamageable implementation
+    public bool IsDead()
+    {
+        return currentHealth <= 0;
     }
 
     // Getters

@@ -7,6 +7,10 @@ public class DeliveryMission : MissionBase
     [SerializeField] private float interactionRange = 2f;
     [SerializeField] private float minDistanceBetweenPoints = 10f; // Minimum distance between pickup and delivery
 
+    [Header("Timer")]
+    [SerializeField] private float deliveryTimeLimit = 60f; // Time limit in seconds (default: 60 seconds)
+    [SerializeField] private bool hasTimeLimit = true; // Enable/disable time limit
+
     [Header("Visual Prefabs")]
     [SerializeField] private GameObject pickupVisualPrefab; // Prefab for pickup point visual
     [SerializeField] private GameObject deliveryVisualPrefab; // Prefab for delivery point visual
@@ -21,6 +25,13 @@ public class DeliveryMission : MissionBase
     private Vector3 deliveryPosition;
     private GameObject pickupVisualInstance;
     private GameObject deliveryVisualInstance;
+
+    // Timer
+    private float currentDeliveryTime = 0f;
+    private bool timerRunning = false;
+
+    // Events
+    public System.Action<float, float> OnTimerUpdate; // currentTime, timeLimit
 
     public override void Initialize()
     {
@@ -217,6 +228,20 @@ public class DeliveryMission : MissionBase
         if (player == null)
             return;
 
+        // Update timer if running
+        if (timerRunning && hasTimeLimit)
+        {
+            currentDeliveryTime += Time.deltaTime;
+            OnTimerUpdate?.Invoke(currentDeliveryTime, deliveryTimeLimit);
+
+            // Check if time limit exceeded
+            if (currentDeliveryTime >= deliveryTimeLimit)
+            {
+                FailMission();
+                return;
+            }
+        }
+
         if (!hasPickedUpItem)
         {
             // Check if player is near pickup point
@@ -255,7 +280,18 @@ public class DeliveryMission : MissionBase
     private void PickupItem()
     {
         hasPickedUpItem = true;
-        Debug.Log("Item picked up! Deliver it to the delivery point.");
+
+        // Start timer
+        if (hasTimeLimit)
+        {
+            timerRunning = true;
+            currentDeliveryTime = 0f;
+            Debug.Log($"Item picked up! Deliver it within {deliveryTimeLimit} seconds.");
+        }
+        else
+        {
+            Debug.Log("Item picked up! Deliver it to the delivery point.");
+        }
 
         // Visual feedback: hide pickup object (delivery is already visible)
         if (pickupVisualInstance != null)
@@ -268,10 +304,41 @@ public class DeliveryMission : MissionBase
     {
         if (hasPickedUpItem)
         {
-            Debug.Log("Item delivered!");
+            timerRunning = false;
+
+            if (hasTimeLimit)
+            {
+                float remainingTime = deliveryTimeLimit - currentDeliveryTime;
+                Debug.Log($"Item delivered with {remainingTime:F1} seconds remaining!");
+            }
+            else
+            {
+                Debug.Log("Item delivered!");
+            }
+
             CompleteMission();
         }
     }
+
+    private void FailMission()
+    {
+        timerRunning = false;
+        Debug.Log("Delivery mission FAILED! Time limit exceeded.");
+
+        // Reset mission
+        hasPickedUpItem = false;
+        currentDeliveryTime = 0f;
+
+        // Show pickup object again
+        if (pickupVisualInstance != null)
+            pickupVisualInstance.SetActive(true);
+    }
+
+    // Getters for UI
+    public float GetCurrentTime() => currentDeliveryTime;
+    public float GetTimeLimit() => deliveryTimeLimit;
+    public bool IsTimerRunning() => timerRunning;
+    public bool HasTimeLimit() => hasTimeLimit;
 
     private void OnDrawGizmos()
     {
@@ -283,12 +350,23 @@ public class DeliveryMission : MissionBase
             Gizmos.DrawWireSphere(pickupPosition, interactionRange);
 
             // Draw delivery point
-            Gizmos.color = Color.green;
+            Gizmos.color = timerRunning ? Color.red : Color.green;
             Gizmos.DrawWireSphere(deliveryPosition, interactionRange);
 
             // Draw line between them
             Gizmos.color = Color.cyan;
             Gizmos.DrawLine(pickupPosition, deliveryPosition);
+
+            // Draw timer progress (if timer is running)
+            if (timerRunning && hasTimeLimit)
+            {
+                float progress = currentDeliveryTime / deliveryTimeLimit;
+                Gizmos.color = progress < 0.5f ? Color.green : (progress < 0.75f ? Color.yellow : Color.red);
+
+                // Draw a circle above delivery point showing time progress
+                Vector3 timerPos = deliveryPosition + Vector3.up * 5f;
+                Gizmos.DrawWireSphere(timerPos, 1f);
+            }
         }
     }
 }
