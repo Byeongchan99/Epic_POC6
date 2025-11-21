@@ -45,6 +45,8 @@ public class MapGenerator : MonoBehaviour
 
     [Header("References")]
     [SerializeField] private Transform mapParent;
+    [SerializeField] private Transform missionZoneContainer;
+    [SerializeField] private Transform farmingZoneContainer;
 
     // Map data
     private int[,] mapData;
@@ -490,10 +492,17 @@ public class MapGenerator : MonoBehaviour
 
     private void SpawnMissionZonePrefabs()
     {
+        // Create mission zone container if not assigned
+        if (missionZoneContainer == null)
+        {
+            GameObject containerObj = new GameObject("MissionZones");
+            missionZoneContainer = containerObj.transform;
+        }
+
         foreach (var zoneData in placedMissionZones)
         {
             Vector3 worldPos = new Vector3(zoneData.position.x * tileSize, 0, zoneData.position.y * tileSize);
-            GameObject zone = Instantiate(zoneData.instance, worldPos, Quaternion.identity);
+            GameObject zone = Instantiate(zoneData.instance, worldPos, Quaternion.identity, missionZoneContainer);
             zone.name = zoneData.instance.name + "_Instance";
 
             // Bake NavMesh for this zone
@@ -510,10 +519,17 @@ public class MapGenerator : MonoBehaviour
 
     private void SpawnFarmingZonePrefabs()
     {
+        // Create farming zone container if not assigned
+        if (farmingZoneContainer == null)
+        {
+            GameObject containerObj = new GameObject("FarmingZones");
+            farmingZoneContainer = containerObj.transform;
+        }
+
         foreach (var zoneData in placedFarmingZones)
         {
             Vector3 worldPos = new Vector3(zoneData.position.x * tileSize, 0, zoneData.position.y * tileSize);
-            GameObject zone = Instantiate(zoneData.prefab, worldPos, Quaternion.identity);
+            GameObject zone = Instantiate(zoneData.prefab, worldPos, Quaternion.identity, farmingZoneContainer);
             zone.name = zoneData.prefab.name + "_Farming_Instance";
 
             // Bake NavMesh for this zone if it has NavMeshSurface
