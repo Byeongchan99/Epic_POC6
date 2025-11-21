@@ -166,7 +166,11 @@ public class UIManager : MonoBehaviour
         {
             // Update crosshair position to follow mouse
             Vector2 mousePosition = Input.mousePosition;
-            crosshairImage.transform.position = mousePosition;
+            RectTransform rectTransform = crosshairImage.rectTransform;
+            if (rectTransform != null)
+            {
+                rectTransform.position = mousePosition;
+            }
         }
     }
 
