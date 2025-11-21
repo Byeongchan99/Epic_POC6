@@ -26,6 +26,16 @@ public class TopDownCamera : MonoBehaviour
     [Tooltip("Enable to see real-time updates in Play Mode")]
     [SerializeField] private bool enableRuntimeAdjustment = true;
 
+    [Header("Mouse Follow Settings")]
+    [Tooltip("Enable camera offset based on mouse position")]
+    [SerializeField] private bool enableMouseFollow = true;
+    [Tooltip("Maximum distance camera can move towards mouse (in world units)")]
+    [SerializeField] private float maxMouseOffset = 5f;
+    [Tooltip("How fast camera follows mouse position")]
+    [SerializeField] private float mouseFollowSpeed = 3f;
+    [Tooltip("Dead zone in center where mouse doesn't affect camera (0-1, where 0.5 = half screen)")]
+    [SerializeField] private float mouseDeadZone = 0.1f;
+
     private bool isFollowingVehicle = false;
     private Vector3 currentOffset;
     private float currentCameraAngle;
@@ -35,6 +45,9 @@ public class TopDownCamera : MonoBehaviour
     private Vector3 previousVehicleOffset;
     private float previousVehicleCameraAngle;
     private bool previousVehicleFollowRotation;
+
+    // Mouse follow
+    private Vector3 currentMouseOffset = Vector3.zero;
 
     private void Start()
     {
@@ -63,6 +76,12 @@ public class TopDownCamera : MonoBehaviour
             CheckForVehicleSettingsChanges();
         }
 
+        // Update mouse offset
+        if (enableMouseFollow)
+        {
+            UpdateMouseOffset();
+        }
+
         FollowTarget();
     }
 
@@ -89,6 +108,51 @@ public class TopDownCamera : MonoBehaviour
         }
     }
 
+    private void UpdateMouseOffset()
+    {
+        // Get mouse position in viewport space (0-1)
+        Vector2 mouseViewportPos = new Vector2(
+            Input.mousePosition.x / Screen.width,
+            Input.mousePosition.y / Screen.height
+        );
+
+        // Convert to -1 to 1 range (centered at 0)
+        Vector2 mouseNormalized = new Vector2(
+            (mouseViewportPos.x - 0.5f) * 2f,
+            (mouseViewportPos.y - 0.5f) * 2f
+        );
+
+        // Apply dead zone
+        if (mouseNormalized.magnitude < mouseDeadZone)
+        {
+            mouseNormalized = Vector2.zero;
+        }
+        else
+        {
+            // Smooth dead zone transition
+            float magnitude = mouseNormalized.magnitude;
+            float adjustedMagnitude = (magnitude - mouseDeadZone) / (1f - mouseDeadZone);
+            mouseNormalized = mouseNormalized.normalized * adjustedMagnitude;
+        }
+
+        // Clamp to prevent values greater than 1
+        mouseNormalized = Vector2.ClampMagnitude(mouseNormalized, 1f);
+
+        // Calculate target offset (world space, on XZ plane)
+        Vector3 targetMouseOffset = new Vector3(
+            mouseNormalized.x * maxMouseOffset,
+            0f,
+            mouseNormalized.y * maxMouseOffset
+        );
+
+        // Smoothly interpolate current offset
+        currentMouseOffset = Vector3.Lerp(
+            currentMouseOffset,
+            targetMouseOffset,
+            mouseFollowSpeed * Time.deltaTime
+        );
+    }
+
     private void FollowTarget()
     {
         // Calculate desired position based on target's rotation if following rotation
@@ -104,6 +168,12 @@ public class TopDownCamera : MonoBehaviour
         {
             // Fixed offset (world space)
             desiredPosition = target.position + currentOffset;
+        }
+
+        // Add mouse offset to desired position
+        if (enableMouseFollow)
+        {
+            desiredPosition += currentMouseOffset;
         }
 
         if (smoothFollow)
