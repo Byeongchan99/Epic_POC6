@@ -10,6 +10,7 @@ public class EnemyStats : MonoBehaviour, IDamageable
     private float currentHealth;
 
     public System.Action OnDeath;
+    public System.Action OnDamaged;
 
     private void Start()
     {
@@ -22,6 +23,9 @@ public class EnemyStats : MonoBehaviour, IDamageable
         currentHealth = Mathf.Max(currentHealth, 0);
 
         Debug.Log($"Enemy took {damage} damage. Health: {currentHealth}/{maxHealth}");
+
+        // Notify AI that we've been damaged
+        OnDamaged?.Invoke();
 
         if (currentHealth <= 0)
         {

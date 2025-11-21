@@ -245,6 +245,15 @@ public class Vehicle : MonoBehaviour, IDamageable, IInteractable
         if (currentFuel <= 0)
             return;
 
+        // Only consume fuel when the vehicle is actively moving
+        // Check for WASD input (Vertical and Horizontal axes)
+        float verticalInput = Input.GetAxis("Vertical");
+        float horizontalInput = Input.GetAxis("Horizontal");
+        bool isMoving = Mathf.Abs(verticalInput) > 0.1f || Mathf.Abs(horizontalInput) > 0.1f;
+
+        if (!isMoving)
+            return;
+
         float consumption = fuelConsumptionRate * Time.deltaTime;
 
         // Extra consumption for boost

@@ -67,6 +67,9 @@ public class EnemyAI : MonoBehaviour
         // Subscribe to death event
         stats.OnDeath += OnDeath;
 
+        // Subscribe to damage event
+        stats.OnDamaged += OnDamaged;
+
         // Start in patrol state
         ChangeState(patrolState);
     }
@@ -89,6 +92,16 @@ public class EnemyAI : MonoBehaviour
     private void OnDeath()
     {
         ChangeState(deadState);
+    }
+
+    private void OnDamaged()
+    {
+        // Only switch to chase if not already dead or attacking
+        if (currentState != deadState && currentState != attackState)
+        {
+            ChangeState(chaseState);
+            Debug.Log("Enemy damaged! Switching to chase state.");
+        }
     }
 
     // State getters
